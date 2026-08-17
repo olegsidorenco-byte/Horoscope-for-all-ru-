@@ -3,10 +3,10 @@ import sys
 import requests
 from google import genai
 
-# Получаем ключи из безопасного хранилища GitHub
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+# Получаем ключи из безопасного хранилища GitHub и очищаем от случайных пробелов
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "").strip()
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 
 # Унификация: берем модель из переменных окружения. 
 # Если переменная не задана в GitHub, по умолчанию используем актуальную 3.7-flash.
