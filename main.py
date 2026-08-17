@@ -8,10 +8,13 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
+# Унификация: берем модель из переменных окружения. 
+# Если переменная не задана в GitHub, по умолчанию используем актуальную 3.7-flash.
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
+
 def generate_horoscope():
     """Генерирует гороскоп с помощью новой библиотеки Google GenAI."""
     try:
-        # Инициализация нового клиента
         client = genai.Client(api_key=GEMINI_API_KEY)
         
         prompt = (
@@ -21,9 +24,9 @@ def generate_horoscope():
             "позитивным и мотивирующим. Уложись в 3500 символов, чтобы текст поместился в Telegram."
         )
         
-        # Используем актуальную и быструю модель через новый синтаксис
+        # Модель теперь подставляется автоматически
         response = client.models.generate_content(
-            model='gemini-2.5-flash', 
+            model=GEMINI_MODEL, 
             contents=prompt
         )
         return response.text
@@ -47,18 +50,16 @@ def send_to_telegram(text):
         print("Гороскоп успешно отправлен в Telegram-канал!")
     except requests.exceptions.RequestException as e:
         print(f"Ошибка при отправке в Telegram: {e}")
-        # Пытаемся вывести причину отказа от самого Telegram
         if 'response' in locals() and response is not None:
             print(f"Ответ сервера Telegram: {response.text}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    # Проверка, что все ключи на месте
     if not all([GEMINI_API_KEY, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]):
         print("Ошибка: Не заданы необходимые ключи доступа (переменные окружения).")
         sys.exit(1)
         
-    print("Начинаем генерацию гороскопа...")
+    print(f"Начинаем генерацию гороскопа (используемая модель: {GEMINI_MODEL})...")
     horoscope_text = generate_horoscope()
     
     print("Отправляем в канал...")
