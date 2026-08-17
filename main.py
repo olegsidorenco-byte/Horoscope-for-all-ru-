@@ -13,7 +13,7 @@ def generate_horoscope():
     genai.configure(api_key=GEMINI_API_KEY)
     
     # Используем быструю и современную модель
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-pro')
     
     # Промпт (задание) для нейросети
     prompt = (
