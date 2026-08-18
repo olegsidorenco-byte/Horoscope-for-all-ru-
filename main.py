@@ -117,7 +117,7 @@ if __name__ == "__main__":
     print(f"Начинаем процесс публикации...")
 
     # 1. Отправляем верхний логотип
-    logo_filename = "Astro_main_top25.jpg"
+    logo_filename = "Astro_main_top25.png"
     if os.path.exists(logo_filename):
         print("Отправляем логотип...")
         send_photo_to_telegram(logo_filename, is_local=True)
