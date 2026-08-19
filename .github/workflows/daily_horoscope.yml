@@ -1,0 +1,32 @@
+name: Daily Horoscope Bot
+
+on:
+  schedule:
+    # Запуск каждый день в 03:33 UTC (раннее утро)
+    - cron: '33 3 * * *'
+  workflow_dispatch: # Кнопка для ручного запуска в интерфейсе GitHub
+
+jobs:
+  run-horoscope:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run daily horoscope
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
