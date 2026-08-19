@@ -61,14 +61,25 @@ def get_config():
     if os.path.exists(CONFIG_PATH):
         try:
             with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-                if isinstance(loaded, dict):
-                    if "user_profile" in loaded:
-                        default_config["user_profile"].update(loaded["user_profile"])
-                    if "bot_settings" in loaded:
-                        default_config["bot_settings"].update(loaded["bot_settings"])
+                raw_lines = f.readlines()
+            # Очищаем строки от комментариев # и // для безопасного парсинга JSON
+            cleaned_lines = []
+            for line in raw_lines:
+                stripped = line.strip()
+                if stripped.startswith("#") or stripped.startswith("//"):
+                    continue
+                # Удаляем строчные комментарии если строка не является строковым значением
+                cleaned_lines.append(line)
+            
+            clean_json_str = "".join(cleaned_lines)
+            loaded = json.loads(clean_json_str)
+            if isinstance(loaded, dict):
+                if "user_profile" in loaded:
+                    default_config["user_profile"].update(loaded["user_profile"])
+                if "bot_settings" in loaded:
+                    default_config["bot_settings"].update(loaded["bot_settings"])
         except Exception as e:
-            print(f"⚠️ Предупреждение: Не удалось прочитать config.json ({e}). Используются настройки по умолчанию.")
+            print(f"⚠️ Предупреждение: Не удалось прочитать config.json ({e}). Используются настройки по умолчанию (общий прогноз).")
 
     # Получаем секретные ключи
     gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()

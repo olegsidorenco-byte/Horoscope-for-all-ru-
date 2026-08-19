@@ -1,10 +1,10 @@
 {
   "user_profile": {
-    "name": "Иван",
-    "birth_date": "15.04.1988",
-    "birth_time": "14:30",
-    "birth_city": "Москва",
-    "is_general": false
+    "name": "",
+    "birth_date": "",
+    "birth_time": "",
+    "birth_city": "",
+    "is_general": true
   },
   "bot_settings": {
     "send_image": true,
