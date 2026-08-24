@@ -17,10 +17,13 @@ def strip_html_tags(text: str) -> str:
     """
     Очищает текст от всех HTML-тегов для безопасной резервной отправки чистым текстом.
     """
-    clean = re.sub(r"<[^>]+>", "", text)
+    # Заменяем переводы строк в тегах br и p
+    clean = re.sub(r"<\/?(br|p)\s*\/?>", "\n", text, flags=re.IGNORECASE)
+    clean = re.sub(r"<[^>]+>", "", clean)
     # Заменяем распространенные HTML-сущности
     clean = clean.replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
-    return clean
+    clean = re.sub(r"\n{3,}", "\n\n", clean)
+    return clean.strip()
 
 
 def split_text_into_chunks(text: str, max_chars: int = 3800) -> list[str]:
@@ -66,46 +69,131 @@ def split_text_into_chunks(text: str, max_chars: int = 3800) -> list[str]:
     return chunks
 
 
-def send_text_message(bot_token: str, chat_id: str, text: str) -> bool:
+def send_chat_action(bot_token: str, chat_id: str, action: str = "typing") -> bool:
     """
-    Отправляет текстовое сообщение в Telegram.
-    При ошибке разметки HTML (код 400) мгновенно делает резервную отправку чистым текстом.
+    Отправляет статус действия бота в чат (по умолчанию 'typing' — печатает...).
+    Это снижает риск спам-блокировки и делает поведение бота естественным.
+    """
+    url = f"https://api.telegram.org/bot{bot_token}/sendChatAction"
+    try:
+        requests.post(url, json={"chat_id": chat_id, "action": action}, timeout=5)
+        return True
+    except Exception:
+        # Не критично, если статус действия не прошел
+        return False
+
+
+def send_single_message_with_retry(bot_token: str, chat_id: str, text: str, max_retries: int = 3) -> bool:
+    """
+    Отправляет одиночное сообщение с автоматической защитой от анти-спама:
+    - При ошибке 429 Too Many Requests: выжидает время из retry_after и повторяет.
+    - При ошибке 400 Bad Request (разметка HTML): мгновенно отправляет чистый текст.
+    - При сетевых сбоях: повторяет с экспоненциальной задержкой до max_retries раз.
     """
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-    chunks = split_text_into_chunks(text)
-    
-    for i, chunk in enumerate(chunks, 1):
-        # 1. Первая попытка: отправка с HTML-разметкой
+
+    for attempt in range(1, max_retries + 1):
         payload = {
             "chat_id": chat_id,
-            "text": chunk,
+            "text": text,
             "parse_mode": "HTML"
         }
-        
+
         try:
             response = requests.post(url, json=payload, timeout=20)
+            
+            # Успешная доставка
             if response.status_code == 200:
-                print(f"📨 Сообщение (часть {i}/{len(chunks)}) успешно доставлено в Telegram!")
+                return True
+
+            # 1. Защита от спам-лимитов Telegram (HTTP 429 Too Many Requests / Flood Control)
+            if response.status_code == 429:
+                try:
+                    resp_json = response.json()
+                    retry_after = resp_json.get("parameters", {}).get("retry_after", 5)
+                except Exception:
+                    retry_after = 5
+                
+                print(f"⏳ [Анти-спам Telegram] Превышен лимит запросов. Ожидание {retry_after + 1} сек...")
+                import time
+                time.sleep(retry_after + 1)
                 continue
-            
-            # Если Telegram вернул ошибку форматирования HTML (400)
-            print(f"⚠️ Ошибка отправки HTML ({response.text}). Применяем резервную отправку чистым текстом...")
-            
-            # 2. Вторая попытка: отправка без разметки (гарантированная доставка)
-            plain_chunk = strip_html_tags(chunk)
-            plain_payload = {
-                "chat_id": chat_id,
-                "text": plain_chunk
-            }
-            retry_res = requests.post(url, json=plain_payload, timeout=20)
-            retry_res.raise_for_status()
-            print(f"📨 Сообщение (часть {i}/{len(chunks)}) успешно доставлено чистым текстом!")
 
-        except Exception as e:
-            print(f"❌ Критическая ошибка при отправке сообщения в Telegram: {e}")
-            raise e
+            # 2. Ошибка форматирования HTML (400) — резервная отправка чистым текстом
+            if response.status_code == 400:
+                print(f"⚠️ Ошибка разметки HTML ({response.text[:120]}). Отправляем резервную копию чистым текстом...")
+                plain_payload = {
+                    "chat_id": chat_id,
+                    "text": strip_html_tags(text)
+                }
+                fallback_res = requests.post(url, json=plain_payload, timeout=20)
+                if fallback_res.status_code == 200:
+                    return True
+                fallback_res.raise_for_status()
 
+            # 3. Серверные сбои (5xx) — пауза и повтор
+            if response.status_code >= 500:
+                print(f"⚠️ Ошибка сервера Telegram (HTTP {response.status_code}), попытка {attempt}/{max_retries}...")
+                import time
+                time.sleep(2 * attempt)
+                continue
+
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as e:
+            print(f"⚠️ Сетевая ошибка при отправке ({e}), попытка {attempt}/{max_retries}...")
+            import time
+            time.sleep(2 * attempt)
+
+    raise RuntimeError(f"Не удалось доставить сообщение в Telegram после {max_retries} попыток.")
+
+
+def send_topic_messages(bot_token: str, chat_id: str, messages: list[str], delay_seconds: float = 2.0) -> bool:
+    """
+    Отправляет пакет тематических сообщений отдельными частями с соблюдением
+    строгих анти-спам правил Telegram (задержка между сообщениями, typing-индикатор,
+    автоматический Flood Control).
+    """
+    import time
+
+    total = len(messages)
+    print(f"📦 Подготовка к отправке пакета из {total} тематических сообщений...")
+
+    for idx, msg in enumerate(messages, 1):
+        if not msg.strip():
+            continue
+
+        # Проверяем, если отдельная тема длиннее лимита Telegram (4096 симв.)
+        chunks = split_text_into_chunks(msg)
+
+        for c_idx, chunk in enumerate(chunks, 1):
+            # Индикация набора текста для естественного темпа
+            send_chat_action(bot_token, chat_id, action="typing")
+            
+            # Небольшая пауза для имитации набора перед сообщением
+            time.sleep(0.4)
+
+            # Отправка сообщения
+            send_single_message_with_retry(bot_token, chat_id, chunk)
+            
+            part_info = f" (часть {c_idx}/{len(chunks)})" if len(chunks) > 1 else ""
+            print(f"📨 Тематическое сообщение [{idx}/{total}]{part_info} успешно доставлено!")
+
+        # Анти-спам задержка перед следующим тематическим сообщением
+        if idx < total:
+            time.sleep(delay_seconds)
+
+    print("✨ Все тематические сообщения успешно доставлены без нарушений анти-спама!")
     return True
+
+
+def send_text_message(bot_token: str, chat_id: str, text: str) -> bool:
+    """
+    Отправляет текстовое сообщение или разбитый по темам текст в Telegram.
+    Сохранена для обратной совместимости.
+    """
+    chunks = split_text_into_chunks(text)
+    return send_topic_messages(bot_token, chat_id, chunks)
 
 
 def send_photo(bot_token: str, chat_id: str, photo_data: bytes | str, caption: str = "✨ <b>Космическая визуализация ключевых аспектов дня</b>") -> bool:

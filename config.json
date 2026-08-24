@@ -7,7 +7,7 @@
     "is_general": true
   },
   "bot_settings": {
-    "send_image": true,
+    "send_image": false,
     "timezone": "Europe/Moscow"
   }
 }

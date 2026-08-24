@@ -1,17 +1,14 @@
 """
 Главный координирующий модуль Telegram-бота ежедневного гороскопа.
 Выполняет загрузку конфигурации, генерацию прогноза через Google AI
-и гарантированную доставку текста и иллюстрации в Telegram.
+и безопасную доставку прогноза по темам отдельными сообщениями в Telegram.
 """
 
 import sys
-from pathlib import Path
 
 from config_loader import get_config, validate_secrets
-from ai_service import generate_horoscope_text, generate_cosmic_image
-from telegram_service import send_text_message, send_photo
-
-DEFAULT_COVER_PATH = str(Path(__file__).resolve().parent / "assets" / "default_cover.png")
+from ai_service import generate_horoscope_text, split_into_topic_messages
+from telegram_service import send_topic_messages
 
 
 def main():
@@ -30,27 +27,20 @@ def main():
     bot_token = config["telegram_token"]
     chat_id = config["telegram_chat_id"]
     user_profile = config["user_profile"]
-    bot_settings = config["bot_settings"]
 
     try:
         # 2. Генерация текста гороскопа
         print("🔮 Расчет натальных аспектов и генерация прогноза дня...")
         horoscope_text = generate_horoscope_text(api_key, user_profile)
 
-        # 3. Доставка текста в Telegram
-        print("📤 Отправка прогноза в Telegram...")
-        send_text_message(bot_token, chat_id, horoscope_text)
+        # 3. Разделение текста на тематические сообщения
+        print("📑 Формирование тематических блоков прогноза...")
+        topics = split_into_topic_messages(horoscope_text)
+        print(f"📦 Сформировано {len(topics)} тематических сообщений.")
 
-        # 4. Генерация и отправка космической картины дня
-        if bot_settings.get("send_image", True):
-            print("🎨 Создание космической визуализации дня...")
-            image_data = generate_cosmic_image(api_key, horoscope_text)
-            
-            if image_data:
-                send_photo(bot_token, chat_id, image_data)
-            else:
-                print("🖼️ Отправка резервной графической обложки...")
-                send_photo(bot_token, chat_id, DEFAULT_COVER_PATH)
+        # 4. Безопасная доставка пакета сообщений в Telegram (с защитой от анти-спама)
+        print("📤 Отправка тематических сообщений в Telegram...")
+        send_topic_messages(bot_token, chat_id, topics, delay_seconds=2.0)
 
         print("✨ Ежедневная рассылка успешно завершена!")
 
@@ -61,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

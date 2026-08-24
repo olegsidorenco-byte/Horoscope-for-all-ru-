@@ -9,8 +9,8 @@ from pathlib import Path
 import requests
 
 from config_loader import get_config, validate_secrets
-from ai_service import discover_models, generate_horoscope_text, generate_cosmic_image
-from telegram_service import send_text_message, send_photo
+from ai_service import discover_models, generate_horoscope_text, split_into_topic_messages
+from telegram_service import send_topic_messages, send_chat_action
 
 
 def test_connections():
@@ -74,53 +74,39 @@ def test_models_discovery():
         print(f" {i}. {star} {m}")
 
 
-def test_text_generation():
-    """Генерирует и выводит гороскоп в консоль (без отправки в Telegram)."""
-    print("\n--- 📜 Тестирование генерации текста гороскопа ---")
+def test_text_and_topics_generation():
+    """Генерирует гороскоп и показывает разбивку на темы в консоли."""
+    print("\n--- 📜 Тестирование генерации и разбивки по темам ---")
     config = get_config()
     api_key = config["gemini_api_key"]
     if not api_key:
         print("❌ Укажите GEMINI_API_KEY в файле .env")
         return
 
-    print(f"👤 Профиль: {config['user_profile'].get('name', 'Пользователь')}, Дата рождения: {config['user_profile'].get('birth_date') or 'Общий гороскоп'}")
+    print(f"👤 Профиль: {config['user_profile'].get('name', 'Пользователь')}, Дата: {config['user_profile'].get('birth_date') or 'Общий прогноз'}")
     print("⏳ Генерация прогноза... Пожалуйста, подождите...")
     
     try:
-        text = generate_horoscope_text(api_key, config["user_profile"])
-        print("\n" + "=" * 50)
-        print(text)
-        print("=" * 50)
-        print(f"✅ Длина сгенерированного текста: {len(text)} символов.")
+        raw_text = generate_horoscope_text(api_key, config["user_profile"])
+        topics = split_into_topic_messages(raw_text)
+        
+        print("\n" + "=" * 55)
+        print(f"✅ Успешно сформировано сообщений по темам: {len(topics)}")
+        print("=" * 55)
+        
+        for idx, topic in enumerate(topics, 1):
+            print(f"\n--- 📨 Тематическое сообщение #{idx} ({len(topic)} симв.) ---")
+            print(topic)
+            print("-" * 45)
+            
     except Exception as e:
         print(f"❌ Ошибка при генерации: {e}")
 
 
-def test_image_generation():
-    """Тестирует генерацию космической картины дня и сохраняет локальный файл."""
-    print("\n--- 🎨 Тестирование генерации космической картины ---")
-    config = get_config()
-    api_key = config["gemini_api_key"]
-    if not api_key:
-        print("❌ Укажите GEMINI_API_KEY в файле .env")
-        return
-
-    sample_text = "Гармоничный аспект Юпитера и Солнца дарит вдохновение и творческий подъем."
-    print("⏳ Запрос на создание космической картины в Google AI...")
-    
-    image_bytes = generate_cosmic_image(api_key, sample_text)
-    if image_bytes:
-        out_file = Path("test_cosmic_image.png")
-        out_file.write_bytes(image_bytes)
-        print(f"✅ Картина успешно сгенерирована и сохранена в файл: {out_file.resolve()}")
-    else:
-        print("ℹ️ Онлайн-генератор недоступен для данного ключа. Будет использована обложка: assets/default_cover.png")
-
-
 def test_full_pipeline():
-    """Выполняет полный боевой запуск с отправкой в Telegram."""
-    print("\n--- 🚀 Полный боевой тест с отправкой в Telegram ---")
-    confirm = input("Отправить тестовый прогноз в Telegram прямо сейчас? (y/n): ").strip().lower()
+    """Выполняет полный боевой запуск с отправкой пакета тем в Telegram."""
+    print("\n--- 🚀 Полный боевой тест с отправкой тем в Telegram ---")
+    confirm = input("Отправить тестовый пакет сообщений в Telegram прямо сейчас? (y/n): ").strip().lower()
     if confirm in ["y", "yes", "д", "да"]:
         import main
         main.main()
@@ -143,38 +129,36 @@ def show_user_profile():
 
 def main_menu():
     while True:
-        print("\n" + "=" * 45)
+        print("\n" + "=" * 48)
         print("   🌟 АСТРОЛОГИЧЕСКИЙ БОТ: МЕНЮ ТЕСТОВ 🌟")
-        print("=" * 45)
+        print("=" * 48)
         print(" 1. 🔑 Проверить API-ключи и связь (Gemini & Telegram)")
         print(" 2. 🔍 Проверить автопоиск моделей Google AI")
-        print(" 3. 📜 Сгенерировать гороскоп (вывод в консоль)")
-        print(" 4. 🎨 Проверить генерацию космической картины")
-        print(" 5. 🚀 Полный боевой тест (генерация + отправка)")
-        print(" 6. ⚙️ Посмотреть настройки (config.json)")
+        print(" 3. 📜 Сгенерировать гороскоп и разбивку по темам")
+        print(" 4. 🚀 Полный боевой запуск (потемная отправка)")
+        print(" 5. ⚙️ Посмотреть настройки (config.json)")
         print(" 0. ❌ Выход")
-        print("=" * 45)
+        print("=" * 48)
         
-        choice = input("Выберите пункт меню (0-6): ").strip()
+        choice = input("Выберите пункт меню (0-5): ").strip()
         
         if choice == "1":
             test_connections()
         elif choice == "2":
             test_models_discovery()
         elif choice == "3":
-            test_text_generation()
+            test_text_and_topics_generation()
         elif choice == "4":
-            test_image_generation()
-        elif choice == "5":
             test_full_pipeline()
-        elif choice == "6":
+        elif choice == "5":
             show_user_profile()
         elif choice in ["0", "q", "exit"]:
             print("До свидания! ✨")
             break
         else:
-            print("Неверный ввод. Пожалуйста, введите число от 0 до 6.")
+            print("Неверный ввод. Пожалуйста, введите число от 0 до 5.")
 
 
 if __name__ == "__main__":
     main_menu()
+
