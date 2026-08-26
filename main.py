@@ -28,6 +28,10 @@ def main():
     chat_id = config["telegram_chat_id"]
     user_profile = config["user_profile"]
 
+    bot_settings = config.get("bot_settings", {})
+    delay_minutes = bot_settings.get("delay_between_messages_minutes", 10)
+    delay_seconds = bot_settings.get("delay_between_messages_seconds", delay_minutes * 60)
+
     try:
         # 2. Генерация текста гороскопа
         print("🔮 Расчет натальных аспектов и генерация прогноза дня...")
@@ -38,9 +42,9 @@ def main():
         topics = split_into_topic_messages(horoscope_text)
         print(f"📦 Сформировано {len(topics)} тематических сообщений.")
 
-        # 4. Безопасная доставка пакета сообщений в Telegram (с защитой от анти-спама)
-        print("📤 Отправка тематических сообщений в Telegram...")
-        send_topic_messages(bot_token, chat_id, topics, delay_seconds=2.0)
+        # 4. Доставка пакета сообщений в Telegram с интервалами (по умолчанию 10 минут)
+        print(f"📤 Отправка тематических сообщений в Telegram (интервал {delay_seconds / 60:.1f} мин)...")
+        send_topic_messages(bot_token, chat_id, topics, delay_seconds=delay_seconds)
 
         print("✨ Ежедневная рассылка успешно завершена!")
 

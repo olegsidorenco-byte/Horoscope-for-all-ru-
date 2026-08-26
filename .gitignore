@@ -15,3 +15,6 @@ test_*.jpg
 venv/
 .venv/
 env/
+
+# IDE и снимки
+.snapshots/

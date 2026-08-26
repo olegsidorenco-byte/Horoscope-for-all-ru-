@@ -148,16 +148,18 @@ def send_single_message_with_retry(bot_token: str, chat_id: str, text: str, max_
     raise RuntimeError(f"Не удалось доставить сообщение в Telegram после {max_retries} попыток.")
 
 
-def send_topic_messages(bot_token: str, chat_id: str, messages: list[str], delay_seconds: float = 2.0) -> bool:
+def send_topic_messages(bot_token: str, chat_id: str, messages: list[str], delay_seconds: float = 600.0) -> bool:
     """
-    Отправляет пакет тематических сообщений отдельными частями с соблюдением
-    строгих анти-спам правил Telegram (задержка между сообщениями, typing-индикатор,
-    автоматический Flood Control).
+    Отправляет пакет тематических сообщений отдельными частями с комфортными интервалами
+    (по умолчанию 10 минут) и соблюдением строгих анти-спам правил Telegram
+    (typing-индикатор, Flood Control, безопасные задержки).
     """
     import time
+    import sys
 
     total = len(messages)
-    print(f"📦 Подготовка к отправке пакета из {total} тематических сообщений...")
+    delay_min = delay_seconds / 60
+    print(f"📦 Подготовка к отправке {total} тематических сообщений (интервал: {delay_min:.1f} мин)...")
 
     for idx, msg in enumerate(messages, 1):
         if not msg.strip():
@@ -177,13 +179,20 @@ def send_topic_messages(bot_token: str, chat_id: str, messages: list[str], delay
             send_single_message_with_retry(bot_token, chat_id, chunk)
             
             part_info = f" (часть {c_idx}/{len(chunks)})" if len(chunks) > 1 else ""
-            print(f"📨 Тематическое сообщение [{idx}/{total}]{part_info} успешно доставлено!")
+            print(f"📨 [{idx}/{total}] Тематическое сообщение успешно доставлено!{part_info}")
+            sys.stdout.flush()
 
-        # Анти-спам задержка перед следующим тематическим сообщением
-        if idx < total:
+        # Интервал перед следующим тематическим сообщением
+        if idx < total and delay_seconds > 0:
+            if delay_seconds >= 60:
+                print(f"⏳ Ожидание {delay_seconds / 60:.1f} мин перед отправкой следующей темы [{idx + 1}/{total}]...")
+            else:
+                print(f"⏳ Ожидание {delay_seconds:.0f} сек перед отправкой следующей темы [{idx + 1}/{total}]...")
+            sys.stdout.flush()
             time.sleep(delay_seconds)
 
-    print("✨ Все тематические сообщения успешно доставлены без нарушений анти-спама!")
+    print("✨ Все тематические сообщения успешно доставлены с комфортными перерывами!")
+    sys.stdout.flush()
     return True
 
 

@@ -53,8 +53,9 @@ def get_config():
             "is_general": True
         },
         "bot_settings": {
-            "send_image": True,
-            "timezone": "UTC"
+            "send_image": False,
+            "delay_between_messages_minutes": 10,
+            "timezone": "Europe/Moscow"
         }
     }
 
