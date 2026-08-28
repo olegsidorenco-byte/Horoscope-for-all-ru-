@@ -105,28 +105,9 @@ def test_text_and_topics_generation():
 
 def test_full_pipeline():
     """Выполняет полный боевой запуск с отправкой пакета тем в Telegram."""
-    print("\n--- 🚀 Тестовый запуск с отправкой тем в Telegram ---")
-    config = get_config()
-    configured_min = config["bot_settings"].get("delay_between_messages_minutes", 10)
-    print(f"Текущий интервал в настройках: {configured_min} мин.")
-    print("1. Быстрый тест (интервал 2 секунды между темами)")
-    print(f"2. Боевой запуск (интервал {configured_min} минут)")
-    print("0. Отмена")
-    
-    mode = input("Выберите режим (1/2/0): ").strip()
-    if mode == "1":
-        # Временная быстрая отправка
-        api_key = config["gemini_api_key"]
-        bot_token = config["telegram_token"]
-        chat_id = config["telegram_chat_id"]
-        user_profile = config["user_profile"]
-        
-        print("⏳ Генерация прогноза...")
-        text = generate_horoscope_text(api_key, user_profile)
-        topics = split_into_topic_messages(text)
-        print("📤 Отправка в Telegram с быстрой тестовой паузой 2 сек...")
-        send_topic_messages(bot_token, chat_id, topics, delay_seconds=2.0)
-    elif mode == "2":
+    print("\n--- 🚀 Полный боевой тест с отправкой тем в Telegram ---")
+    confirm = input("Отправить тестовый пакет сообщений в Telegram прямо сейчас? (y/n): ").strip().lower()
+    if confirm in ["y", "yes", "д", "да"]:
         import main
         main.main()
     else:
@@ -144,7 +125,7 @@ def show_user_profile():
     print(f"• Время рождения: {prof.get('birth_time') or '(не указано)'}")
     print(f"• Город: {prof.get('birth_city') or '(не указан)'}")
     print(f"• Режим общего прогноза: {prof.get('is_general')}")
-    print(f"• Интервал между темами: {settings.get('delay_between_messages_minutes', 10)} мин")
+    print(f"• Анти-спам интервал: {settings.get('delay_between_messages_seconds', 2)} сек")
     print(f"• Часовой пояс: {settings.get('timezone', 'Europe/Moscow')}")
 
 

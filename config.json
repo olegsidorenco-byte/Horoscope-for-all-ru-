@@ -8,7 +8,7 @@
   },
   "bot_settings": {
     "send_image": false,
-    "delay_between_messages_minutes": 10,
+    "delay_between_messages_seconds": 2,
     "timezone": "Europe/Moscow"
   }
 }

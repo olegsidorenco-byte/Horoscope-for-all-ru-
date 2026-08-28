@@ -54,7 +54,7 @@ def get_config():
         },
         "bot_settings": {
             "send_image": False,
-            "delay_between_messages_minutes": 10,
+            "delay_between_messages_seconds": 2,
             "timezone": "Europe/Moscow"
         }
     }
