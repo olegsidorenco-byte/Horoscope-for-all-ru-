@@ -192,11 +192,22 @@ def send_topic_messages(bot_token: str, chat_id: str, messages: list[str], delay
 
 def send_text_message(bot_token: str, chat_id: str, text: str) -> bool:
     """
-    Отправляет текстовое сообщение или разбитый по темам текст в Telegram.
-    Сохранена для обратной совместимости.
+    Отправляет полный текст гороскопа в Telegram единым сообщением.
+    Если текст по какой-то причине превысит лимит Telegram (3800 символов),
+    он будет аккуратно разделен по абзацам.
     """
+    import time
     chunks = split_text_into_chunks(text)
-    return send_topic_messages(bot_token, chat_id, chunks)
+    
+    if len(chunks) == 1:
+        send_chat_action(bot_token, chat_id, action="typing")
+        time.sleep(0.4)
+        send_single_message_with_retry(bot_token, chat_id, chunks[0])
+        print(f"📨 Гороскоп успешно доставлен единым сообщением в Telegram! (длина: {len(text)} симв.)")
+        return True
+
+    print(f"ℹ️ Текст превысил лимит одного сообщения ({len(text)} симв.). Отправка по частям ({len(chunks)} шт.)...")
+    return send_topic_messages(bot_token, chat_id, chunks, delay_seconds=2.0)
 
 
 def send_photo(bot_token: str, chat_id: str, photo_data: bytes | str, caption: str = "✨ <b>Космическая визуализация ключевых аспектов дня</b>") -> bool:

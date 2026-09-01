@@ -88,25 +88,25 @@ def test_text_and_topics_generation():
     
     try:
         raw_text = generate_horoscope_text(api_key, config["user_profile"])
-        topics = split_into_topic_messages(raw_text)
         
         print("\n" + "=" * 55)
-        print(f"✅ Успешно сформировано сообщений по темам: {len(topics)}")
+        print(f"✅ Прогноз сформирован (длина: {len(raw_text)} симв. / лимит 4096)")
         print("=" * 55)
-        
-        for idx, topic in enumerate(topics, 1):
-            print(f"\n--- 📨 Тематическое сообщение #{idx} ({len(topic)} симв.) ---")
-            print(topic)
-            print("-" * 45)
+        print(raw_text)
+        print("=" * 55)
+        if len(raw_text) <= 4096:
+            print("✨ Отлично! Текст идеально помещается в ОДНО сообщение Telegram.")
+        else:
+            print("⚠️ Текст превышает 4096 символов.")
             
     except Exception as e:
         print(f"❌ Ошибка при генерации: {e}")
 
 
 def test_full_pipeline():
-    """Выполняет полный боевой запуск с отправкой пакета тем в Telegram."""
-    print("\n--- 🚀 Полный боевой тест с отправкой тем в Telegram ---")
-    confirm = input("Отправить тестовый пакет сообщений в Telegram прямо сейчас? (y/n): ").strip().lower()
+    """Выполняет полный боевой запуск с отправкой гороскопа единым сообщением в Telegram."""
+    print("\n--- 🚀 Полный боевой тест с отправкой единого сообщения в Telegram ---")
+    confirm = input("Отправить тестовое сообщение в Telegram прямо сейчас? (y/n): ").strip().lower()
     if confirm in ["y", "yes", "д", "да"]:
         import main
         main.main()
@@ -125,7 +125,6 @@ def show_user_profile():
     print(f"• Время рождения: {prof.get('birth_time') or '(не указано)'}")
     print(f"• Город: {prof.get('birth_city') or '(не указан)'}")
     print(f"• Режим общего прогноза: {prof.get('is_general')}")
-    print(f"• Анти-спам интервал: {settings.get('delay_between_messages_seconds', 2)} сек")
     print(f"• Часовой пояс: {settings.get('timezone', 'Europe/Moscow')}")
 
 
@@ -136,8 +135,8 @@ def main_menu():
         print("=" * 48)
         print(" 1. 🔑 Проверить API-ключи и связь (Gemini & Telegram)")
         print(" 2. 🔍 Проверить автопоиск моделей Google AI")
-        print(" 3. 📜 Сгенерировать гороскоп и разбивку по темам")
-        print(" 4. 🚀 Полный боевой запуск (потемная отправка)")
+        print(" 3. 📜 Сгенерировать гороскоп (проверить объем и текст)")
+        print(" 4. 🚀 Полный боевой запуск (отправка одного сообщения)")
         print(" 5. ⚙️ Посмотреть настройки (config.json)")
         print(" 0. ❌ Выход")
         print("=" * 48)

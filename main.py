@@ -7,8 +7,8 @@
 import sys
 
 from config_loader import get_config, validate_secrets
-from ai_service import generate_horoscope_text, split_into_topic_messages
-from telegram_service import send_topic_messages
+from ai_service import generate_horoscope_text
+from telegram_service import send_text_message
 
 
 def main():
@@ -35,15 +35,11 @@ def main():
         # 2. Генерация текста гороскопа
         print("🔮 Расчет натальных аспектов и генерация прогноза дня...")
         horoscope_text = generate_horoscope_text(api_key, user_profile)
+        print(f"📝 Текст гороскопа успешно сформирован (объем: {len(horoscope_text)} симв.).")
 
-        # 3. Разделение текста на тематические сообщения
-        print("📑 Формирование тематических блоков прогноза...")
-        topics = split_into_topic_messages(horoscope_text)
-        print(f"📦 Сформировано {len(topics)} тематических сообщений.")
-
-        # 4. Безопасная доставка пакета сообщений в Telegram (с защитой от анти-спама)
-        print("📤 Отправка тематических сообщений в Telegram...")
-        send_topic_messages(bot_token, chat_id, topics, delay_seconds=delay_seconds)
+        # 3. Доставка гороскопа единым сообщением в Telegram
+        print("📤 Отправка гороскопа в Telegram единым сообщением...")
+        send_text_message(bot_token, chat_id, horoscope_text)
 
         print("✨ Ежедневная рассылка успешно завершена!")
 
