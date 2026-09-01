@@ -49,6 +49,16 @@ jobs:
             sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>' android/app/src/main/AndroidManifest.xml
           fi
           
+          # Включение coreLibraryDesugaring для поддержки flutter_local_notifications
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i '/compileOptions {/a \        isCoreLibraryDesugaringEnabled = true' android/app/build.gradle.kts
+            echo 'dependencies { coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4") }' >> android/app/build.gradle.kts
+          fi
+          if [ -f android/app/build.gradle ]; then
+            sed -i '/compileOptions {/a \        coreLibraryDesugaringEnabled true' android/app/build.gradle
+            echo 'dependencies { coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4" }' >> android/app/build.gradle
+          fi
+
           flutter pub get
           dart run flutter_launcher_icons
 
