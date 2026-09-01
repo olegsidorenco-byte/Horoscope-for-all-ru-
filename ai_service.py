@@ -397,3 +397,96 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
         pass
 
     return default_prompt
+
+
+def build_zodiac_prompt(target_date: str = None) -> str:
+    """
+    Формирует структурированный промпт для генерации компактного гороскопа по 12 знакам зодиака.
+    """
+    if not target_date:
+        target_date = datetime.now().strftime("%d.%m.%Y")
+    
+    return f"""Ты — высококвалифицированный астролог классической школы.
+Твоя задача — рассчитать и составить точный астрологический гороскоп на {target_date} ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА.
+
+СТРОГИЕ ПРАВИЛА ОФОРМЛЕНИЯ:
+1. В самом начале напиши заголовок:
+✨ <b>ГОРОСКОП ПО ЗНАКАМ ЗОДИАКА НА {target_date}</b> ✨
+
+2. Оформи каждый знак зодиака строго по порядку в следующем виде:
+<b>♈ Овен (21.03–19.04)</b>
+• Фокус: [Краткий акцент дня, 2-4 слова]
+• Энергия: [Процент, например: 90%] | Часы удачи: [Например: 10:00–12:00]
+[2 емких астрологических предложения с учетом планетарных влияний и точным практическим советом]
+
+Порядок знаков:
+1. ♈ Овен (21.03–19.04)
+2. ♉ Телец (20.04–20.05)
+3. ♊ Близнецы (21.05–20.06)
+4. ♋ Рак (21.06–22.07)
+5. ♌ Лев (23.07–22.08)
+6. ♍ Дева (23.08–22.09)
+7. ♎ Весы (23.09–22.10)
+8. ♏ Скорпион (23.10–21.11)
+9. ♐ Стрелец (22.11–21.12)
+10. ♑ Козерог (22.12–19.01)
+11. ♒ Водолей (20.01–18.02)
+12. ♓ Рыбы (19.02–20.03)
+
+3. ОБЪЕМ: строго по 150–220 символов на каждый знак. Общий объем текста: 2200–2600 символов (строго уместиться в одно сообщение).
+4. Используй только HTML теги <b> и <i>, без Markdown решеток и звездочек.
+"""
+
+
+def generate_zodiac_horoscope_text(api_key: str, target_date: str = None) -> str:
+    """
+    Генерирует гороскоп по 12 знакам зодиака через Google Gemini API с автопоиском и отказоустойчивостью.
+    """
+    if not target_date:
+        target_date = datetime.now().strftime("%d.%m.%Y")
+
+    prompt = build_zodiac_prompt(target_date)
+    models = discover_models(api_key)
+    if not models:
+        models = DEFAULT_MODELS_PRIORITY
+
+    headers = {
+        "x-goog-api-key": api_key,
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 3000,
+            "topP": 0.95
+        }
+    }
+
+    last_error = None
+    for model_name in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
+        for attempt in range(1, 3):
+            try:
+                print(f"🤖 [Зодиак] Запрос к модели {model_name} (попытка {attempt}/2)...")
+                response = requests.post(url, headers=headers, json=payload, timeout=40)
+                if response.status_code == 200:
+                    data = response.json()
+                    candidates = data.get("candidates", [])
+                    if candidates:
+                        text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                        if text:
+                            print(f"✅ [Зодиак] Гороскоп успешно сгенерирован моделью {model_name} ({len(text)} симв.)!")
+                            return text.strip()
+                elif response.status_code == 429:
+                    print(f"⚠️ [Зодиак] Лимит запросов к {model_name}. Ожидание 5 сек...")
+                    time.sleep(5)
+                else:
+                    last_error = f"HTTP {response.status_code}: {response.text[:200]}"
+            except Exception as e:
+                last_error = str(e)
+                time.sleep(2)
+
+    raise RuntimeError(f"Не удалось сгенерировать гороскоп по знакам зодиака: {last_error}")
+

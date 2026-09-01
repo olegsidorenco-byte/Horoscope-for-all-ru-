@@ -1,15 +1,16 @@
 """
 Главный координирующий модуль Telegram-бота ежедневного гороскопа.
-Выполняет загрузку конфигурации, генерацию прогноза через Google AI
-и безопасную доставку прогноза по темам отдельными сообщениями в Telegram.
+Выполняет загрузку конфигурации, генерацию персонального прогноза и гороскопа
+по 12 знакам зодиака через Google AI, сохранение в архив и доставку в Telegram.
 """
 
 import sys
+import time
 
 from config_loader import get_config, validate_secrets
-from ai_service import generate_horoscope_text
+from ai_service import generate_horoscope_text, generate_zodiac_horoscope_text
 from telegram_service import send_text_message
-from archive_service import save_horoscope_to_archive
+from archive_service import save_horoscope_to_archive, save_zodiac_to_archive
 
 
 def main():
@@ -33,20 +34,31 @@ def main():
     delay_seconds = bot_settings.get("delay_between_messages_seconds", 2.0)
 
     try:
-        # 2. Генерация текста гороскопа
-        print("🔮 Расчет натальных аспектов и генерация прогноза дня...")
+        # 2. Генерация и доставка Персонального прогноза (Сообщение 1)
+        print("🔮 1/2. Расчет натальных аспектов и генерация персонального прогноза дня...")
         horoscope_text = generate_horoscope_text(api_key, user_profile)
-        print(f"📝 Текст гороскопа успешно сформирован (объем: {len(horoscope_text)} симв.).")
+        print(f"📝 Персональный гороскоп сформирован (объем: {len(horoscope_text)} симв.).")
 
-        # 3. Сохранение в архив по дням и публикация в data/
-        print("🗄️ Сохранение прогноза в архив по дням...")
+        print("🗄️ Сохранение персонального прогноза в архив...")
         save_horoscope_to_archive(horoscope_text)
 
-        # 4. Доставка гороскопа единым сообщением в Telegram
-        print("📤 Отправка гороскопа в Telegram единым сообщением...")
+        print("📤 Отправка персонального прогноза в Telegram (Сообщение 1)...")
         send_text_message(bot_token, chat_id, horoscope_text)
 
-        print("✨ Ежедневная рассылка и архивация успешно завершены!")
+        time.sleep(delay_seconds)
+
+        # 3. Генерация и доставка Гороскопа по 12 знакам зодиака (Сообщение 2)
+        print("♈ 2/2. Расчет и генерация гороскопа по 12 знакам зодиака...")
+        zodiac_text = generate_zodiac_horoscope_text(api_key)
+        print(f"📝 Гороскоп по знакам зодиака сформирован (объем: {len(zodiac_text)} симв.).")
+
+        print("🗄️ Сохранение гороскопа по знакам в архив...")
+        save_zodiac_to_archive(zodiac_text)
+
+        print("📤 Отправка гороскопа по знакам в Telegram (Сообщение 2)...")
+        send_text_message(bot_token, chat_id, zodiac_text)
+
+        print("✨ Все астрологические рассылки и архивация успешно завершены!")
 
     except Exception as e:
         print(f"❌ Критическая ошибка выполнения: {e}")
@@ -55,4 +67,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

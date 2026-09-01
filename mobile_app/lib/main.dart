@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ui/theme/cosmic_theme.dart';
-import 'ui/screens/home_screen.dart';
+import 'ui/screens/main_nav_screen.dart';
 import 'services/notification_service.dart';
 
 void main() async {
@@ -34,7 +34,7 @@ class CosmicHoroscopeApp extends StatelessWidget {
       title: 'Астро Гороскоп',
       debugShowCheckedModeBanner: false,
       theme: CosmicTheme.darkTheme,
-      home: const HomeScreen(),
+      home: const MainNavScreen(),
     );
   }
 }

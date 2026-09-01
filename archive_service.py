@@ -1,6 +1,7 @@
 """
 Модуль архивации и публикации ежедневных астрологических прогнозов.
 Сохраняет актуальный гороскоп в data/latest_horoscope.json,
+сохраняет гороскоп по 12 знакам зодиака в data/latest_zodiac.json,
 создает архивные копии по дням в data/archive/ и обновляет data/archive/index.json.
 """
 
@@ -12,6 +13,21 @@ from datetime import datetime
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ARCHIVE_DIR = os.path.join(DATA_DIR, "archive")
 
+ZODIAC_SIGNS_META = [
+    {"id": "aries", "name": "Овен", "symbol": "♈", "dates": "21.03 – 19.04", "element": "Огонь", "color": "0xFFE63946"},
+    {"id": "taurus", "name": "Телец", "symbol": "♉", "dates": "20.04 – 20.05", "element": "Земля", "color": "0xFF2A9D8F"},
+    {"id": "gemini", "name": "Близнецы", "symbol": "♊", "dates": "21.05 – 20.06", "element": "Воздух", "color": "0xFFE9C46A"},
+    {"id": "cancer", "name": "Рак", "symbol": "♋", "dates": "21.06 – 22.07", "element": "Вода", "color": "0xFF457B9D"},
+    {"id": "leo", "name": "Лев", "symbol": "♌", "dates": "23.07 – 22.08", "element": "Огонь", "color": "0xFFF4A261"},
+    {"id": "virgo", "name": "Дева", "symbol": "♍", "dates": "23.08 – 22.09", "element": "Земля", "color": "0xFF588157"},
+    {"id": "libra", "name": "Весы", "symbol": "♎", "dates": "23.09 – 22.10", "element": "Воздух", "color": "0xFFA8DADC"},
+    {"id": "scorpio", "name": "Скорпион", "symbol": "♏", "dates": "23.10 – 21.11", "element": "Вода", "color": "0xFF9D0208"},
+    {"id": "sagittarius", "name": "Стрелец", "symbol": "♐", "dates": "22.11 – 21.12", "element": "Огонь", "color": "0xFFE76F51"},
+    {"id": "capricorn", "name": "Козерог", "symbol": "♑", "dates": "22.12 – 19.01", "element": "Земля", "color": "0xFF3A5A40"},
+    {"id": "aquarius", "name": "Водолей", "symbol": "♒", "dates": "20.01 – 18.02", "element": "Воздух", "color": "0xFF00B4D8"},
+    {"id": "pisces", "name": "Рыбы", "symbol": "♓", "dates": "19.02 – 20.03", "element": "Вода", "color": "0xFF7209B7"},
+]
+
 
 def ensure_directories():
     """Создает необходимые каталоги data и data/archive."""
@@ -20,17 +36,11 @@ def ensure_directories():
 
 
 def parse_horoscope_structure(raw_text: str, target_date: str) -> dict:
-    """Парсит сгенерированный текст гороскопа на структурированные поля."""
+    """Парсит сгенерированный текст общего натального гороскопа."""
     clean_text = raw_text.strip()
-    
-    # Очистка HTML тегов для превью
-    plain_text = re.sub(r'<[^>]*>', '', clean_text)
-    
-    # Поиск первого абзаца (приветствие)
     paragraphs = [p.strip() for p in clean_text.split("\n\n") if p.strip()]
     greeting = paragraphs[0] if paragraphs else clean_text
     
-    # Извлечение тем
     topics = []
     topic_blocks = clean_text.split("<b>")
     for block in topic_blocks[1:]:
@@ -38,7 +48,6 @@ def parse_horoscope_structure(raw_text: str, target_date: str) -> dict:
         if len(parts) == 2:
             raw_title = parts[0].strip()
             content = parts[1].strip()
-            # Определение иконки
             icon = "✨"
             if "Влияние планет" in raw_title:
                 icon = "🪐"
@@ -68,20 +77,85 @@ def parse_horoscope_structure(raw_text: str, target_date: str) -> dict:
     }
 
 
+def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
+    """Парсит текст гороскопа по 12 знакам зодиака в структурированный JSON."""
+    clean_text = raw_text.strip()
+    signs_data = []
+
+    for meta in ZODIAC_SIGNS_META:
+        sign_name = meta["name"]
+        symbol = meta["symbol"]
+        
+        # Поиск блока знака
+        pattern = re.compile(rf"{symbol}\s*{sign_name}[^<]*</b>(.*?)(?=<b>[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
+        match = pattern.search(clean_text)
+        
+        block_text = ""
+        focus = "Гармония и развитие"
+        energy = "85%"
+        lucky_hours = "10:00–12:00"
+        forecast = ""
+
+        if match:
+            block_text = match.group(1).strip()
+        else:
+            # Резервный поиск по имени
+            simple_pattern = re.compile(rf"{sign_name}.*?\n(.*?)(?=\n[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
+            simple_match = simple_pattern.search(clean_text)
+            if simple_match:
+                block_text = simple_match.group(1).strip()
+
+        if block_text:
+            lines = [l.strip() for l in block_text.split("\n") if l.strip()]
+            forecast_lines = []
+            for line in lines:
+                if "Фокус:" in line:
+                    focus = line.replace("•", "").replace("Фокус:", "").strip()
+                elif "Энергия:" in line or "Часы удачи:" in line:
+                    parts = line.split("|")
+                    for p in parts:
+                        if "Энергия:" in p:
+                            energy = p.replace("•", "").replace("Энергия:", "").strip()
+                        if "Часы удачи:" in p or "Часы:" in p:
+                            lucky_hours = p.replace("Часы удачи:", "").replace("Часы:", "").strip()
+                else:
+                    forecast_lines.append(line)
+            
+            forecast = " ".join(forecast_lines).strip()
+            # Очистка HTML
+            forecast = re.sub(r'<[^>]*>', '', forecast).strip()
+
+        if not forecast:
+            forecast = f"Благоприятный день для знака {sign_name}. Сосредоточьтесь на ключевых задачах и доверяйте интуиции."
+
+        signs_data.append({
+            "id": meta["id"],
+            "name": meta["name"],
+            "symbol": meta["symbol"],
+            "dates": meta["dates"],
+            "element": meta["element"],
+            "color": meta["color"],
+            "focus": focus,
+            "energy": energy,
+            "lucky_hours": lucky_hours,
+            "forecast": forecast
+        })
+
+    return {
+        "date": target_date,
+        "raw_text": clean_text,
+        "signs": signs_data,
+        "updated_at": datetime.utcnow().isoformat() + "Z"
+    }
+
+
 def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
-    """
-    Сохраняет гороскоп в:
-    1. data/latest_horoscope.json (для мгновенной загрузки в приложении)
-    2. data/archive/horoscope_YYYY_MM_DD.json (персональный архив дня)
-    3. data/archive/index.json (каталог доступных дат)
-    """
+    """Сохраняет персональный прогноз в data/latest_horoscope.json и data/archive/."""
     ensure_directories()
-    
     if not target_date:
         target_date = datetime.now().strftime("%d.%m.%Y")
         
     try:
-        # Формируем ISO дату для имени файла (YYYY_MM_DD)
         dt = datetime.strptime(target_date, "%d.%m.%Y")
         iso_key = dt.strftime("%Y_%m_%d")
         display_date = target_date
@@ -91,18 +165,15 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
 
     data_payload = parse_horoscope_structure(raw_text, display_date)
 
-    # 1. Сохранение latest_horoscope.json
     latest_path = os.path.join(DATA_DIR, "latest_horoscope.json")
     with open(latest_path, "w", encoding="utf-8") as f:
         json.dump(data_payload, f, ensure_ascii=False, indent=2)
 
-    # 2. Сохранение архивного файла за день
     archive_file_name = f"horoscope_{iso_key}.json"
     archive_file_path = os.path.join(ARCHIVE_DIR, archive_file_name)
     with open(archive_file_path, "w", encoding="utf-8") as f:
         json.dump(data_payload, f, ensure_ascii=False, indent=2)
 
-    # 3. Обновление индекса архива data/archive/index.json
     index_path = os.path.join(ARCHIVE_DIR, "index.json")
     index_data = []
     if os.path.exists(index_path):
@@ -112,7 +183,6 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
         except Exception:
             index_data = []
 
-    # Проверяем, есть ли уже эта дата в индексе
     existing_entry = next((item for item in index_data if item.get("date") == display_date), None)
     new_entry = {
         "date": display_date,
@@ -127,9 +197,37 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
     else:
         index_data.insert(0, new_entry)
 
-    # Сортировка индекса по дате (самые свежие сверху)
     with open(index_path, "w", encoding="utf-8") as f:
         json.dump(index_data, f, ensure_ascii=False, indent=2)
 
-    print(f"🗄️ Гороскоп на {display_date} успешно добавлен в архив: {archive_file_name}")
+    print(f"🗄️ Персональный гороскоп на {display_date} сохранен в архив: {archive_file_name}")
     return data_payload
+
+
+def save_zodiac_to_archive(raw_text: str, target_date: str = None) -> dict:
+    """Сохраняет гороскоп по 12 знакам зодиака в data/latest_zodiac.json и data/archive/."""
+    ensure_directories()
+    if not target_date:
+        target_date = datetime.now().strftime("%d.%m.%Y")
+
+    try:
+        dt = datetime.strptime(target_date, "%d.%m.%Y")
+        iso_key = dt.strftime("%Y_%m_%d")
+        display_date = target_date
+    except Exception:
+        iso_key = target_date.replace(".", "_")
+        display_date = target_date
+
+    zodiac_payload = parse_zodiac_structure(raw_text, display_date)
+
+    latest_zodiac_path = os.path.join(DATA_DIR, "latest_zodiac.json")
+    with open(latest_zodiac_path, "w", encoding="utf-8") as f:
+        json.dump(zodiac_payload, f, ensure_ascii=False, indent=2)
+
+    archive_zodiac_name = f"zodiac_{iso_key}.json"
+    archive_zodiac_path = os.path.join(ARCHIVE_DIR, archive_zodiac_name)
+    with open(archive_zodiac_path, "w", encoding="utf-8") as f:
+        json.dump(zodiac_payload, f, ensure_ascii=False, indent=2)
+
+    print(f"♈ Гороскоп по 12 знакам зодиака на {display_date} сохранен: {archive_zodiac_name}")
+    return zodiac_payload

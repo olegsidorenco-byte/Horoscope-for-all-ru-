@@ -79,9 +79,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: app-v1.0.3
-          name: "📱 Релиз Horoscope-for-all-ru.apk (Астро Гороскоп)"
-          body: "Готовый установочный файл Horoscope-for-all-ru.apk для Android. Название приложения в системе: «Астро Гороскоп»."
+          tag_name: app-v1.0.4
+          name: "📱 Релиз Horoscope-for-all-ru.apk v1.0.4 (Астро Гороскоп)"
+          body: "Готовый установочный файл Horoscope-for-all-ru.apk для Android. Включает раздел 12 знаков зодиака с фильтрами стихий, персональный прогноз, утренние Push-уведомления и архив."
           files: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           draft: false
           prerelease: false

@@ -8,7 +8,7 @@ import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 import '../widgets/greeting_header.dart';
 import '../widgets/topic_card.dart';
-import 'archive_screen.dart';
+import 'zodiac_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -23,6 +23,21 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isNewForecast = false;
+
+  final List<Map<String, String>> _zodiacQuickList = const [
+    {'id': 'aries', 'name': 'Овен', 'symbol': '♈'},
+    {'id': 'taurus', 'name': 'Телец', 'symbol': '♉'},
+    {'id': 'gemini', 'name': 'Близнецы', 'symbol': '♊'},
+    {'id': 'cancer', 'name': 'Рак', 'symbol': '♋'},
+    {'id': 'leo', 'name': 'Лев', 'symbol': '♌'},
+    {'id': 'virgo', 'name': 'Дева', 'symbol': '♍'},
+    {'id': 'libra', 'name': 'Весы', 'symbol': '♎'},
+    {'id': 'scorpio', 'name': 'Скорпион', 'symbol': '♏'},
+    {'id': 'sagittarius', 'name': 'Стрелец', 'symbol': '♐'},
+    {'id': 'capricorn', 'name': 'Козерог', 'symbol': '♑'},
+    {'id': 'aquarius', 'name': 'Водолей', 'symbol': '♒'},
+    {'id': 'pisces', 'name': 'Рыбы', 'symbol': '♓'},
+  ];
 
   @override
   void initState() {
@@ -51,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
 
-      // Фиксируем прочтение
       if (h.date.isNotEmpty) {
         await StorageService.setLastReadDate(h.date);
       }
@@ -63,6 +77,13 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     }
+  }
+
+  void _openZodiacSign(String signId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ZodiacScreen(initialSignId: signId)),
+    );
   }
 
   @override
@@ -90,16 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.history_rounded, color: CosmicTheme.goldSoft, size: 26),
-            tooltip: 'Архив по дням',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ArchiveScreen()),
-              );
-            },
-          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: CosmicTheme.cyanAccent),
             tooltip: 'Настройки',
@@ -223,13 +234,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
+
+          // Заголовок и приветствие
           GreetingHeader(
             greetingText: _horoscope!.greeting,
             dateStr: _horoscope!.date,
             isLoading: _isLoading,
             onRefresh: () => _fetchLatestHoroscope(forceRefresh: true),
           ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
-          const SizedBox(height: 4),
+
+          // Быстрая панель перехода к знакам зодиака
+          _buildZodiacQuickBar(),
+          const SizedBox(height: 6),
+
+          // Карточки тем
           ..._horoscope!.topics.asMap().entries.map((entry) {
             final idx = entry.key;
             final topic = entry.value;
@@ -238,9 +256,85 @@ class _HomeScreenState extends State<HomeScreen> {
               index: idx,
             ).animate().fadeIn(delay: (60 * idx).ms, duration: 400.ms).slideY(begin: 0.1, end: 0);
           }),
-          const SizedBox(height: 24),
+          const SizedBox(height: 80), // Отступ для красивой нижней панели навигации
         ],
       ),
+    );
+  }
+
+  Widget _buildZodiacQuickBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '♈ Гороскоп по знакам зодиака',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: CosmicTheme.textPrimary,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ZodiacScreen()),
+                ),
+                child: const Row(
+                  children: [
+                    Text(
+                      'Все 12',
+                      style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                    Icon(Icons.chevron_right, color: CosmicTheme.goldSoft, size: 18),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 74,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: _zodiacQuickList.length,
+            itemBuilder: (context, idx) {
+              final item = _zodiacQuickList[idx];
+              return GestureDetector(
+                onTap: () => _openZodiacSign(item['id']!),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  width: 60,
+                  decoration: BoxDecoration(
+                    color: CosmicTheme.backgroundCard,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        item['symbol']!,
+                        style: const TextStyle(fontSize: 22, color: CosmicTheme.goldAccent),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        item['name']!,
+                        style: const TextStyle(fontSize: 10.5, color: CosmicTheme.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

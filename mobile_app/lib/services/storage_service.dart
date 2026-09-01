@@ -6,6 +6,8 @@ import '../models/horoscope_model.dart';
 class StorageService {
   static const String _keyProfile = 'cosmic_user_profile';
   static const String _keyLatest = 'cosmic_cache_latest_json';
+  static const String _keyLatestZodiac = 'cosmic_cache_latest_zodiac_json';
+  static const String _keySelectedSign = 'cosmic_selected_zodiac_sign';
   static const String _keyArchiveIndex = 'cosmic_cache_archive_index';
   static const String _keyLastReadDate = 'cosmic_last_read_date';
   static const String _keyNotifEnabled = 'cosmic_notif_enabled';
@@ -28,7 +30,7 @@ class StorageService {
     return UserProfile.deserialize(data);
   }
 
-  // Кэширование последнего актуального прогноза
+  // Кэширование последнего актуального персонального прогноза
   static Future<void> cacheLatestHoroscope(Map<String, dynamic> data) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyLatest, jsonEncode(data));
@@ -43,6 +45,28 @@ class StorageService {
       } catch (_) {}
     }
     return null;
+  }
+
+  // Кэширование гороскопа по 12 знакам зодиака
+  static Future<void> cacheZodiacJson(String jsonStr) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyLatestZodiac, jsonStr);
+  }
+
+  static Future<String?> getCachedZodiacJson() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLatestZodiac);
+  }
+
+  // Выбранный пользователем знак зодиака (например: 'aries', 'leo')
+  static Future<String> getSelectedZodiacSign() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keySelectedSign) ?? 'aries';
+  }
+
+  static Future<void> setSelectedZodiacSign(String signId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keySelectedSign, signId);
   }
 
   // Кэширование конкретного дня
@@ -87,7 +111,7 @@ class StorageService {
   // Настройки уведомлений
   static Future<bool> isNotificationsEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyNotifEnabled) ?? true; // По умолчанию включено
+    return prefs.getBool(_keyNotifEnabled) ?? true;
   }
 
   static Future<void> setNotificationsEnabled(bool val) async {
@@ -97,7 +121,7 @@ class StorageService {
 
   static Future<int> getNotificationHour() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_keyNotifHour) ?? 8; // По умолчанию 8:00
+    return prefs.getInt(_keyNotifHour) ?? 8;
   }
 
   static Future<int> getNotificationMinute() async {
