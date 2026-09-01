@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../models/horoscope_model.dart';
 import 'storage_service.dart';
@@ -17,37 +18,46 @@ class HoroscopeSyncService {
       }
     }
 
+    // 2. Пробуем загрузить из сети (GitHub Raw)
     try {
       final url = Uri.parse('$repoBaseUrl/latest_horoscope.json');
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      final response = await http.get(url).timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
         final horoscope = HoroscopeDay.fromJson(decoded);
         
-        // Сохраняем в локальный кэш
         await StorageService.cacheLatestHoroscope(decoded);
         await StorageService.cacheDayHoroscope(horoscope.date, decoded);
         
         return horoscope;
-      } else {
-        throw Exception('Сервер вернул статус ${response.statusCode}');
       }
+    } catch (_) {}
+
+    // 3. Пробуем взять из кэша
+    final cached = await StorageService.getLatestCachedHoroscope();
+    if (cached != null) {
+      return cached;
+    }
+
+    // 4. Если в кэше пусто и сеть недоступна / приватный репозиторий, загружаем встроенный ассет
+    try {
+      final assetJsonStr = await rootBundle.loadString('assets/data/latest_horoscope.json');
+      final decoded = jsonDecode(assetJsonStr);
+      final horoscope = HoroscopeDay.fromJson(decoded);
+      await StorageService.cacheLatestHoroscope(decoded);
+      return horoscope;
     } catch (e) {
-      // При ошибке сети пытаемся взять из кэша
-      final cached = await StorageService.getLatestCachedHoroscope();
-      if (cached != null) {
-        return cached;
-      }
-      throw Exception('Не удалось загрузить прогноз дня: $e');
+      throw Exception('Не удалось загрузить прогноз дня. Проверьте интернет-соединение.');
     }
   }
 
   /// Загружает список доступных архивных дней
   static Future<List<ArchiveIndexItem>> fetchArchiveIndex() async {
+    // 1. Сеть
     try {
       final url = Uri.parse('$repoBaseUrl/archive/index.json');
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      final response = await http.get(url).timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final List list = jsonDecode(utf8.decode(response.bodyBytes));
@@ -57,7 +67,7 @@ class HoroscopeSyncService {
       }
     } catch (_) {}
 
-    // Фолбэк на сохраненный кэш архива
+    // 2. Кэш
     final cachedStr = await StorageService.getCachedArchiveIndex();
     if (cachedStr != null && cachedStr.isNotEmpty) {
       try {
@@ -66,20 +76,28 @@ class HoroscopeSyncService {
       } catch (_) {}
     }
 
+    // 3. Встроенный ассет
+    try {
+      final assetStr = await rootBundle.loadString('assets/data/archive/index.json');
+      final List list = jsonDecode(assetStr);
+      return list.map((item) => ArchiveIndexItem.fromJson(item)).toList();
+    } catch (_) {}
+
     return [];
   }
 
   /// Загружает конкретный архивный день по дате
   static Future<HoroscopeDay> fetchArchiveDay(String isoDate, String displayDate) async {
-    // 1. Проверяем локальный кэш
+    // 1. Локальный кэш
     final cached = await StorageService.getCachedDayHoroscope(displayDate);
     if (cached != null) {
       return cached;
     }
 
+    // 2. Сеть
     try {
       final url = Uri.parse('$repoBaseUrl/archive/horoscope_$isoDate.json');
-      final response = await http.get(url).timeout(const Duration(seconds: 15));
+      final response = await http.get(url).timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -87,9 +105,16 @@ class HoroscopeSyncService {
         await StorageService.cacheDayHoroscope(displayDate, decoded);
         return horoscope;
       }
-    } catch (e) {
-      throw Exception('Не удалось загрузить архивный прогноз за $displayDate');
-    }
+    } catch (_) {}
+
+    // 3. Встроенный ассет
+    try {
+      final assetStr = await rootBundle.loadString('assets/data/archive/horoscope_$isoDate.json');
+      final decoded = jsonDecode(assetStr);
+      final horoscope = HoroscopeDay.fromJson(decoded);
+      await StorageService.cacheDayHoroscope(displayDate, decoded);
+      return horoscope;
+    } catch (_) {}
 
     throw Exception('Архивная запись за $displayDate не найдена');
   }

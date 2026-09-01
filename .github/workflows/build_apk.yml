@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'mobile_app/**'
+      - 'data/**'
       - '.github/workflows/build_apk.yml'
   workflow_dispatch: # Кнопка ручной сборки в GitHub Actions
 
@@ -34,6 +35,8 @@ jobs:
 
       - name: Prepare native Android project and icons
         run: |
+          mkdir -p mobile_app/assets/data/archive
+          cp -r data/* mobile_app/assets/data/ || true
           cd mobile_app
           rm -rf android
           flutter create --platforms=android --org com.cosmic .
@@ -59,9 +62,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: app-v1.0.0
-          name: "📱 Релиз Android APK v1.0.0"
-          body: "Готовый установочный файл мобильного приложения Астро Гороскоп с официальной иконкой Astro_main_top25.png и архивом дней."
+          tag_name: app-v1.0.1
+          name: "📱 Релиз Android APK v1.0.1"
+          body: "Готовый установочный файл мобильного приложения Астро Гороскоп с официальной иконкой Astro_main_top25.png, архивом дней и офлайн-поддержкой."
           files: mobile_app/build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false

@@ -1,7 +1,7 @@
 name: cosmic_horoscope
 description: "Премиальное мобильное приложение ежедневного персонализированного астрологического гороскопа"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -31,3 +31,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon/app_icon.png
+    - assets/data/
+    - assets/data/archive/
