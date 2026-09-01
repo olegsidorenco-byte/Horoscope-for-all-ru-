@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/horoscope_model.dart';
 import '../../services/horoscope_sync_service.dart';
+import '../../services/storage_service.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 import '../widgets/greeting_header.dart';
@@ -20,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   HoroscopeDay? _horoscope;
   bool _isLoading = false;
   String? _errorMessage;
+  bool _isNewForecast = false;
 
   @override
   void initState() {
@@ -35,11 +38,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final h = await HoroscopeSyncService.fetchLatestHoroscope(forceRefresh: forceRefresh);
+      final lastRead = await StorageService.getLastReadDate();
+      final todayStr = DateFormat('dd.MM.yyyy').format(DateTime.now());
+
+      final isUnread = h.date == todayStr && lastRead != h.date;
+
       if (mounted) {
         setState(() {
           _horoscope = h;
           _isLoading = false;
+          _isNewForecast = isUnread;
         });
+      }
+
+      // Фиксируем прочтение
+      if (h.date.isNotEmpty) {
+        await StorageService.setLastReadDate(h.date);
       }
     } catch (e) {
       if (mounted) {
@@ -164,6 +178,51 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         children: [
+          // Всплывающий баннер о новом прогнозе
+          if (_isNewForecast)
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFF2EC4B6), Color(0xFF0F4C81)],
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2EC4B6).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      '✨ Новый астрологический прогноз дня готов!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white70, size: 18),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () {
+                      setState(() {
+                        _isNewForecast = false;
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.2, end: 0),
           GreetingHeader(
             greetingText: _horoscope!.greeting,
             dateStr: _horoscope!.date,

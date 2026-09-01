@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'ui/theme/cosmic_theme.dart';
 import 'ui/screens/home_screen.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Устанавливаем стиль системного статус-бара
@@ -15,6 +16,11 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
+
+  // Инициализация сервиса утренних напоминаний
+  try {
+    await NotificationService.initialize();
+  } catch (_) {}
 
   runApp(const CosmicHoroscopeApp());
 }

@@ -7,6 +7,10 @@ class StorageService {
   static const String _keyProfile = 'cosmic_user_profile';
   static const String _keyLatest = 'cosmic_cache_latest_json';
   static const String _keyArchiveIndex = 'cosmic_cache_archive_index';
+  static const String _keyLastReadDate = 'cosmic_last_read_date';
+  static const String _keyNotifEnabled = 'cosmic_notif_enabled';
+  static const String _keyNotifHour = 'cosmic_notif_hour';
+  static const String _keyNotifMinute = 'cosmic_notif_minute';
   static const String _prefixDay = 'cosmic_day_json_';
 
   // Сохранение и получение профиля
@@ -67,6 +71,44 @@ class StorageService {
   static Future<String?> getCachedArchiveIndex() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyArchiveIndex);
+  }
+
+  // Дата последнего прочитанного гороскопа
+  static Future<String> getLastReadDate() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLastReadDate) ?? '';
+  }
+
+  static Future<void> setLastReadDate(String date) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyLastReadDate, date);
+  }
+
+  // Настройки уведомлений
+  static Future<bool> isNotificationsEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyNotifEnabled) ?? true; // По умолчанию включено
+  }
+
+  static Future<void> setNotificationsEnabled(bool val) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyNotifEnabled, val);
+  }
+
+  static Future<int> getNotificationHour() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyNotifHour) ?? 8; // По умолчанию 8:00
+  }
+
+  static Future<int> getNotificationMinute() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_keyNotifMinute) ?? 0;
+  }
+
+  static Future<void> setNotificationTime(int hour, int minute) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_keyNotifHour, hour);
+    await prefs.setInt(_keyNotifMinute, minute);
   }
 
   // Очистка кэша
