@@ -37,7 +37,7 @@ class CosmicTheme {
           bodyMedium: const TextStyle(color: textSecondary, fontSize: 14, height: 1.4),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: backgroundCard,
         elevation: 4,
         shadowColor: Colors.black.withOpacity(0.5),
