@@ -40,9 +40,15 @@ jobs:
           cd mobile_app
           rm -rf android
           flutter create --platforms=android --org com.cosmic .
+          
+          # Устанавливаем русское название приложения на смартфоне: Астро Гороскоп
+          sed -i 's/android:label="[^"]*"/android:label="Астро Гороскоп"/g' android/app/src/main/AndroidManifest.xml
+          
+          # Устанавливаем необходимые системные разрешения
           if ! grep -q "android.permission.INTERNET" android/app/src/main/AndroidManifest.xml; then
             sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>' android/app/src/main/AndroidManifest.xml
           fi
+          
           flutter pub get
           dart run flutter_launcher_icons
 
@@ -50,22 +56,23 @@ jobs:
         run: |
           cd mobile_app
           flutter build apk --release --no-tree-shake-icons
+          cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cosmic-horoscope-release-apk
-          path: mobile_app/build/app/outputs/flutter-apk/app-release.apk
+          name: Horoscope-for-all-ru-apk
+          path: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           if-no-files-found: error
 
       - name: Publish Release with APK
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: app-v1.0.2
-          name: "📱 Релиз Android APK v1.0.2"
-          body: "Готовый установочный файл мобильного приложения Астро Гороскоп с утренними напоминаниями (Push), индикатором свежести и архивом дней."
-          files: mobile_app/build/app/outputs/flutter-apk/app-release.apk
+          tag_name: app-v1.0.3
+          name: "📱 Релиз Horoscope-for-all-ru.apk (Астро Гороскоп)"
+          body: "Готовый установочный файл Horoscope-for-all-ru.apk для Android. Название приложения в системе: «Астро Гороскоп»."
+          files: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           draft: false
           prerelease: false
         env:
