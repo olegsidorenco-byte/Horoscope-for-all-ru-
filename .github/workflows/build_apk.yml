@@ -32,7 +32,7 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Prepare native Android project
+      - name: Prepare native Android project and icons
         run: |
           cd mobile_app
           rm -rf android
@@ -41,6 +41,7 @@ jobs:
             sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>' android/app/src/main/AndroidManifest.xml
           fi
           flutter pub get
+          dart run flutter_launcher_icons
 
       - name: Build Release APK
         run: |
@@ -60,7 +61,7 @@ jobs:
         with:
           tag_name: app-v1.0.0
           name: "📱 Релиз Android APK v1.0.0"
-          body: "Готовый установочный файл мобильного приложения Астро Гороскоп (Flutter / Android)."
+          body: "Готовый установочный файл мобильного приложения Астро Гороскоп с официальной иконкой Astro_main_top25.png и архивом дней."
           files: mobile_app/build/app/outputs/flutter-apk/app-release.apk
           draft: false
           prerelease: false

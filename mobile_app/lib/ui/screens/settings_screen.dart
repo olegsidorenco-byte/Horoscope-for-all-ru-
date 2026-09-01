@@ -11,37 +11,30 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late TextEditingController _apiKeyController;
-  bool _obscureKey = true;
+  int _cachedDays = 0;
 
   @override
   void initState() {
     super.initState();
-    _apiKeyController = TextEditingController();
-    _loadKey();
+    _loadCacheInfo();
   }
 
-  Future<void> _loadKey() async {
-    final key = await StorageService.loadApiKey();
+  Future<void> _loadCacheInfo() async {
+    final count = await StorageService.getCachedDaysCount();
     if (mounted) {
       setState(() {
-        _apiKeyController.text = key;
+        _cachedDays = count;
       });
     }
   }
 
-  @override
-  void dispose() {
-    _apiKeyController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveKey() async {
-    await StorageService.saveApiKey(_apiKeyController.text.trim());
+  Future<void> _clearCache() async {
+    await StorageService.clearAllCache();
+    await _loadCacheInfo();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✨ Ключ Google AI Gemini сохранен!'),
+          content: Text('✨ Локальный кэш успешно очищен'),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
       );
@@ -52,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Настройки'),
+        title: const Text('Настройки и система'),
       ),
       body: CosmicBackground(
         child: SingleChildScrollView(
@@ -60,6 +53,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Карточка логотипа
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: CosmicTheme.backgroundCard,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        'assets/icon/app_icon.png',
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 64,
+                          height: 64,
+                          color: CosmicTheme.goldAccent.withOpacity(0.1),
+                          child: const Icon(Icons.stars, color: CosmicTheme.goldAccent, size: 36),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Астро Гороскоп',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: CosmicTheme.textPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Версия 1.0.0 (Release)',
+                            style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Карточка синхронизации
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -72,10 +116,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     const Row(
                       children: [
-                        Icon(Icons.vpn_key_outlined, color: CosmicTheme.goldAccent),
+                        Icon(Icons.cloud_sync_rounded, color: CosmicTheme.cyanAccent),
                         SizedBox(width: 10),
                         Text(
-                          'Google AI Studio Key',
+                          'Облачная доставка прогнозов',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -86,37 +130,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Для работы ИИ прогноза укажите персональный ключ Google AI Studio (Gemini). Он хранится исключительно на вашем телефоне в зашифрованном виде.',
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                      'Прогнозы рассчитываются автономной астрологической системой и автоматически публикуются каждое утро. Приложение работает напрямую из коробки без необходимости настройки API-ключей.',
+                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.45),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _apiKeyController,
-                      obscureText: _obscureKey,
-                      decoration: InputDecoration(
-                        labelText: 'API Ключ (AIzaSy...)',
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureKey ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                            color: CosmicTheme.textSecondary,
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: CosmicTheme.backgroundDeep,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.storage_rounded, color: CosmicTheme.goldSoft, size: 20),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Сохранено в офлайн-памяти: $_cachedDays дн.',
+                              style: const TextStyle(color: CosmicTheme.textPrimary, fontSize: 13),
+                            ),
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureKey = !_obscureKey;
-                            });
-                          },
-                        ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _saveKey,
-                      child: const Text('Сохранить ключ'),
+                    const SizedBox(height: 14),
+                    OutlinedButton.icon(
+                      onPressed: _clearCache,
+                      icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                      label: const Text('Очистить кэш'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: CosmicTheme.textSecondary,
+                        side: const BorderSide(color: Colors.white24),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+              // О системе
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -128,7 +180,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'О приложении',
+                      'О проекте',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -137,7 +189,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      '🌌 Астро Гороскоп v1.0.0\nАвтономный персональный расчет натальной карты и ежедневных планетарных транзитов на базе новейших моделей Google Gemini 3.7 / 2.5 Flash.',
+                      '🌌 Автономный астрологический комплекс\nРасчет планетарных транзитов, аспектов и домов на базе фундаментальной классической астрологии и ИИ моделей Google Gemini.',
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.5),
                     ),
                   ],

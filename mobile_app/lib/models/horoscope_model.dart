@@ -8,6 +8,18 @@ class HoroscopeTopic {
     required this.content,
     required this.icon,
   });
+
+  factory HoroscopeTopic.fromJson(Map<String, dynamic> json) => HoroscopeTopic(
+    title: json['title'] ?? '',
+    content: json['content'] ?? '',
+    icon: json['icon'] ?? '✨',
+  );
+
+  Map<String, dynamic> toJson() => {
+    'title': title,
+    'content': content,
+    'icon': icon,
+  };
 }
 
 class HoroscopeDay {
@@ -15,91 +27,90 @@ class HoroscopeDay {
   final String greeting;
   final List<HoroscopeTopic> topics;
   final String rawText;
+  final String updatedAt;
 
   HoroscopeDay({
     required this.date,
     required this.greeting,
     required this.topics,
     required this.rawText,
+    this.updatedAt = '',
   });
+
+  factory HoroscopeDay.fromJson(Map<String, dynamic> json) {
+    var rawTopics = json['topics'] as List? ?? [];
+    List<HoroscopeTopic> parsedTopics = rawTopics
+        .map((item) => HoroscopeTopic.fromJson(item as Map<String, dynamic>))
+        .toList();
+
+    return HoroscopeDay(
+      date: json['date'] ?? '',
+      greeting: json['greeting'] ?? '',
+      topics: parsedTopics,
+      rawText: json['raw_text'] ?? '',
+      updatedAt: json['updated_at'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'date': date,
+    'greeting': greeting,
+    'topics': topics.map((t) => t.toJson()).toList(),
+    'raw_text': rawText,
+    'updated_at': updatedAt,
+  };
 
   factory HoroscopeDay.fromRawText(String date, String raw) {
     String clean = raw
-        .replaceAll(RegExp(r'<[^>]*>'), '')
         .replaceAll('&quot;', '"')
         .replaceAll('&amp;', '&')
         .replaceAll('&lt;', '<')
         .replaceAll('&gt;', '>');
 
-    List<String> rawTopics = [];
-    if (clean.contains('===TOPIC===')) {
-      rawTopics = clean
-          .split('===TOPIC===')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-    } else {
-      // Резервный парсинг по ключевым рубрикам
-      final pattern = RegExp(
-        r'\n+(?=(?:Влияние планет|Работа|Личные отношения|Здоровье|Добрый совет|Пожелание|Положительная аффирмация))',
-        caseSensitive: false,
-      );
-      rawTopics = clean
-          .split(pattern)
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-    }
-
+    // Поиск первого блока / приветствия
     String greeting = '';
     List<HoroscopeTopic> topics = [];
 
-    if (rawTopics.isNotEmpty) {
-      greeting = rawTopics[0];
-      
-      for (int i = 1; i < rawTopics.length; i++) {
-        final text = rawTopics[i];
-        final lines = text.split('\n');
-        String firstLine = lines.first.trim();
-        String body = lines.skip(1).join('\n').trim();
+    final topicBlocks = clean.split('<b>');
+    if (topicBlocks.isNotEmpty) {
+      greeting = topicBlocks[0]
+          .replaceAll(RegExp(r'<[^>]*>'), '')
+          .trim();
+    }
+
+    for (int i = 1; i < topicBlocks.length; i++) {
+      final parts = topicBlocks[i].split('</b>');
+      if (parts.length >= 2) {
+        String title = parts[0].trim();
+        String content = parts[1]
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .trim();
 
         String icon = '✨';
-        String title = firstLine;
-
-        if (firstLine.contains('Влияние планет')) {
+        if (title.contains('Влияние планет')) {
           icon = '🪐';
-          title = 'Влияние планет на сегодня';
-        } else if (firstLine.contains('Работа') || firstLine.contains('бизнес')) {
+        } else if (title.contains('Работа') || title.contains('бизнес')) {
           icon = '💼';
-          title = 'Работа, бизнес и финансы';
-        } else if (firstLine.contains('Личные отношения') || firstLine.contains('общение')) {
+        } else if (title.contains('Личные отношения') || title.contains('общение')) {
           icon = '❤️';
-          title = 'Личные отношения и общение';
-        } else if (firstLine.contains('Здоровье') || firstLine.contains('тонус')) {
+        } else if (title.contains('Здоровье') || title.contains('тонус')) {
           icon = '🌿';
-          title = 'Здоровье и тонус';
-        } else if (firstLine.contains('Добрый совет')) {
+        } else if (title.contains('Добрый совет')) {
           icon = '💡';
-          title = 'Добрый совет на сегодня';
-        } else if (firstLine.contains('Пожелание') || firstLine.contains('аффирмация')) {
+        } else if (title.contains('Пожелание')) {
           icon = '✨';
-          title = 'Пожелание на сегодня';
-        }
-
-        if (body.isEmpty) {
-          body = text;
         }
 
         topics.add(HoroscopeTopic(
           title: title,
-          content: body,
+          content: content,
           icon: icon,
         ));
       }
     }
 
     if (greeting.isEmpty) {
-      greeting = clean;
+      greeting = clean.replaceAll(RegExp(r'<[^>]*>'), '').trim();
     }
 
     return HoroscopeDay(
@@ -109,4 +120,36 @@ class HoroscopeDay {
       rawText: raw,
     );
   }
+}
+
+class ArchiveIndexItem {
+  final String date;
+  final String isoDate;
+  final String file;
+  final String preview;
+  final String updatedAt;
+
+  ArchiveIndexItem({
+    required this.date,
+    required this.isoDate,
+    required this.file,
+    required this.preview,
+    required this.updatedAt,
+  });
+
+  factory ArchiveIndexItem.fromJson(Map<String, dynamic> json) => ArchiveIndexItem(
+    date: json['date'] ?? '',
+    isoDate: json['iso_date'] ?? '',
+    file: json['file'] ?? '',
+    preview: json['preview'] ?? '',
+    updatedAt: json['updated_at'] ?? '',
+  );
+
+  Map<String, dynamic> toJson() => {
+    'date': date,
+    'iso_date': isoDate,
+    'file': file,
+    'preview': preview,
+    'updated_at': updatedAt,
+  };
 }

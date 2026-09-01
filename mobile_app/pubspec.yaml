@@ -1,5 +1,5 @@
 name: cosmic_horoscope
-description: "Премиальное мобильное приложение ежедневного персонализированного астрологического гороскопа на базе Google AI Gemini"
+description: "Премиальное мобильное приложение ежедневного персонализированного астрологического гороскопа"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -19,6 +19,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/app_icon.png

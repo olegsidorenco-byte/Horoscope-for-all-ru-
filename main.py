@@ -9,6 +9,7 @@ import sys
 from config_loader import get_config, validate_secrets
 from ai_service import generate_horoscope_text
 from telegram_service import send_text_message
+from archive_service import save_horoscope_to_archive
 
 
 def main():
@@ -37,11 +38,15 @@ def main():
         horoscope_text = generate_horoscope_text(api_key, user_profile)
         print(f"📝 Текст гороскопа успешно сформирован (объем: {len(horoscope_text)} симв.).")
 
-        # 3. Доставка гороскопа единым сообщением в Telegram
+        # 3. Сохранение в архив по дням и публикация в data/
+        print("🗄️ Сохранение прогноза в архив по дням...")
+        save_horoscope_to_archive(horoscope_text)
+
+        # 4. Доставка гороскопа единым сообщением в Telegram
         print("📤 Отправка гороскопа в Telegram единым сообщением...")
         send_text_message(bot_token, chat_id, horoscope_text)
 
-        print("✨ Ежедневная рассылка успешно завершена!")
+        print("✨ Ежедневная рассылка и архивация успешно завершены!")
 
     except Exception as e:
         print(f"❌ Критическая ошибка выполнения: {e}")
