@@ -7,6 +7,9 @@ on:
       - '.github/workflows/build_apk.yml'
   workflow_dispatch: # Кнопка ручной сборки в GitHub Actions
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     name: Build Release APK
@@ -50,3 +53,16 @@ jobs:
           name: cosmic-horoscope-release-apk
           path: mobile_app/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+
+      - name: Publish Release with APK
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          tag_name: app-v1.0.0
+          name: "📱 Релиз Android APK v1.0.0"
+          body: "Готовый установочный файл мобильного приложения Астро Гороскоп (Flutter / Android)."
+          files: mobile_app/build/app/outputs/flutter-apk/app-release.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
