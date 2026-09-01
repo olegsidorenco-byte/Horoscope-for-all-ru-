@@ -29,9 +29,13 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Get Flutter dependencies
+      - name: Prepare native Android project
         run: |
           cd mobile_app
+          flutter create --platforms=android --org com.cosmic .
+          if ! grep -q "android.permission.INTERNET" android/app/src/main/AndroidManifest.xml; then
+            sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>' android/app/src/main/AndroidManifest.xml
+          fi
           flutter pub get
 
       - name: Build Release APK
