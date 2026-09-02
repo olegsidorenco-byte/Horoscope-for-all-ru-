@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
+import '../../models/user_profile.dart';
+import 'profile_screen.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 
@@ -16,6 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   int _notifHour = 8;
   int _notifMinute = 0;
+  UserProfile _profile = UserProfile.defaultProfile();
 
   @override
   void initState() {
@@ -28,6 +31,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final notifEnabled = await StorageService.isNotificationsEnabled();
     final hour = await StorageService.getNotificationHour();
     final minute = await StorageService.getNotificationMinute();
+    final profile = await StorageService.loadProfile();
 
     if (mounted) {
       setState(() {
@@ -35,6 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _notificationsEnabled = notifEnabled;
         _notifHour = hour;
         _notifMinute = minute;
+        _profile = profile;
       });
     }
   }
@@ -182,7 +187,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.2 (Release)',
+                            'Версия 1.0.8 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -191,6 +196,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // Блок Личного Профиля пользователя
+              _buildProfileSection(),
               const SizedBox(height: 20),
 
               // Блок утренних уведомлений
@@ -375,6 +384,150 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileSection() {
+    final isRegistered = _profile.isRegistered;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: CosmicTheme.backgroundCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isRegistered ? CosmicTheme.goldAccent.withOpacity(0.35) : Colors.white12,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isRegistered ? Icons.account_circle : Icons.person_add_alt_1_rounded,
+                    color: CosmicTheme.goldAccent,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Мой натальный профиль',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: CosmicTheme.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              if (isRegistered)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: CosmicTheme.goldAccent.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    '${_profile.zodiacSymbol} ${_profile.zodiacSign}',
+                    style: const TextStyle(
+                      color: CosmicTheme.goldAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (isRegistered) ...[
+            Text(
+              '👤 Имя: ${_profile.name}',
+              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '📧 Email: ${_profile.email}',
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '📅 Дата и время: ${_profile.formattedBirthDate}, ${_profile.birthTime}',
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '📍 Рождение: ${_profile.birthPlace.isNotEmpty ? _profile.birthPlace : "Не указано"}',
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '🏠 Проживание: ${_profile.currentCity.isNotEmpty ? _profile.currentCity : "Не указано"}',
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      final updated = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileScreen(initialProfile: _profile),
+                        ),
+                      );
+                      if (updated == true) {
+                        _loadSettings();
+                      }
+                    },
+                    icon: const Icon(Icons.edit, size: 16, color: CosmicTheme.goldAccent),
+                    label: const Text('Редактировать анкету', style: TextStyle(color: CosmicTheme.goldAccent)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: CosmicTheme.goldAccent),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            const Text(
+              'Заполните дату, время и место рождения для формирования индивидуального гороскопа под ваши личные натальные координаты.',
+              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: () async {
+                  final registered = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfileScreen(initialProfile: _profile),
+                    ),
+                  );
+                  if (registered == true) {
+                    _loadSettings();
+                  }
+                },
+                icon: const Icon(Icons.auto_awesome, size: 18, color: Colors.black),
+                label: const Text(
+                  'Заполнить анкету / Регистрация',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CosmicTheme.goldAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

@@ -18,16 +18,25 @@ class StorageService {
   // Сохранение и получение профиля
   static Future<void> saveProfile(UserProfile profile) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyProfile, profile.serialize());
+    await prefs.setString(_keyProfile, jsonEncode(profile.toJson()));
   }
 
   static Future<UserProfile> loadProfile() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString(_keyProfile);
     if (data == null || data.isEmpty) {
-      return UserProfile();
+      return UserProfile.defaultProfile();
     }
-    return UserProfile.deserialize(data);
+    try {
+      return UserProfile.fromJson(jsonDecode(data));
+    } catch (_) {
+      return UserProfile.defaultProfile();
+    }
+  }
+
+  static Future<void> clearProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyProfile);
   }
 
   // Кэширование последнего актуального персонального прогноза

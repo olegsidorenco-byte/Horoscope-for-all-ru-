@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/horoscope_model.dart';
+import '../../models/user_profile.dart';
 import '../../services/horoscope_sync_service.dart';
 import '../../services/storage_service.dart';
 import '../theme/cosmic_theme.dart';
@@ -10,6 +11,7 @@ import '../widgets/greeting_header.dart';
 import '../widgets/topic_card.dart';
 import 'zodiac_screen.dart';
 import 'settings_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _isNewForecast = false;
+  UserProfile _userProfile = UserProfile.defaultProfile();
 
   final List<Map<String, String>> _zodiacQuickList = const [
     {'id': 'aries', 'name': 'Овен', 'symbol': '♈'},
@@ -54,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       final h = await HoroscopeSyncService.fetchLatestHoroscope(forceRefresh: forceRefresh);
       final lastRead = await StorageService.getLastReadDate();
+      final profile = await StorageService.loadProfile();
       final todayStr = DateFormat('dd.MM.yyyy').format(DateTime.now());
 
       final isUnread = h.date == todayStr && lastRead != h.date;
@@ -63,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _horoscope = h;
           _isLoading = false;
           _isNewForecast = isUnread;
+          _userProfile = profile;
         });
       }
 
@@ -243,6 +248,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: () => _fetchLatestHoroscope(forceRefresh: true),
           ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0),
 
+          // Персональный натальный баннер пользователя
+          _buildPersonalProfileBanner(),
+
           // Быстрая панель перехода к знакам зодиака
           _buildZodiacQuickBar(),
           const SizedBox(height: 6),
@@ -354,6 +362,125 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildPersonalProfileBanner() {
+    if (!_userProfile.isRegistered) {
+      return Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: CosmicTheme.backgroundCard.withOpacity(0.85),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: CosmicTheme.goldAccent.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.person_add_alt_1_rounded, color: CosmicTheme.goldAccent, size: 22),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Натальный профиль',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Заполните анкету (дата, время, место) для личного расчета',
+                    style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                final res = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileScreen(initialProfile: _userProfile)),
+                );
+                if (res == true) {
+                  final p = await StorageService.loadProfile();
+                  if (mounted) setState(() => _userProfile = p);
+                }
+              },
+              child: const Text(
+                'Анкета',
+                style: TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF2A2356).withOpacity(0.8),
+            CosmicTheme.backgroundCard.withOpacity(0.9),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: CosmicTheme.goldAccent.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: CosmicTheme.goldAccent.withOpacity(0.15),
+              border: Border.all(color: CosmicTheme.goldAccent, width: 1.2),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              _userProfile.zodiacSymbol,
+              style: const TextStyle(fontSize: 19, color: CosmicTheme.goldAccent),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '✨ Гороскоп для: ${_userProfile.name}',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_userProfile.zodiacSign} • ${_userProfile.birthPlace} → ${_userProfile.currentCity}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.tune_rounded, color: CosmicTheme.goldSoft, size: 18),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () async {
+              final res = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen(initialProfile: _userProfile)),
+              );
+              if (res == true) {
+                final p = await StorageService.loadProfile();
+                if (mounted) setState(() => _userProfile = p);
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 }

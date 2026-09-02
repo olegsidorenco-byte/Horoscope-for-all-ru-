@@ -33,7 +33,7 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Prepare native Android project and icons
+      - name: Prepare native Android project, permanent keystore and icons
         run: |
           mkdir -p mobile_app/assets/data/archive
           cp -r data/* mobile_app/assets/data/ || true
@@ -59,6 +59,22 @@ jobs:
             echo 'dependencies { coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4" }' >> android/app/build.gradle
           fi
 
+          # Копируем постоянный цифровой сертификат подписи
+          mkdir -p android/app
+          cp keystore/release.keystore android/app/release.keystore
+
+          # Настройка постоянной цифровой подписи (Release Keystore) для бесшовных обновлений APK
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i '/buildTypes {/i \    signingConfigs {\n        create("release") {\n            keyAlias = "cosmic_key"\n            keyPassword = "cosmic_pass_2026"\n            storeFile = file("release.keystore")\n            storePassword = "cosmic_pass_2026"\n        }\n    }' android/app/build.gradle.kts
+            sed -i 's/signingConfig = signingConfigs.getByName("debug")/signingConfig = signingConfigs.getByName("release")/g' android/app/build.gradle.kts
+            sed -i '/getByName("release") {/a \            signingConfig = signingConfigs.getByName("release")' android/app/build.gradle.kts
+          fi
+
+          if [ -f android/app/build.gradle ]; then
+            sed -i '/buildTypes {/i \    signingConfigs {\n        release {\n            keyAlias "cosmic_key"\n            keyPassword "cosmic_pass_2026"\n            storeFile file("release.keystore")\n            storePassword "cosmic_pass_2026"\n        }\n    }' android/app/build.gradle
+            sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.release/g' android/app/build.gradle
+          fi
+
           flutter pub get
           dart run flutter_launcher_icons
 
@@ -79,9 +95,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: app-v1.0.7
-          name: "📱 Релиз Horoscope-for-all-ru.apk v1.0.7 (Астро Гороскоп)"
-          body: "Готовый установочный файл Horoscope-for-all-ru.apk для Android. Полностью устранены любые обрезания текста на кнопках стихий и фильтров."
+          tag_name: app-v1.0.8
+          name: "📱 Релиз Horoscope-for-all-ru.apk v1.0.8 (Астро Гороскоп)"
+          body: "Готовый установочный файл Horoscope-for-all-ru.apk для Android. Вшита постоянная цифровая подпись для бесшовных обновлений поверх старых версий, анкета натального профиля и смещение времени рассылки."
           files: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           draft: false
           prerelease: false
