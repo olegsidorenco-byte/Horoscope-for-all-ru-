@@ -201,49 +201,62 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // 1. Верхняя кнопка "Все 12 знаков зодиака" по всей ширине экрана с идеальной контрастностью
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                setState(() {
-                  _selectedElement = 'Все';
-                });
-              },
-              icon: Icon(
-                Icons.auto_awesome,
-                size: 17,
-                color: isAllSelected ? Colors.black : CosmicTheme.goldAccent,
-              ),
-              label: Text(
-                'Все 12 знаков зодиака',
-                style: TextStyle(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.bold,
-                  color: isAllSelected ? Colors.black : Colors.white,
-                  letterSpacing: 0.3,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isAllSelected
+          // 1. Верхняя кнопка "Все 12 знаков зодиака" по всей ширине экрана с идеальным центрированием
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedElement = 'Все';
+              });
+            },
+            child: Container(
+              width: double.infinity,
+              height: 44,
+              decoration: BoxDecoration(
+                color: isAllSelected
                     ? CosmicTheme.goldAccent
                     : const Color(0xFF1E2235),
-                foregroundColor: isAllSelected ? Colors.black : Colors.white,
-                elevation: isAllSelected ? 4 : 0,
-                side: BorderSide(
-                  color: isAllSelected ? CosmicTheme.goldAccent : Colors.white30,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(
+                  color: isAllSelected ? CosmicTheme.goldAccent : Colors.white24,
                   width: 1.2,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                boxShadow: isAllSelected
+                    ? [
+                        BoxShadow(
+                          color: CosmicTheme.goldAccent.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    size: 17,
+                    color: isAllSelected ? Colors.black : CosmicTheme.goldAccent,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Все 12 знаков зодиака',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: isAllSelected ? Colors.black : Colors.white,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           const SizedBox(height: 8),
 
-          // 2. 4 кнопки стихий в одну строку на всю ширину экрана (без прокрутки)
+          // 2. 4 кнопки стихий в одну строку на всю ширину экрана
           Row(
             children: [
               _buildElementButton('Огонь', const Color(0xFFE76F51), Icons.local_fire_department_rounded),
@@ -264,37 +277,42 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     final isSelected = _selectedElement == name;
 
     return Expanded(
-      child: SizedBox(
-        height: 36,
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() {
-              _selectedElement = name;
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            backgroundColor: isSelected ? color : const Color(0xFF1E2235),
-            foregroundColor: isSelected ? Colors.black : Colors.white,
-            elevation: isSelected ? 3 : 0,
-            side: BorderSide(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedElement = name;
+          });
+        },
+        child: Container(
+          height: 38,
+          decoration: BoxDecoration(
+            color: isSelected ? color : const Color(0xFF1E2235),
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(
               color: isSelected ? color : Colors.white12,
               width: 1,
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: color.withOpacity(0.3),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
+          alignment: Alignment.center,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 13,
+                size: 14,
                 color: isSelected ? Colors.black : color,
               ),
-              const SizedBox(width: 3),
+              const SizedBox(width: 4),
               Text(
                 name,
                 maxLines: 1,
