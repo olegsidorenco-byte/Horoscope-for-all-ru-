@@ -163,12 +163,12 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
-          // Фильтры по стихиям
+          // Фильтры по стихиям (Ряд 1: кнопка "Все знаки", Ряд 2: 4 стихии)
           _buildElementFilterChips(),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
-          // Горизонтальный селектор 12 знаков
-          _buildZodiacCarousel(),
+          // Ряд 3: Селектор всех 12 знаков в 2 ряда по 6 кнопок (аналогично главной странице)
+          _buildZodiacGridSelector(),
           const SizedBox(height: 16),
 
           // Большая карточка активного знака
@@ -201,10 +201,10 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // 1. Кнопка "Все 12 знаков зодиака" по всей ширине экрана
+          // 1. Верхняя кнопка "Все 12 знаков зодиака" по всей ширине экрана с идеальной контрастностью
           SizedBox(
             width: double.infinity,
-            height: 38,
+            height: 40,
             child: ElevatedButton.icon(
               onPressed: () {
                 setState(() {
@@ -213,25 +213,27 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
               },
               icon: Icon(
                 Icons.auto_awesome,
-                size: 16,
+                size: 17,
                 color: isAllSelected ? Colors.black : CosmicTheme.goldAccent,
               ),
               label: Text(
                 'Все 12 знаков зодиака',
                 style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isAllSelected ? FontWeight.bold : FontWeight.w600,
-                  color: isAllSelected ? Colors.black : CosmicTheme.textPrimary,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: isAllSelected ? Colors.black : Colors.white,
+                  letterSpacing: 0.3,
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isAllSelected
                     ? CosmicTheme.goldAccent
-                    : CosmicTheme.backgroundCard,
-                elevation: isAllSelected ? 3 : 0,
+                    : const Color(0xFF1E2235),
+                foregroundColor: isAllSelected ? Colors.black : Colors.white,
+                elevation: isAllSelected ? 4 : 0,
                 side: BorderSide(
-                  color: isAllSelected ? CosmicTheme.goldAccent : Colors.white12,
-                  width: 1,
+                  color: isAllSelected ? CosmicTheme.goldAccent : Colors.white30,
+                  width: 1.2,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -272,7 +274,8 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
           },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 2),
-            backgroundColor: isSelected ? color : CosmicTheme.backgroundCard,
+            backgroundColor: isSelected ? color : const Color(0xFF1E2235),
+            foregroundColor: isSelected ? Colors.black : Colors.white,
             elevation: isSelected ? 3 : 0,
             side: BorderSide(
               color: isSelected ? color : Colors.white12,
@@ -299,7 +302,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                  color: isSelected ? Colors.black : CosmicTheme.textPrimary,
+                  color: isSelected ? Colors.black : Colors.white,
                 ),
               ),
             ],
@@ -309,68 +312,100 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     );
   }
 
-  Widget _buildZodiacCarousel() {
+  Widget _buildZodiacGridSelector() {
     final signs = _zodiacData?.signs ?? [];
-    return SizedBox(
-      height: 94,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: signs.length,
-        itemBuilder: (context, index) {
-          final sign = signs[index];
-          final isSelected = sign.id == _activeSignId;
+    if (signs.length < 12) {
+      return const SizedBox.shrink();
+    }
 
-          return GestureDetector(
-            onTap: () => _onSignSelected(sign.id),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              margin: const EdgeInsets.only(right: 12),
-              width: 74,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? sign.elementColor.withOpacity(0.2)
-                    : CosmicTheme.backgroundCard,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: isSelected ? sign.elementColor : Colors.white10,
-                  width: isSelected ? 2 : 1,
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: CosmicTheme.backgroundCard.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        children: [
+          // Ряд 1: 6 знаков (Овен - Дева)
+          _buildSelectorRow(signs.sublist(0, 6)),
+          const SizedBox(height: 8),
+          // Ряд 2: 6 знаков (Весы - Рыбы)
+          _buildSelectorRow(signs.sublist(6, 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectorRow(List<ZodiacSign> signs) {
+    return Row(
+      children: signs.map((sign) {
+        final isSelected = sign.id == _activeSignId;
+        final matchesElement = _selectedElement == 'Все' ||
+            sign.element.toLowerCase() == _selectedElement.toLowerCase();
+
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2.5),
+            child: GestureDetector(
+              onTap: () => _onSignSelected(sign.id),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? sign.elementColor.withOpacity(0.28)
+                      : CosmicTheme.backgroundDeep,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected
+                        ? sign.elementColor
+                        : (matchesElement ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.02)),
+                    width: isSelected ? 1.8 : 1,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: sign.elementColor.withOpacity(0.35),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : null,
                 ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: sign.elementColor.withOpacity(0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 3),
+                child: Opacity(
+                  opacity: matchesElement ? 1.0 : 0.4,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        sign.symbol,
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: isSelected ? sign.elementColor : CosmicTheme.goldAccent,
                         ),
-                      ]
-                    : null,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    sign.symbol,
-                    style: TextStyle(
-                      fontSize: 28,
-                      color: isSelected ? sign.elementColor : CosmicTheme.goldSoft,
-                    ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        sign.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          color: isSelected ? Colors.white : CosmicTheme.textSecondary,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    sign.name,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      color: isSelected ? Colors.white : CosmicTheme.textSecondary,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      }).toList(),
     );
   }
 
