@@ -118,6 +118,42 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
         self.assertIn("<b>Жирный текст</b>", cleaned)
         print("✅ Тест 5 пройден: Очиститель форматирования надежно защищает разметку сообщений.")
 
+    def test_06_edge_case_dates_and_leap_years(self):
+        """Проверка граничных дат: високосные годы (29 февраля), стыки знаков, исторические даты."""
+        def calculate_sign(m, d):
+            if (m == 3 and d >= 21) or (m == 4 and d <= 19): return "Овен"
+            if (m == 4 and d >= 20) or (m == 5 and d <= 20): return "Телец"
+            if (m == 5 and d >= 21) or (m == 6 and d <= 20): return "Близнецы"
+            if (m == 6 and d >= 21) or (m == 7 and d <= 22): return "Рак"
+            if (m == 7 and d >= 23) or (m == 8 and d <= 22): return "Лев"
+            if (m == 8 and d >= 23) or (m == 9 and d <= 22): return "Дева"
+            if (m == 9 and d >= 23) or (m == 10 and d <= 22): return "Весы"
+            if (m == 10 and d >= 23) or (m == 11 and d <= 21): return "Скорпион"
+            if (m == 11 and d >= 22) or (m == 12 and d <= 21): return "Стрелец"
+            if (m == 12 and d >= 22) or (m == 1 and d <= 19): return "Козерог"
+            if (m == 1 and d >= 20) or (m == 2 and d <= 18): return "Водолей"
+            return "Рыбы"
+
+        edge_dates = [
+            ("29.02.2000", 2, 29, "Рыбы"),   # Високосный день 2000
+            ("29.02.2024", 2, 29, "Рыбы"),   # Високосный день 2024
+            ("01.01.2000", 1, 1, "Козерог"), # Дефолтная дата рождения
+            ("31.12.1999", 12, 31, "Козерог"),
+            ("20.03.1985", 3, 20, "Рыбы"),   # Стык Рыбы / Овен
+            ("21.03.1985", 3, 21, "Овен"),
+            ("15.08.1935", 8, 15, "Лев"),    # Дата пожилого возраста
+            ("01.09.2026", 9, 1, "Дева"),
+        ]
+
+        for date_str, m, d, expected_sign in edge_dates:
+            dt = datetime.strptime(date_str, "%d.%m.%Y")
+            self.assertEqual(dt.month, m)
+            self.assertEqual(dt.day, d)
+            sign = calculate_sign(m, d)
+            self.assertEqual(sign, expected_sign, f"Ошибка для даты {date_str}: ожидался {expected_sign}, получен {sign}")
+
+        print("✅ Тест 6 пройден: Граничные даты (29 февраля, стыки знаков, исторические даты) рассчитываются корректно.")
+
 
 if __name__ == "__main__":
     unittest.main()

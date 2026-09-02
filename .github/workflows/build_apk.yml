@@ -76,6 +76,8 @@ jobs:
           fi
 
           flutter pub get
+          echo "🔍 Проверка устаревших зависимостей Flutter (flutter pub outdated)..."
+          flutter pub outdated || true
           dart run flutter_launcher_icons
 
       - name: Build Release APK
