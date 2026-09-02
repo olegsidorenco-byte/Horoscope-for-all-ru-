@@ -3,15 +3,17 @@
 Сохраняет актуальный гороскоп в data/latest_horoscope.json,
 сохраняет гороскоп по 12 знакам зодиака в data/latest_zodiac.json,
 создает архивные копии по дням в data/archive/ и обновляет data/archive/index.json.
+Ограничивает хранение архива на сервере периодом в 60 дней.
 """
 
 import os
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ARCHIVE_DIR = os.path.join(DATA_DIR, "archive")
+MAX_ARCHIVE_DAYS = 60
 
 ZODIAC_SIGNS_META = [
     {"id": "aries", "name": "Овен", "symbol": "♈", "dates": "21.03 – 19.04", "element": "Огонь", "color": "0xFFE63946"},
@@ -86,7 +88,6 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         sign_name = meta["name"]
         symbol = meta["symbol"]
         
-        # Поиск блока знака
         pattern = re.compile(rf"{symbol}\s*{sign_name}[^<]*</b>(.*?)(?=<b>[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
         match = pattern.search(clean_text)
         
@@ -99,7 +100,6 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         if match:
             block_text = match.group(1).strip()
         else:
-            # Резервный поиск по имени
             simple_pattern = re.compile(rf"{sign_name}.*?\n(.*?)(?=\n[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
             simple_match = simple_pattern.search(clean_text)
             if simple_match:
@@ -122,7 +122,6 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
                     forecast_lines.append(line)
             
             forecast = " ".join(forecast_lines).strip()
-            # Очистка HTML
             forecast = re.sub(r'<[^>]*>', '', forecast).strip()
 
         if not forecast:
@@ -147,6 +146,63 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         "signs": signs_data,
         "updated_at": datetime.utcnow().isoformat() + "Z"
     }
+
+
+def prune_archive(max_days: int = MAX_ARCHIVE_DAYS):
+    """
+    Очищает серверный архив, сохраняя только последние max_days (60 дней).
+    Удаляет устаревшие файлы гороскопов и обновляет index.json.
+    """
+    index_path = os.path.join(ARCHIVE_DIR, "index.json")
+    if not os.path.exists(index_path):
+        return
+
+    try:
+        with open(index_path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+    except Exception:
+        return
+
+    if not isinstance(entries, list):
+        return
+
+    # Парсинг дат и сортировка по убыванию (сначала самые свежие)
+    def parse_entry_date(item):
+        d_str = item.get("date", "")
+        try:
+            return datetime.strptime(d_str, "%d.%m.%Y")
+        except Exception:
+            return datetime.min
+
+    sorted_entries = sorted(entries, key=parse_entry_date, reverse=True)
+
+    # Если записей больше 60, отсекаем старые
+    kept_entries = sorted_entries[:max_days]
+    removed_entries = sorted_entries[max_days:]
+
+    # Удаление устаревших файлов
+    for old_item in removed_entries:
+        iso_key = old_item.get("iso_date", "")
+        if iso_key:
+            h_file = os.path.join(ARCHIVE_DIR, f"horoscope_{iso_key}.json")
+            z_file = os.path.join(ARCHIVE_DIR, f"zodiac_{iso_key}.json")
+            if os.path.exists(h_file):
+                try:
+                    os.remove(h_file)
+                except OSError:
+                    pass
+            if os.path.exists(z_file):
+                try:
+                    os.remove(z_file)
+                except OSError:
+                    pass
+
+    # Сохраняем обновленный index.json
+    with open(index_path, "w", encoding="utf-8") as f:
+        json.dump(kept_entries, f, ensure_ascii=False, indent=2)
+
+    if removed_entries:
+        print(f"🧹 Серверный архив очищен: удалено {len(removed_entries)} старых записей. Хранится: {len(kept_entries)} дн. (макс. {max_days})")
 
 
 def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
@@ -200,7 +256,10 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
     with open(index_path, "w", encoding="utf-8") as f:
         json.dump(index_data, f, ensure_ascii=False, indent=2)
 
-    print(f"🗄️ Персональный гороскоп на {display_date} сохранен в архив: {archive_file_name}")
+    # Применение правила 60 дней
+    prune_archive(MAX_ARCHIVE_DAYS)
+
+    print(f"🗄️ Персональный гороскоп на {display_date} сохранен в архив: {archive_file_name} (период хранения: {MAX_ARCHIVE_DAYS} дн.)")
     return data_payload
 
 
@@ -229,5 +288,8 @@ def save_zodiac_to_archive(raw_text: str, target_date: str = None) -> dict:
     with open(archive_zodiac_path, "w", encoding="utf-8") as f:
         json.dump(zodiac_payload, f, ensure_ascii=False, indent=2)
 
-    print(f"♈ Гороскоп по 12 знакам зодиака на {display_date} сохранен: {archive_zodiac_name}")
+    # Применение правила 60 дней
+    prune_archive(MAX_ARCHIVE_DAYS)
+
+    print(f"♈ Гороскоп по 12 знакам зодиака на {display_date} сохранен: {archive_zodiac_name} (период хранения: {MAX_ARCHIVE_DAYS} дн.)")
     return zodiac_payload

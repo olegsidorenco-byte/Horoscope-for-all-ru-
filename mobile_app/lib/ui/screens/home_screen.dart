@@ -263,18 +263,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildZodiacQuickBar() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: Row(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: CosmicTheme.backgroundCard.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
                 '♈ Гороскоп по знакам зодиака',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14.5,
                   fontWeight: FontWeight.bold,
                   color: CosmicTheme.textPrimary,
                 ),
@@ -288,53 +294,67 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       'Все 12',
-                      style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
+                      style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 12.5, fontWeight: FontWeight.w600),
                     ),
-                    Icon(Icons.chevron_right, color: CosmicTheme.goldSoft, size: 18),
+                    Icon(Icons.chevron_right, color: CosmicTheme.goldSoft, size: 16),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-        SizedBox(
-          height: 74,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _zodiacQuickList.length,
-            itemBuilder: (context, idx) {
-              final item = _zodiacQuickList[idx];
-              return GestureDetector(
-                onTap: () => _openZodiacSign(item['id']!),
-                child: Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  width: 60,
-                  decoration: BoxDecoration(
-                    color: CosmicTheme.backgroundCard,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        item['symbol']!,
-                        style: const TextStyle(fontSize: 22, color: CosmicTheme.goldAccent),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        item['name']!,
-                        style: const TextStyle(fontSize: 10.5, color: CosmicTheme.textSecondary),
-                      ),
-                    ],
-                  ),
+          const SizedBox(height: 12),
+          // Ряд 1: Первые 6 знаков (Овен - Дева)
+          _buildZodiacRow(_zodiacQuickList.sublist(0, 6)),
+          const SizedBox(height: 8),
+          // Ряд 2: Следующие 6 знаков (Весы - Рыбы)
+          _buildZodiacRow(_zodiacQuickList.sublist(6, 12)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildZodiacRow(List<Map<String, String>> signs) {
+    return Row(
+      children: signs.map((item) {
+        return Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2.5),
+            child: GestureDetector(
+              onTap: () => _openZodiacSign(item['id']!),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: CosmicTheme.backgroundDeep,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white.withOpacity(0.08)),
                 ),
-              );
-            },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      item['symbol']!,
+                      style: const TextStyle(fontSize: 18, color: CosmicTheme.goldAccent),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item['name']!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 9.5,
+                        color: CosmicTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 }
+

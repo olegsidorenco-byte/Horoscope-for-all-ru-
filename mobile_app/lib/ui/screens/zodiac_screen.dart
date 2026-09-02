@@ -195,57 +195,116 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
   }
 
   Widget _buildElementFilterChips() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+    final isAllSelected = _selectedElement == 'Все';
+
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: _elements.map((el) {
-          final isSelected = _selectedElement == el;
-          Color chipColor = CosmicTheme.goldAccent;
-          IconData? icon;
-
-          if (el == 'Огонь') {
-            chipColor = const Color(0xFFE76F51);
-            icon = Icons.local_fire_department_rounded;
-          } else if (el == 'Земля') {
-            chipColor = const Color(0xFF2A9D8F);
-            icon = Icons.eco_rounded;
-          } else if (el == 'Воздух') {
-            chipColor = const Color(0xFFE9C46A);
-            icon = Icons.air_rounded;
-          } else if (el == 'Вода') {
-            chipColor = const Color(0xFF457B9D);
-            icon = Icons.water_drop_rounded;
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              avatar: icon != null
-                  ? Icon(icon, size: 16, color: isSelected ? Colors.black : chipColor)
-                  : null,
-              label: Text(el),
-              selected: isSelected,
-              selectedColor: chipColor,
-              backgroundColor: CosmicTheme.backgroundCard,
-              labelStyle: TextStyle(
-                color: isSelected ? Colors.black : CosmicTheme.textPrimary,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                fontSize: 13,
-              ),
-              side: BorderSide(
-                color: isSelected ? chipColor : Colors.white12,
-              ),
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() {
-                    _selectedElement = el;
-                  });
-                }
+      child: Column(
+        children: [
+          // 1. Кнопка "Все 12 знаков зодиака" по всей ширине экрана
+          SizedBox(
+            width: double.infinity,
+            height: 38,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                setState(() {
+                  _selectedElement = 'Все';
+                });
               },
+              icon: Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: isAllSelected ? Colors.black : CosmicTheme.goldAccent,
+              ),
+              label: Text(
+                'Все 12 знаков зодиака',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isAllSelected ? FontWeight.bold : FontWeight.w600,
+                  color: isAllSelected ? Colors.black : CosmicTheme.textPrimary,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isAllSelected
+                    ? CosmicTheme.goldAccent
+                    : CosmicTheme.backgroundCard,
+                elevation: isAllSelected ? 3 : 0,
+                side: BorderSide(
+                  color: isAllSelected ? CosmicTheme.goldAccent : Colors.white12,
+                  width: 1,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
-          );
-        }).toList(),
+          ),
+          const SizedBox(height: 8),
+
+          // 2. 4 кнопки стихий в одну строку на всю ширину экрана (без прокрутки)
+          Row(
+            children: [
+              _buildElementButton('Огонь', const Color(0xFFE76F51), Icons.local_fire_department_rounded),
+              const SizedBox(width: 6),
+              _buildElementButton('Земля', const Color(0xFF2A9D8F), Icons.eco_rounded),
+              const SizedBox(width: 6),
+              _buildElementButton('Воздух', const Color(0xFFE9C46A), Icons.air_rounded),
+              const SizedBox(width: 6),
+              _buildElementButton('Вода', const Color(0xFF457B9D), Icons.water_drop_rounded),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildElementButton(String name, Color color, IconData icon) {
+    final isSelected = _selectedElement == name;
+
+    return Expanded(
+      child: SizedBox(
+        height: 36,
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _selectedElement = name;
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            backgroundColor: isSelected ? color : CosmicTheme.backgroundCard,
+            elevation: isSelected ? 3 : 0,
+            side: BorderSide(
+              color: isSelected ? color : Colors.white12,
+              width: 1,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 13,
+                color: isSelected ? Colors.black : color,
+              ),
+              const SizedBox(width: 3),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  color: isSelected ? Colors.black : CosmicTheme.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
