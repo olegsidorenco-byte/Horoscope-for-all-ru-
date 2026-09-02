@@ -35,28 +35,43 @@ def split_text_into_chunks(text: str, max_chars: int = 3800) -> list[str]:
         return [text]
 
     paragraphs = text.split("\n\n")
+    raw_pieces = []
+
+    for p in paragraphs:
+        if len(p) <= max_chars:
+            raw_pieces.append(p)
+        else:
+            lines = p.split("\n")
+            for line in lines:
+                if len(line) <= max_chars:
+                    raw_pieces.append(line)
+                else:
+                    words = line.split(" ")
+                    buf = ""
+                    for w in words:
+                        if len(buf) + len(w) + 1 <= max_chars:
+                            buf = f"{buf} {w}".strip()
+                        else:
+                            if buf:
+                                raw_pieces.append(buf)
+                            buf = w
+                    if buf:
+                        raw_pieces.append(buf)
+
     chunks = []
     current_chunk = ""
 
-    for p in paragraphs:
-        # Если отдельный абзац сам по себе длиннее max_chars, делим по одиночным переносам
-        if len(p) > max_chars:
-            lines = p.split("\n")
-            for line in lines:
-                if len(current_chunk) + len(line) + 2 > max_chars and current_chunk:
-                    chunks.append(current_chunk.strip())
-                    current_chunk = line + "\n"
-                else:
-                    current_chunk += line + "\n"
+    for piece in raw_pieces:
+        sep = "\n\n" if "\n" not in piece else "\n"
+        if len(current_chunk) + len(piece) + len(sep) <= max_chars:
+            current_chunk = f"{current_chunk}{sep}{piece}".strip()
         else:
-            if len(current_chunk) + len(p) + 2 > max_chars and current_chunk:
-                chunks.append(current_chunk.strip())
-                current_chunk = p + "\n\n"
-            else:
-                current_chunk += p + "\n\n"
+            if current_chunk:
+                chunks.append(current_chunk)
+            current_chunk = piece
 
-    if current_chunk.strip():
-        chunks.append(current_chunk.strip())
+    if current_chunk:
+        chunks.append(current_chunk)
 
     total = len(chunks)
     if total > 1:

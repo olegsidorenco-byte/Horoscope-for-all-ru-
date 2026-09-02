@@ -7,7 +7,7 @@
 
 import os
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 DATA_USERS_DIR = os.path.join(os.path.dirname(__file__), "data", "users")
 USERS_REGISTRY_FILE = os.path.join(DATA_USERS_DIR, "users_registry.json")
@@ -43,9 +43,9 @@ def register_or_update_user(user_data: dict) -> dict:
     if not email:
         raise ValueError("Email обязателен для регистрации пользователя")
 
-    now_iso = datetime.utcnow().isoformat() + "Z"
+    now_iso = datetime.now(timezone.utc).isoformat()
     user_entry = {
-        "id": user_data.get("id") or f"usr_{int(datetime.utcnow().timestamp())}",
+        "id": user_data.get("id") or f"usr_{int(datetime.now(timezone.utc).timestamp())}",
         "name": user_data.get("name", "").strip(),
         "email": email,
         "birth_date": user_data.get("birth_date", "2000-01-01"),
