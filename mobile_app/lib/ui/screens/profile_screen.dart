@@ -86,6 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime(1920),
       lastDate: DateTime.now(),
+      locale: const Locale('ru', 'RU'),
       helpText: 'Выберите дату рождения',
       cancelText: 'Отмена',
       confirmText: 'Выбрать',
@@ -423,7 +424,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   controller: _birthPlaceController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Например: Москва, Россия',
+                    hintText: 'Например: Лондон, Великобритания',
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.location_city_rounded, color: CosmicTheme.goldAccent),
                     filled: true,
@@ -452,7 +453,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   controller: _currentCityController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Например: Санкт-Петербург',
+                    hintText: 'Например: Берлин, Германия',
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.explore_rounded, color: CosmicTheme.goldAccent),
                     filled: true,

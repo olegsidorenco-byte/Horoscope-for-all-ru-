@@ -375,7 +375,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      '🌌 Автономный астрологический комплекс\nРасчет планетарных транзитов, аспектов и домов на базе фундаментальной классической астрологии и ИИ моделей Google Gemini.',
+                      '🌌 Автономный астрологический комплекс\nРасчет планетарных транзитов, аспектов и домов на базе фундаментальной классической астрологии и современных нейросетевых моделей искусственного интеллекта.',
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.5),
                     ),
                   ],
@@ -502,7 +502,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              height: 44,
               child: ElevatedButton.icon(
                 onPressed: () async {
                   final registered = await Navigator.push(
@@ -518,11 +517,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(Icons.auto_awesome, size: 18, color: Colors.black),
                 label: const Text(
                   'Заполнить анкету / Регистрация',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: CosmicTheme.goldAccent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
               ),
             ),

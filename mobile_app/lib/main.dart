@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'ui/theme/cosmic_theme.dart';
 import 'ui/screens/main_nav_screen.dart';
 import 'services/notification_service.dart';
@@ -34,6 +35,15 @@ class CosmicHoroscopeApp extends StatelessWidget {
       title: 'Астро Гороскоп',
       debugShowCheckedModeBanner: false,
       theme: CosmicTheme.darkTheme,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ru', 'RU'),
+      ],
+      locale: const Locale('ru', 'RU'),
       home: const MainNavScreen(),
     );
   }
