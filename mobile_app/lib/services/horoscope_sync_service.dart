@@ -11,16 +11,11 @@ class HoroscopeSyncService {
 
   /// Загружает самый свежий опубликованный персональный прогноз дня
   static Future<HoroscopeDay> fetchLatestHoroscope({bool forceRefresh = false}) async {
-    if (!forceRefresh) {
-      final cached = await StorageService.getLatestCachedHoroscope();
-      if (cached != null) {
-        return cached;
-      }
-    }
-
+    // 1. Всегда пробуем запросить свежие данные из сети с тайм-аутом 4 сек и анти-кэш параметром
     try {
-      final url = Uri.parse('$repoBaseUrl/latest_horoscope.json');
-      final response = await http.get(url).timeout(const Duration(seconds: 8));
+      final cacheBuster = DateTime.now().millisecondsSinceEpoch;
+      final url = Uri.parse('$repoBaseUrl/latest_horoscope.json?t=$cacheBuster');
+      final response = await http.get(url).timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -33,11 +28,13 @@ class HoroscopeSyncService {
       }
     } catch (_) {}
 
+    // 2. Если сеть недоступна (оффлайн) или ошибка сервера, используем локальный кэш
     final cached = await StorageService.getLatestCachedHoroscope();
     if (cached != null) {
       return cached;
     }
 
+    // 3. Если кэша еще нет (первый запуск в оффлайн-режиме), берем встроенный asset
     try {
       final assetJsonStr = await rootBundle.loadString('assets/data/latest_horoscope.json');
       final decoded = jsonDecode(assetJsonStr);
@@ -51,18 +48,11 @@ class HoroscopeSyncService {
 
   /// Загружает актуальный гороскоп по 12 знакам зодиака
   static Future<ZodiacDayData> fetchLatestZodiac({bool forceRefresh = false}) async {
-    if (!forceRefresh) {
-      final cachedStr = await StorageService.getCachedZodiacJson();
-      if (cachedStr != null && cachedStr.isNotEmpty) {
-        try {
-          return ZodiacDayData.fromJson(jsonDecode(cachedStr));
-        } catch (_) {}
-      }
-    }
-
+    // 1. Запрос свежего гороскопа по знакам из сети
     try {
-      final url = Uri.parse('$repoBaseUrl/latest_zodiac.json');
-      final response = await http.get(url).timeout(const Duration(seconds: 8));
+      final cacheBuster = DateTime.now().millisecondsSinceEpoch;
+      final url = Uri.parse('$repoBaseUrl/latest_zodiac.json?t=$cacheBuster');
+      final response = await http.get(url).timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
@@ -72,6 +62,7 @@ class HoroscopeSyncService {
       }
     } catch (_) {}
 
+    // 2. Откат на кэш при оффлайне
     final cachedStr = await StorageService.getCachedZodiacJson();
     if (cachedStr != null && cachedStr.isNotEmpty) {
       try {
@@ -79,6 +70,7 @@ class HoroscopeSyncService {
       } catch (_) {}
     }
 
+    // 3. Откат на встроенный asset
     try {
       final assetStr = await rootBundle.loadString('assets/data/latest_zodiac.json');
       final decoded = jsonDecode(assetStr);

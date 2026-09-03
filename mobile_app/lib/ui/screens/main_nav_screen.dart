@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/cosmic_theme.dart';
+import '../../services/storage_service.dart';
 import 'home_screen.dart';
 import 'zodiac_screen.dart';
 import 'archive_screen.dart';
@@ -12,22 +13,59 @@ class MainNavScreen extends StatefulWidget {
   State<MainNavScreen> createState() => _MainNavScreenState();
 }
 
-class _MainNavScreenState extends State<MainNavScreen> {
+class _MainNavScreenState extends State<MainNavScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
+  bool _hasUnread = false;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    ZodiacScreen(),
-    ArchiveScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkUnreadStatus();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkUnreadStatus();
+    }
+  }
+
+  Future<void> _checkUnreadStatus() async {
+    final unread = await StorageService.hasUnreadHoroscope();
+    if (mounted && unread != _hasUnread) {
+      setState(() {
+        _hasUnread = unread;
+      });
+    }
+  }
+
+  void _onTabChanged(int idx) {
+    setState(() {
+      _currentIndex = idx;
+    });
+    _checkUnreadStatus();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final screens = [
+      HomeScreen(onReadStateChanged: _checkUnreadStatus),
+      const ZodiacScreen(),
+      const ArchiveScreen(),
+    ];
+
     return Scaffold(
       extendBody: true,
       body: IndexedStack(
         index: _currentIndex,
-        children: _screens,
+        children: screens,
       ),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -58,27 +96,41 @@ class _MainNavScreenState extends State<MainNavScreen> {
               ),
               child: NavigationBar(
                 selectedIndex: _currentIndex,
-                onDestinationSelected: (idx) {
-                  setState(() {
-                    _currentIndex = idx;
-                  });
-                },
+                onDestinationSelected: _onTabChanged,
                 backgroundColor: Colors.transparent,
                 surfaceTintColor: Colors.transparent,
                 indicatorColor: CosmicTheme.goldAccent.withOpacity(0.2),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                destinations: const [
+                destinations: [
                   NavigationDestination(
-                    icon: Icon(Icons.stars_outlined, color: CosmicTheme.textSecondary),
-                    selectedIcon: Icon(Icons.stars_rounded, color: CosmicTheme.goldAccent),
+                    icon: Badge(
+                      isLabelVisible: _hasUnread,
+                      label: const Text(
+                        'NEW',
+                        style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      backgroundColor: const Color(0xFFFF3D71),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      child: const Icon(Icons.stars_outlined, color: CosmicTheme.textSecondary),
+                    ),
+                    selectedIcon: Badge(
+                      isLabelVisible: _hasUnread,
+                      label: const Text(
+                        'NEW',
+                        style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                      backgroundColor: const Color(0xFFFF3D71),
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      child: const Icon(Icons.stars_rounded, color: CosmicTheme.goldAccent),
+                    ),
                     label: 'Мой день',
                   ),
-                  NavigationDestination(
+                  const NavigationDestination(
                     icon: Icon(Icons.auto_awesome_outlined, color: CosmicTheme.textSecondary),
                     selectedIcon: Icon(Icons.auto_awesome, color: CosmicTheme.cyanAccent),
                     label: 'Знаки зодиака',
                   ),
-                  NavigationDestination(
+                  const NavigationDestination(
                     icon: Icon(Icons.calendar_month_outlined, color: CosmicTheme.textSecondary),
                     selectedIcon: Icon(Icons.calendar_month_rounded, color: CosmicTheme.goldSoft),
                     label: 'Архив',

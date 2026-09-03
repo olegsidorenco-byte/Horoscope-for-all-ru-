@@ -14,7 +14,8 @@ import 'settings_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback? onReadStateChanged;
+  const HomeScreen({super.key, this.onReadStateChanged});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -58,9 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
       final h = await HoroscopeSyncService.fetchLatestHoroscope(forceRefresh: forceRefresh);
       final lastRead = await StorageService.getLastReadDate();
       final profile = await StorageService.loadProfile();
-      final todayStr = DateFormat('dd.MM.yyyy').format(DateTime.now());
 
-      final isUnread = h.date == todayStr && lastRead != h.date;
+      final isUnread = h.date.isNotEmpty && lastRead != h.date;
 
       if (mounted) {
         setState(() {
@@ -71,8 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
 
-      if (h.date.isNotEmpty) {
-        await StorageService.setLastReadDate(h.date);
+      if (isUnread) {
+        await NotificationService.showNewForecastNotification(h.date);
+        widget.onReadStateChanged?.call();
       }
     } catch (e) {
       if (mounted) {
@@ -81,6 +82,18 @@ class _HomeScreenState extends State<HomeScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _markAsRead() async {
+    if (_horoscope != null && _horoscope!.date.isNotEmpty) {
+      await StorageService.setLastReadDate(_horoscope!.date);
+      if (mounted) {
+        setState(() {
+          _isNewForecast = false;
+        });
+      }
+      widget.onReadStateChanged?.call();
     }
   }
 
@@ -116,6 +129,43 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          if (_isNewForecast)
+            GestureDetector(
+              onTap: _markAsRead,
+              child: Container(
+                margin: const EdgeInsets.only(right: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFF3D71), Color(0xFFFF8F00)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFFF3D71).withOpacity(0.5),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.circle, color: Colors.white, size: 7),
+                    SizedBox(width: 5),
+                    Text(
+                      'НОВОЕ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(begin: const Offset(1, 1), end: const Offset(1.06, 1.06), duration: 800.ms),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: CosmicTheme.cyanAccent),
             tooltip: 'Настройки',
@@ -197,44 +247,74 @@ class _HomeScreenState extends State<HomeScreen> {
           // Всплывающий баннер о новом прогнозе
           if (_isNewForecast)
             Container(
-              margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF2EC4B6), Color(0xFF0F4C81)],
+                  colors: [Color(0xFF8A2387), Color(0xFFE94057), Color(0xFFF27121)],
                 ),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF2EC4B6).withOpacity(0.3),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
+                    color: const Color(0xFFE94057).withOpacity(0.4),
+                    blurRadius: 14,
+                    offset: const Offset(0, 5),
                   ),
                 ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.mark_email_unread_rounded, color: Colors.white, size: 22),
+                  ),
                   const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      '✨ Новый астрологический прогноз дня готов!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'НЕПРОЧИТАННЫЙ ГОРОСКОП',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 10,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Свежий прогноз на ${_horoscope!.date} опубликован!',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white70, size: 18),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () {
-                      setState(() {
-                        _isNewForecast = false;
-                      });
-                    },
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    onPressed: _markAsRead,
+                    icon: const Icon(Icons.done_all_rounded, size: 14, color: Colors.black),
+                    label: const Text(
+                      'Прочитано',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
                   ),
                 ],
               ),

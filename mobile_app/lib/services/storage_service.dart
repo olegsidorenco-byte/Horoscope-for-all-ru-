@@ -117,6 +117,27 @@ class StorageService {
     await prefs.setString(_keyLastReadDate, date);
   }
 
+  // Проверка наличия свежего непрочитанного гороскопа
+  static Future<bool> hasUnreadHoroscope() async {
+    final cached = await getLatestCachedHoroscope();
+    if (cached == null || cached.date.isEmpty) return false;
+    final lastRead = await getLastReadDate();
+    return lastRead != cached.date;
+  }
+
+  // Дата отправки утреннего системного уведомления
+  static const String _keyLastNotifiedDate = 'cosmic_last_notified_date';
+
+  static Future<String> getLastNotifiedDate() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLastNotifiedDate) ?? '';
+  }
+
+  static Future<void> setLastNotifiedDate(String date) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyLastNotifiedDate, date);
+  }
+
   // Настройки уведомлений
   static Future<bool> isNotificationsEnabled() async {
     final prefs = await SharedPreferences.getInstance();

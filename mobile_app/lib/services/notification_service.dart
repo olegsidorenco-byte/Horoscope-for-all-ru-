@@ -12,8 +12,25 @@ class NotificationService {
   static const String channelDescription =
       'Утренние напоминания о свежем астрологическом прогнозе дня';
 
+  /// Определение правильной временной зоны на основе текущего смещения устройства
+  static tz.Location _resolveLocalLocation() {
+    try {
+      final deviceOffsetMs = DateTime.now().timeZoneOffset.inMilliseconds;
+      for (final location in tz.timeZoneDatabase.locations.values) {
+        if (location.currentTimeZone.offset == deviceOffsetMs) {
+          return location;
+        }
+      }
+    } catch (_) {}
+    return tz.local;
+  }
+
   static Future<void> initialize() async {
     tz.initializeTimeZones();
+    try {
+      final loc = _resolveLocalLocation();
+      tz.setLocalLocation(loc);
+    } catch (_) {}
 
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -24,12 +41,12 @@ class NotificationService {
 
     await _notificationsPlugin.initialize(initSettings);
 
-    // Создаем канал уведомлений с высоким приоритетом
+    // Создаем канал уведомлений с максимальным приоритетом и звуком
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       channelId,
       channelName,
       description: channelDescription,
-      importance: Importance.high,
+      importance: Importance.max,
       playSound: true,
       enableVibration: true,
     );
@@ -39,7 +56,7 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // Проверяем и восстанавливаем расписание из настроек
+    // Восстанавливаем расписание из сохраненных настроек
     final isEnabled = await StorageService.isNotificationsEnabled();
     if (isEnabled) {
       final hour = await StorageService.getNotificationHour();
@@ -83,7 +100,7 @@ class NotificationService {
       channelId,
       channelName,
       channelDescription: channelDescription,
-      importance: Importance.high,
+      importance: Importance.max,
       priority: Priority.high,
       playSound: true,
       enableVibration: true,
@@ -106,6 +123,39 @@ class NotificationService {
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+  }
+
+  /// Отправить уведомление о публикации свежего гороскопа (если еще не отправляли сегодня)
+  static Future<void> showNewForecastNotification(String date) async {
+    final lastNotified = await StorageService.getLastNotifiedDate();
+    if (lastNotified == date) return;
+
+    await requestPermission();
+
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      channelId,
+      channelName,
+      channelDescription: channelDescription,
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+      enableVibration: true,
+      styleInformation: BigTextStyleInformation(
+        'Опубликован новый подробный астрологический прогноз дня! Узнайте ключевые часы активности, влияние планет и персональный совет ✨',
+        contentTitle: '✨ <b>Свежий гороскоп на сегодня готов!</b>',
+        htmlFormatContentTitle: true,
+        htmlFormatBigText: true,
+      ),
+    );
+
+    await _notificationsPlugin.show(
+      202,
+      '✨ Свежий гороскоп на сегодня готов!',
+      'Новый астрологический прогноз уже доступен в приложении ✨',
+      const NotificationDetails(android: androidDetails),
+    );
+
+    await StorageService.setLastNotifiedDate(date);
   }
 
   /// Отменить напоминания
