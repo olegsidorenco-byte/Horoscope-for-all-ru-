@@ -5,6 +5,7 @@ import '../../models/horoscope_model.dart';
 import '../../models/user_profile.dart';
 import '../../services/horoscope_sync_service.dart';
 import '../../services/storage_service.dart';
+import '../../services/notification_service.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 import '../widgets/greeting_header.dart';
