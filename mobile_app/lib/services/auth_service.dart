@@ -199,6 +199,7 @@ class AuthService {
   static Future<UserProfile> loginWithTelegram({
     required String telegramUsername,
     String? phone,
+    String? name,
     String? firstName,
   }) async {
     final cleanTg = telegramUsername.replaceAll('@', '').trim();
@@ -208,6 +209,9 @@ class AuthService {
 
     final accounts = await _getAllAccounts();
     final normPhone = phone != null ? normalizeContact(phone) : '';
+    final finalName = (name != null && name.isNotEmpty)
+        ? name
+        : ((firstName != null && firstName.isNotEmpty) ? firstName : cleanTg);
 
     // Ищем существующий аккаунт по Telegram или телефону
     Map<String, dynamic>? existing;
@@ -232,7 +236,7 @@ class AuthService {
       final userId = 'usr_tg_${DateTime.now().millisecondsSinceEpoch}';
       profile = UserProfile(
         id: userId,
-        name: (firstName != null && firstName.isNotEmpty) ? firstName : cleanTg,
+        name: finalName,
         email: '',
         phone: normPhone,
         authType: 'telegram',
