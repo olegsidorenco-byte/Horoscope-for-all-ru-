@@ -4,6 +4,10 @@ class UserProfile {
   final String id;
   final String name;
   final String email;
+  final String phone;
+  final String authType; // "email", "phone", "telegram", "guest"
+  final String telegramUsername;
+  final String passwordHash;
   final DateTime birthDate;
   final String birthTime; // Формат "12:00"
   final bool isTimeExact;
@@ -15,7 +19,11 @@ class UserProfile {
   UserProfile({
     required this.id,
     required this.name,
-    required this.email,
+    this.email = "",
+    this.phone = "",
+    this.authType = "guest",
+    this.telegramUsername = "",
+    this.passwordHash = "",
     required this.birthDate,
     required this.birthTime,
     this.isTimeExact = true,
@@ -28,9 +36,13 @@ class UserProfile {
   /// Создает дефолтный профиль: 1 января 2000 года, 12:00
   factory UserProfile.defaultProfile() {
     return UserProfile(
-      id: "default_user",
+      id: "guest_user",
       name: "",
       email: "",
+      phone: "",
+      authType: "guest",
+      telegramUsername: "",
+      passwordHash: "",
       birthDate: DateTime(2000, 1, 1),
       birthTime: "12:00",
       isTimeExact: false,
@@ -40,7 +52,19 @@ class UserProfile {
     );
   }
 
-  bool get isRegistered => email.trim().isNotEmpty && name.trim().isNotEmpty;
+  bool get isRegistered =>
+      (email.trim().isNotEmpty || phone.trim().isNotEmpty || telegramUsername.trim().isNotEmpty) &&
+      name.trim().isNotEmpty;
+
+  /// Основной контакт пользователя для отображения
+  String get primaryContact {
+    if (phone.trim().isNotEmpty) return phone.trim();
+    if (email.trim().isNotEmpty) return email.trim();
+    if (telegramUsername.trim().isNotEmpty) {
+      return telegramUsername.startsWith("@") ? telegramUsername : "@$telegramUsername";
+    }
+    return "Не привязан";
+  }
 
   String get formattedBirthDate => DateFormat('dd.MM.yyyy').format(birthDate);
 
@@ -115,6 +139,10 @@ class UserProfile {
       "id": id,
       "name": name,
       "email": email,
+      "phone": phone,
+      "authType": authType,
+      "telegramUsername": telegramUsername,
+      "passwordHash": passwordHash,
       "birthDate": birthDate.toIso8601String(),
       "birthTime": birthTime,
       "isTimeExact": isTimeExact,
@@ -130,6 +158,10 @@ class UserProfile {
       id: json["id"] ?? "user_${DateTime.now().millisecondsSinceEpoch}",
       name: json["name"] ?? "",
       email: json["email"] ?? "",
+      phone: json["phone"] ?? "",
+      authType: json["authType"] ?? "guest",
+      telegramUsername: json["telegramUsername"] ?? "",
+      passwordHash: json["passwordHash"] ?? "",
       birthDate: json["birthDate"] != null
           ? DateTime.tryParse(json["birthDate"]) ?? DateTime(2000, 1, 1)
           : DateTime(2000, 1, 1),
@@ -148,6 +180,10 @@ class UserProfile {
     String? id,
     String? name,
     String? email,
+    String? phone,
+    String? authType,
+    String? telegramUsername,
+    String? passwordHash,
     DateTime? birthDate,
     String? birthTime,
     bool? isTimeExact,
@@ -160,6 +196,10 @@ class UserProfile {
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
+      phone: phone ?? this.phone,
+      authType: authType ?? this.authType,
+      telegramUsername: telegramUsername ?? this.telegramUsername,
+      passwordHash: passwordHash ?? this.passwordHash,
       birthDate: birthDate ?? this.birthDate,
       birthTime: birthTime ?? this.birthTime,
       isTimeExact: isTimeExact ?? this.isTimeExact,

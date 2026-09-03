@@ -154,6 +154,69 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 6 пройден: Граничные даты (29 февраля, стыки знаков, исторические даты) рассчитываются корректно.")
 
+    def test_07_unique_account_contact_enforcement(self):
+        """Проверка строгого правила «Один телефон или почта — один аккаунт»."""
+        from user_service import register_or_update_user, get_all_users, USERS_REGISTRY_FILE
+        import json
+
+        # 1. Регистрация первого пользователя
+        u1_data = {
+            "id": "usr_test_unique_1",
+            "name": "Тест Уникальности 1",
+            "email": "unique_contact_test@example.com",
+            "phone": "+79998887766",
+            "birth_date": "2000-01-01",
+            "birth_time": "12:00",
+            "birth_place": "Лондон",
+            "current_city": "Берлин",
+            "gender": "female"
+        }
+        registered_u1 = register_or_update_user(u1_data)
+        self.assertEqual(registered_u1["email"], "unique_contact_test@example.com")
+        self.assertEqual(registered_u1["phone"], "+79998887766")
+
+        # 2. Попытка зарегистрировать другого пользователя с тем же email
+        u2_duplicate_email = {
+            "id": "usr_test_unique_2",
+            "name": "Злоумышленник Почта",
+            "email": "unique_contact_test@example.com",
+            "phone": "+79991112233",
+            "birth_date": "1995-05-05",
+            "birth_time": "10:00",
+            "birth_place": "Париж",
+            "current_city": "Рим",
+        }
+        with self.assertRaises(ValueError):
+            register_or_update_user(u2_duplicate_email)
+
+        # 3. Попытка зарегистрировать другого пользователя с тем же телефоном
+        u3_duplicate_phone = {
+            "id": "usr_test_unique_3",
+            "name": "Злоумышленник Телефон",
+            "email": "another_clean_email@example.com",
+            "phone": "+79998887766",
+            "birth_date": "1992-02-02",
+            "birth_time": "08:00",
+            "birth_place": "Токио",
+            "current_city": "Сеул",
+        }
+        with self.assertRaises(ValueError):
+            register_or_update_user(u3_duplicate_phone)
+
+        # 4. Обновление владельца своего профиля должно проходить успешно
+        u1_updated_data = dict(u1_data)
+        u1_updated_data["name"] = "Тест Уникальности Обновлен"
+        updated_u1 = register_or_update_user(u1_updated_data)
+        self.assertEqual(updated_u1["name"], "Тест Уникальности Обновлен")
+
+        # Очистка тестового пользователя
+        all_u = get_all_users()
+        filtered = [u for u in all_u if u.get("id") != "usr_test_unique_1"]
+        with open(USERS_REGISTRY_FILE, "w", encoding="utf-8") as f:
+            json.dump(filtered, f, ensure_ascii=False, indent=2)
+
+        print("✅ Тест 7 пройден: Защита «Один телефон или почта — один аккаунт» блокирует любые дубликаты контактов.")
+
 
 if __name__ == "__main__":
     unittest.main()

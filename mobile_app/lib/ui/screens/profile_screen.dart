@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/user_profile.dart';
 import '../../services/storage_service.dart';
+import '../../services/auth_service.dart';
 import '../theme/cosmic_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -66,11 +67,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   UserProfile _buildCurrentProfile() {
+    final p = widget.initialProfile ?? UserProfile.defaultProfile();
     final timeStr = "${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}";
     return UserProfile(
-      id: widget.initialProfile?.id ?? "user_${DateTime.now().millisecondsSinceEpoch}",
+      id: p.id.isNotEmpty && p.id != 'default_user' && p.id != 'guest_user'
+          ? p.id
+          : "usr_${DateTime.now().millisecondsSinceEpoch}",
       name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
+      email: _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : p.email,
+      phone: p.phone,
+      authType: p.authType,
+      telegramUsername: p.telegramUsername,
+      passwordHash: p.passwordHash,
       birthDate: _selectedDate,
       birthTime: timeStr,
       isTimeExact: _isTimeExact,
@@ -78,6 +86,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
       currentCity: _currentCityController.text.trim(),
       gender: _selectedGender,
     );
+  }
+
+  Future<void> _confirmLogout() async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E2235),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: const Text('Выйти из аккаунта?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Данные вашей анкеты останутся надежно сохранены в учетной записи. Вы сможете войти в нее снова в любой момент.',
+          style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Выйти', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (ok == true) {
+      await AuthService.logout();
+      if (mounted) {
+        Navigator.pop(context, true);
+      }
+    }
   }
 
   Future<void> _pickDate() async {
@@ -151,7 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     final profile = _buildCurrentProfile();
-    await StorageService.saveProfile(profile);
+    await AuthService.syncCurrentProfile(profile);
 
     // Автоматически синхронизируем выбранный знак зодиака под дату рождения
     await StorageService.setSelectedZodiacSign(profile.zodiacSign.toLowerCase());
@@ -203,6 +244,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Карточка привязки аккаунта
+                if (widget.initialProfile != null && widget.initialProfile!.isRegistered)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E2235),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: CosmicTheme.cyanAccent.withOpacity(0.4)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.verified_user_rounded, color: CosmicTheme.cyanAccent, size: 22),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'АККАУНТ ПРИВЯЗАН',
+                                style: TextStyle(
+                                  color: CosmicTheme.cyanAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                              Text(
+                                widget.initialProfile!.primaryContact,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20),
+                          tooltip: 'Выйти из аккаунта',
+                          onPressed: _confirmLogout,
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // Карточка рассчитанного знака зодиака по текущей дате
                 Container(
                   padding: const EdgeInsets.all(16),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/auth_service.dart';
 import '../../models/user_profile.dart';
 import 'profile_screen.dart';
+import 'auth_screen.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 
@@ -450,8 +452,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              '📧 Email: ${_profile.email}',
-              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+              '📱/📧 Контакт: ${_profile.primaryContact}',
+              style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
@@ -485,9 +487,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       }
                     },
                     icon: const Icon(Icons.edit, size: 16, color: CosmicTheme.goldAccent),
-                    label: const Text('Редактировать анкету', style: TextStyle(color: CosmicTheme.goldAccent)),
+                    label: const Text('Анкета', style: TextStyle(color: CosmicTheme.goldAccent)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: CosmicTheme.goldAccent),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AuthScreen()),
+                      );
+                      _loadSettings();
+                    },
+                    icon: const Icon(Icons.switch_account_outlined, size: 16, color: CosmicTheme.cyanAccent),
+                    label: const Text('Сменить', style: TextStyle(color: CosmicTheme.cyanAccent)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: CosmicTheme.cyanAccent),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
@@ -496,7 +516,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ] else ...[
             const Text(
-              'Заполните дату, время и место рождения для формирования индивидуального гороскопа под ваши личные натальные координаты.',
+              'Авторизуйтесь по номеру телефона, почте или через Telegram, чтобы закрепить за собой персональную натальную анкету.',
               style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 16),
@@ -504,19 +524,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  final registered = await Navigator.push(
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ProfileScreen(initialProfile: _profile),
+                      builder: (context) => const AuthScreen(isRegistrationInitial: true),
                     ),
                   );
-                  if (registered == true) {
-                    _loadSettings();
-                  }
+                  _loadSettings();
                 },
-                icon: const Icon(Icons.auto_awesome, size: 18, color: Colors.black),
+                icon: const Icon(Icons.lock_person_rounded, size: 18, color: Colors.black),
                 label: const Text(
-                  'Заполнить анкету / Регистрация',
+                  'Войти или Зарегистрироваться',
                   style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
                 ),
                 style: ElevatedButton.styleFrom(
