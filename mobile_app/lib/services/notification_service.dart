@@ -112,17 +112,31 @@ class NotificationService {
       ),
     );
 
-    await _notificationsPlugin.zonedSchedule(
-      101,
-      '🪐 Астро Гороскоп на сегодня готов!',
-      'Узнайте ключевые аспекты дня, часы успеха и совет ✨',
-      scheduledDate,
-      const NotificationDetails(android: androidDetails),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        101,
+        '🪐 Астро Гороскоп на сегодня готов!',
+        'Узнайте ключевые аспекты дня, часы успеха и совет ✨',
+        scheduledDate,
+        const NotificationDetails(android: androidDetails),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (_) {
+      await _notificationsPlugin.zonedSchedule(
+        101,
+        '🪐 Астро Гороскоп на сегодня готов!',
+        'Узнайте ключевые аспекты дня, часы успеха и совет ✨',
+        scheduledDate,
+        const NotificationDetails(android: androidDetails),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    }
   }
 
   /// Отправить уведомление о публикации свежего гороскопа (если еще не отправляли сегодня)
