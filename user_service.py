@@ -99,6 +99,7 @@ def register_or_update_user(user_data: dict) -> dict:
         "birth_place": user_data.get("birth_place", "").strip(),
         "current_city": user_data.get("current_city", "").strip(),
         "gender": user_data.get("gender", "female"),
+        "focus": user_data.get("focus", "бизнес, деловые переговоры, финансы и здоровье").strip(),
         "updated_at": now_iso
     }
 

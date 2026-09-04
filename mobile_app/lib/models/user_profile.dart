@@ -14,6 +14,7 @@ class UserProfile {
   final String birthPlace;
   final String currentCity;
   final String gender; // "male", "female", "other"
+  final String focus; // Приоритетные сферы внимания
   final DateTime updatedAt;
 
   UserProfile({
@@ -30,6 +31,7 @@ class UserProfile {
     required this.birthPlace,
     required this.currentCity,
     this.gender = "female",
+    this.focus = "бизнес, деловые переговоры, финансы и здоровье",
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
 
@@ -49,6 +51,7 @@ class UserProfile {
       birthPlace: "",
       currentCity: "",
       gender: "female",
+      focus: "бизнес, деловые переговоры, финансы и здоровье",
     );
   }
 
@@ -149,6 +152,7 @@ class UserProfile {
       "birthPlace": birthPlace,
       "currentCity": currentCity,
       "gender": gender,
+      "focus": focus,
       "updatedAt": updatedAt.toIso8601String(),
     };
   }
@@ -170,6 +174,7 @@ class UserProfile {
       birthPlace: json["birthPlace"] ?? "",
       currentCity: json["currentCity"] ?? "",
       gender: json["gender"] ?? "female",
+      focus: json["focus"] ?? "бизнес, деловые переговоры, финансы и здоровье",
       updatedAt: json["updatedAt"] != null
           ? DateTime.tryParse(json["updatedAt"])
           : null,
@@ -190,6 +195,7 @@ class UserProfile {
     String? birthPlace,
     String? currentCity,
     String? gender,
+    String? focus,
     DateTime? updatedAt,
   }) {
     return UserProfile(
@@ -206,6 +212,7 @@ class UserProfile {
       birthPlace: birthPlace ?? this.birthPlace,
       currentCity: currentCity ?? this.currentCity,
       gender: gender ?? this.gender,
+      focus: focus ?? this.focus,
       updatedAt: updatedAt ?? DateTime.now(),
     );
   }

@@ -267,6 +267,74 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 8 пройден: Гарантирована целостность и полнота гороскопа по всем 12 знакам без обрывов.")
 
+    def test_09_natal_expert_prompt_structure(self):
+        """Проверка структуры промпта высшей натальной категории (стаж 60 лет)."""
+        from ai_service import build_horoscope_prompt
+
+        # 1. Проверяем персональный профиль с натальными координатами, разделением городов, полом и фокусом
+        profile = {
+            "name": "Олег",
+            "birth_date": "23.05.1978",
+            "birth_time": "00:05",
+            "birth_city": "Кишинев",
+            "current_city": "Москва",
+            "gender": "male",
+            "focus": "бизнес, деловые переговоры, финансы и инвестиции",
+            "is_general": False
+        }
+
+        prompt = build_horoscope_prompt(profile, "04.09.2026")
+
+        # Проверка роли и авторитета
+        self.assertIn("60-летним стажем", prompt)
+        self.assertIn("ВЫСШАЯ НАТАЛЬНАЯ ТОЧНОСТЬ", prompt)
+
+        # Проверка натальных параметров
+        self.assertIn("Олег", prompt)
+        self.assertIn("23.05.1978", prompt)
+        self.assertIn("00:05", prompt)
+        self.assertIn("Кишинев", prompt)
+        self.assertIn("Москва", prompt)
+        self.assertIn("Мужской", prompt)
+        self.assertIn("бизнес, деловые переговоры, финансы и инвестиции", prompt)
+
+        # Проверка правил расчета Асцендента, Середины Неба и ключевых домов
+        self.assertIn("Асцендент", prompt)
+        self.assertIn("Середину Неба", prompt)
+        self.assertIn("1 дом", prompt)
+        self.assertIn("2 дом", prompt)
+        self.assertIn("6 дом", prompt)
+        self.assertIn("7 дом", prompt)
+        self.assertIn("10 дом", prompt)
+
+        # Проверка требования указания конкретных часов
+        self.assertIn("конкретные благоприятные часы", prompt)
+
+        # Проверка обязательных рубрик (HTML теги <b>)
+        self.assertIn("<b>Влияние планет на сегодня</b>", prompt)
+        self.assertIn("<b>Работа, бизнес и финансы</b>", prompt)
+        self.assertIn("<b>Личные отношения и общение</b>", prompt)
+        self.assertIn("<b>Здоровье и тонус</b>", prompt)
+        self.assertIn("<b>Добрый совет на сегодня</b>", prompt)
+        self.assertIn("<b>Пожелание на сегодня</b>", prompt)
+
+        # Проверка женского рода для женского профиля
+        female_profile = {
+            "name": "Анна",
+            "birth_date": "15.08.1990",
+            "birth_time": "14:30",
+            "birth_city": "Киев",
+            "current_city": "Варшава",
+            "gender": "female",
+            "is_general": False
+        }
+        female_prompt = build_horoscope_prompt(female_profile, "04.09.2026")
+        self.assertIn("Женский", female_prompt)
+        self.assertIn("женского рода", female_prompt)
+
+        print("✅ Тест 9 пройден: Промпт высшей натальной категории строго соблюдает астрологическую методологию.")
+
 
 if __name__ == "__main__":
     unittest.main()
+

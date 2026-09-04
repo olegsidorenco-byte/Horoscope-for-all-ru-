@@ -4,6 +4,9 @@
     "birth_date": "",
     "birth_time": "",
     "birth_city": "",
+    "current_city": "",
+    "gender": "male",
+    "focus": "бизнес, деловые переговоры, финансы и здоровье",
     "is_general": true
   },
   "bot_settings": {
