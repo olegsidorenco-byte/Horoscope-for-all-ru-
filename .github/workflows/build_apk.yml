@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -96,13 +96,27 @@ jobs:
           path: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           if-no-files-found: error
 
+      - name: Extract App Version
+        id: app_version
+        run: |
+          VERSION=$(grep '^version:' mobile_app/pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | tr -d ' "\r\n')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Extracted App Version: ${VERSION}"
+
       - name: Publish Release with APK
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: app-v1.0.12
-          name: "📱 Релиз Horoscope-for-all-ru.apk v1.0.12 (Астро Гороскоп)"
-          body: "Готовый установочный файл Horoscope-for-all-ru.apk для Android. Внедрена комбинированная авторизация пользователей (Email + Телефон + Telegram) со строгим правилом «Один контакт = один аккаунт» и привязкой натальной анкеты."
+          tag_name: app-v${{ steps.app_version.outputs.version }}
+          name: "📱 Релиз Horoscope-for-all-ru.apk v${{ steps.app_version.outputs.version }} (Астро Гороскоп)"
+          body: |
+            Готовый установочный файл Horoscope-for-all-ru.apk для Android (версия v${{ steps.app_version.outputs.version }}).
+            
+            ✨ Ключевые улучшения в этой версии:
+            • 🔔 Гарантированная доставка утренних уведомлений при закрытом приложении и блокировке экрана (добавлены ScheduledNotificationReceiver и ScheduledNotificationBootReceiver).
+            • ⏰ Поддержка точных будильников Android 13/14+ (SCHEDULE_EXACT_ALARM и USE_EXACT_ALARM).
+            • ♈ Полные 12 знаков зодиака в гороскопе без усечений и обрывов.
+            • 🔐 Комбинированная авторизация пользователей (Email + Телефон + Telegram) со строгим правилом «Один контакт = один аккаунт».
           files: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           draft: false
           prerelease: false
