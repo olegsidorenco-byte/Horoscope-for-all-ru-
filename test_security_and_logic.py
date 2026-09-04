@@ -217,6 +217,56 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 7 пройден: Защита «Один телефон или почта — один аккаунт» блокирует любые дубликаты контактов.")
 
+    def test_08_zodiac_structure_and_completeness(self):
+        """Проверка полноты и целостности структуры гороскопа по 12 знакам зодиака."""
+        from ai_service import REQUIRED_ZODIAC_SIGNS, build_zodiac_prompt
+        from archive_service import parse_zodiac_structure
+
+        # 1. Проверяем список обязательных знаков (строго 12)
+        expected_signs = ["Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева",
+                          "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы"]
+        self.assertEqual(len(REQUIRED_ZODIAC_SIGNS), 12)
+        self.assertEqual(REQUIRED_ZODIAC_SIGNS, expected_signs)
+
+        # 2. Промпт содержит указания на все 12 знаков и требование полноты
+        prompt = build_zodiac_prompt("03.09.2026")
+        for s in expected_signs:
+            self.assertIn(s, prompt, f"Знак {s} отсутствует в промпте зодиака")
+        self.assertIn("ВСЕ 12 знаков", prompt)
+
+        # 3. Парсер структуры корректно извлекает 12 знаков без заглушек
+        sample_zodiac = (
+            "✨ <b>ГОРОСКОП ПО ЗНАКАМ ЗОДИАКА НА 03.09.2026</b> ✨\n\n"
+            + "\n\n".join([
+                f"<b>{meta['symbol']} {meta['name']} ({meta['dates']})</b>\n"
+                f"• Фокус: Фокус дня {idx}\n"
+                f"• Энергия: 80% | Часы удачи: 10:00–12:00\n"
+                f"Индивидуальный астрологический прогноз для знака {meta['name']}."
+                for idx, meta in enumerate([
+                    {"symbol": "♈", "name": "Овен", "dates": "21.03–19.04"},
+                    {"symbol": "♉", "name": "Телец", "dates": "20.04–20.05"},
+                    {"symbol": "♊", "name": "Близнецы", "dates": "21.05–20.06"},
+                    {"symbol": "♋", "name": "Рак", "dates": "21.06–22.07"},
+                    {"symbol": "♌", "name": "Лев", "dates": "23.07–22.08"},
+                    {"symbol": "♍", "name": "Дева", "dates": "23.08–22.09"},
+                    {"symbol": "♎", "name": "Весы", "dates": "23.09–22.10"},
+                    {"symbol": "♏", "name": "Скорпион", "dates": "23.10–21.11"},
+                    {"symbol": "♐", "name": "Стрелец", "dates": "22.11–21.12"},
+                    {"symbol": "♑", "name": "Козерог", "dates": "22.12–19.01"},
+                    {"symbol": "♒", "Водолей": "Водолей", "name": "Водолей", "dates": "20.01–18.02"},
+                    {"symbol": "♓", "name": "Рыбы", "dates": "19.02–20.03"},
+                ], 1)
+            ])
+        )
+        parsed = parse_zodiac_structure(sample_zodiac, "03.09.2026")
+        self.assertEqual(len(parsed["signs"]), 12)
+        for s_data in parsed["signs"]:
+            self.assertFalse(s_data["forecast"].startswith("Благоприятный день для знака"),
+                             f"Знак {s_data['name']} получил заглушку вместо реального прогноза")
+            self.assertIn("Индивидуальный астрологический прогноз", s_data["forecast"])
+
+        print("✅ Тест 8 пройден: Гарантирована целостность и полнота гороскопа по всем 12 знакам без обрывов.")
+
 
 if __name__ == "__main__":
     unittest.main()

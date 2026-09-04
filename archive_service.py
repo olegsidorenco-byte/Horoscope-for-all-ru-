@@ -9,7 +9,7 @@
 import os
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ARCHIVE_DIR = os.path.join(DATA_DIR, "archive")
@@ -144,7 +144,7 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         "date": target_date,
         "raw_text": clean_text,
         "signs": signs_data,
-        "updated_at": datetime.utcnow().isoformat() + "Z"
+        "updated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     }
 
 

@@ -462,7 +462,7 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
     default_prompt = "Sacred astrological cosmic alignment, glowing golden planets, ethereal nebula, deep starry space, mystical zodiac wheel, cinematic lighting"
     
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent"
         headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
         prompt_request = {
             "contents": [{
@@ -472,7 +472,11 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
                     "Only output the prompt text, no quotes, no explanations:\n\n" + horoscope_text[:1500]
                 )}]
             }],
-            "generationConfig": {"temperature": 0.5, "maxOutputTokens": 100}
+            "generationConfig": {
+                "temperature": 0.5,
+                "maxOutputTokens": 1000,
+                "thinkingConfig": {"thinkingBudget": 0}
+            }
         }
         res = requests.post(url, headers=headers, json=prompt_request, timeout=15)
         if res.status_code == 200:
@@ -532,13 +536,21 @@ def build_zodiac_prompt(target_date: str = None) -> str:
 11. ♒ Водолей (20.01–18.02)
 12. ♓ Рыбы (19.02–20.03)
 
-4. ОБЪЕМ: строго по 150–220 символов на каждый знак. Общий объем текста: 2200–2600 символов (строго уместиться в одно сообщение).
-5. Используй только HTML теги <b> и <i>, без Markdown решеток и звездочек."""
+4. ОБЪЕМ: строго по 150–220 символов на каждый знак. Общий объем текста: 2500–3200 символов (строго уместиться в одно сообщение Telegram).
+5. ВАЖНО: Текст ОБЯЗАТЕЛЬНО должен содержать ВСЕ 12 знаков зодиака (от ♈ Овен до ♓ Рыбы) без сокращений и обрывов!
+6. Используй только HTML теги <b> и <i>, без Markdown решеток и звездочек."""
+
+
+REQUIRED_ZODIAC_SIGNS = [
+    "Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева",
+    "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы"
+]
 
 
 def generate_zodiac_horoscope_text(api_key: str, target_date: str = None) -> str:
     """
     Генерирует гороскоп по 12 знакам зодиака через Google Gemini API с автопоиском и отказоустойчивостью.
+    Гарантирует генерацию ВСЕХ 12 знаков без обрыва по лимиту токенов (MAX_TOKENS).
     """
     if not target_date:
         target_date = datetime.now().strftime("%d.%m.%Y")
@@ -557,8 +569,11 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None) -> str
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
             "temperature": 0.7,
-            "maxOutputTokens": 3000,
-            "topP": 0.95
+            "maxOutputTokens": 8192,
+            "topP": 0.95,
+            "thinkingConfig": {
+                "thinkingBudget": 0
+            }
         }
     }
 
@@ -568,14 +583,38 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None) -> str
         for attempt in range(1, 3):
             try:
                 print(f"🤖 [Зодиак] Запрос к модели {model_name} (попытка {attempt}/2)...")
-                response = requests.post(url, headers=headers, json=payload, timeout=40)
+                response = requests.post(url, headers=headers, json=payload, timeout=50)
+                
+                # Если модель не поддерживает thinkingConfig (HTTP 400), пробуем без него
+                if response.status_code == 400 and "thinkingConfig" in response.text:
+                    import copy
+                    fallback_payload = copy.deepcopy(payload)
+                    fallback_payload["generationConfig"].pop("thinkingConfig", None)
+                    response = requests.post(url, headers=headers, json=fallback_payload, timeout=50)
+
                 if response.status_code == 200:
                     data = response.json()
                     candidates = data.get("candidates", [])
                     if candidates:
-                        text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                        candidate = candidates[0]
+                        finish_reason = candidate.get("finishReason", "")
+                        text = candidate.get("content", {}).get("parts", [{}])[0].get("text", "")
+
+                        # Проверяем на обрыв генерации по лимиту токенов
+                        if finish_reason == "MAX_TOKENS":
+                            print(f"⚠️ [Зодиак] Модель {model_name} прервала ответ по MAX_TOKENS. Длина: {len(text)}.")
+                            last_error = f"Превышен лимит токенов (MAX_TOKENS) на модели {model_name}"
+                            continue
+
+                        # Проверяем наличие всех 12 знаков
+                        missing_signs = [s for s in REQUIRED_ZODIAC_SIGNS if s not in text]
+                        if missing_signs:
+                            print(f"⚠️ [Зодиак] Модель {model_name} вернула неполный гороскоп (нет знаков: {missing_signs}).")
+                            last_error = f"Неполный гороскоп: отсутствуют знаки {missing_signs}"
+                            continue
+
                         if text:
-                            print(f"✅ [Зодиак] Гороскоп успешно сгенерирован моделью {model_name} ({len(text)} симв.)!")
+                            print(f"✅ [Зодиак] Гороскоп успешно сгенерирован моделью {model_name} ({len(text)} симв., все 12 знаков на месте)!")
                             return text.strip()
                 elif response.status_code == 429:
                     print(f"⚠️ [Зодиак] Лимит запросов к {model_name}. Ожидание 5 сек...")
