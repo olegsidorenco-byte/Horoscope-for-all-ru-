@@ -1,13 +1,13 @@
 {
   "user_profile": {
-    "name": "",
-    "birth_date": "",
-    "birth_time": "",
-    "birth_city": "",
-    "current_city": "",
+    "name": "Олег",
+    "birth_date": "23.05.1978",
+    "birth_time": "00:05",
+    "birth_city": "Кишинев",
+    "current_city": "Кишинев",
     "gender": "male",
     "focus": "бизнес, деловые переговоры, финансы и здоровье",
-    "is_general": true
+    "is_general": false
   },
   "bot_settings": {
     "send_image": false,

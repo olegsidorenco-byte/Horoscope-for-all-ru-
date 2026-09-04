@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _birthPlaceController;
   late TextEditingController _currentCityController;
+  late TextEditingController _focusController;
 
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
@@ -38,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _emailController = TextEditingController(text: p.email);
     _birthPlaceController = TextEditingController(text: p.birthPlace);
     _currentCityController = TextEditingController(text: p.currentCity);
+    _focusController = TextEditingController(text: p.focus);
 
     _selectedDate = p.birthDate; // по умолчанию 01.01.2000
     
@@ -63,6 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _emailController.dispose();
     _birthPlaceController.dispose();
     _currentCityController.dispose();
+    _focusController.dispose();
     super.dispose();
   }
 
@@ -85,6 +88,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       birthPlace: _birthPlaceController.text.trim(),
       currentCity: _currentCityController.text.trim(),
       gender: _selectedGender,
+      focus: _focusController.text.trim().isNotEmpty
+          ? _focusController.text.trim()
+          : (p.focus.isNotEmpty ? p.focus : "бизнес, деловые переговоры, финансы и здоровье"),
     );
   }
 
@@ -619,6 +625,81 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 20),
+
+                // 7. Приоритетные сферы внимания (фокус натального расчета)
+                const Text(
+                  'Приоритетные сферы внимания (фокус расчета)',
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Персональный акцент в деловой стратегии, переговорах и часах активности',
+                  style: TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
+                ),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    '💼 Бизнес и финансы',
+                    '🤝 Переговоры и сделки',
+                    '📈 Карьера и статус',
+                    '❤️ Отношения и семья',
+                    '🌿 Здоровье и тонус',
+                    '🧘 Духовный рост',
+                  ].map((preset) {
+                    final cleanName = preset.substring(preset.indexOf(' ') + 1).toLowerCase();
+                    final isSelected = _focusController.text.toLowerCase().contains(cleanName);
+                    return ChoiceChip(
+                      label: Text(preset),
+                      selected: isSelected,
+                      selectedColor: CosmicTheme.goldAccent.withOpacity(0.25),
+                      backgroundColor: const Color(0xFF1E2235),
+                      side: BorderSide(
+                        color: isSelected ? CosmicTheme.goldAccent : Colors.white12,
+                      ),
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        color: isSelected ? CosmicTheme.goldAccent : Colors.white70,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      onSelected: (selected) {
+                        setState(() {
+                          final current = _focusController.text.trim();
+                          if (selected) {
+                            if (current.isEmpty) {
+                              _focusController.text = cleanName;
+                            } else if (!current.toLowerCase().contains(cleanName)) {
+                              _focusController.text = "$current, $cleanName";
+                            }
+                          } else {
+                            final parts = current
+                                .split(',')
+                                .map((s) => s.trim())
+                                .where((s) => s.isNotEmpty && !s.toLowerCase().contains(cleanName))
+                                .toList();
+                            _focusController.text = parts.join(', ');
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _focusController,
+                  maxLines: 2,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Например: бизнес, деловые переговоры, финансы и здоровье',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    prefixIcon: const Icon(Icons.stars_rounded, color: CosmicTheme.goldAccent),
+                    filled: true,
+                    fillColor: const Color(0xFF1E2235),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                  ),
                 ),
                 const SizedBox(height: 32),
 

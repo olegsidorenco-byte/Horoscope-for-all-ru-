@@ -11,5 +11,22 @@
     "gender": "female",
     "created_at": "2026-09-02T00:00:00Z",
     "updated_at": "2026-09-02T00:00:00Z"
+  },
+  {
+    "id": "usr_oleg_main",
+    "name": "Олег",
+    "email": "sidorenco@horoscope.ru",
+    "phone": "",
+    "auth_type": "email",
+    "telegram_username": "olegsidorenco",
+    "birth_date": "1978-05-23",
+    "birth_time": "00:05",
+    "is_time_exact": true,
+    "birth_place": "Кишинев",
+    "current_city": "Кишинев",
+    "gender": "male",
+    "focus": "бизнес, деловые переговоры, финансы и здоровье",
+    "updated_at": "2026-09-04T13:05:59.448517+00:00",
+    "created_at": "2026-09-04T13:05:59.448517+00:00"
   }
 ]

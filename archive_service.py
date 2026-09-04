@@ -64,6 +64,8 @@ def parse_horoscope_structure(raw_text: str, target_date: str) -> dict:
             elif "Пожелание" in raw_title:
                 icon = "✨"
                 
+            # Очищаем возможный эмодзи следующего заголовка в конце блока
+            content = re.sub(r'[\s\U00010000-\U0010ffff\u2600-\u26FF\u2700-\u27BF\ufe00-\ufe0f]+$', '', content).strip()
             topics.append({
                 "title": raw_title,
                 "icon": icon,

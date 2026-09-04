@@ -542,6 +542,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
                 ),
+                if (_userProfile.focus.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    '🎯 ${_userProfile.focus}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 10.5, fontWeight: FontWeight.w500),
+                  ),
+                ],
               ],
             ),
           ),
