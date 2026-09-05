@@ -10,6 +10,7 @@
     "is_general": false
   },
   "bot_settings": {
+    "generation_time": "06:30",
     "send_image": false,
     "delay_between_messages_seconds": 2,
     "timezone": "Europe/Moscow"

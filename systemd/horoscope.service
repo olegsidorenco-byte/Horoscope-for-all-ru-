@@ -1,0 +1,15 @@
+[Unit]
+Description=Daily Horoscope Generator and Telegram Publisher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/os/Документы/Horoscope-for-all-ru
+ExecStart=/usr/bin/python3 /home/os/Документы/Horoscope-for-all-ru/run_daily_local.py
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

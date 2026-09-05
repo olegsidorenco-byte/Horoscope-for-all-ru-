@@ -1,10 +1,10 @@
 name: Daily Horoscope Bot
 
 on:
-  schedule:
-    # Запуск каждый день в 02:40 UTC (05:40 МСК, на 30 минут раньше прежнего 03:10 UTC)
-    - cron: '40 2 * * *'
-  workflow_dispatch: # Кнопка для ручного запуска в интерфейсе GitHub
+# schedule:
+  #   # Запуск отключен в пользу локального надежного запуска с ноутбука в 06:30
+  #   - cron: '40 2 * * *'
+  workflow_dispatch: # Ручной резервный запуск через интерфейс GitHub
 
 permissions:
   contents: write

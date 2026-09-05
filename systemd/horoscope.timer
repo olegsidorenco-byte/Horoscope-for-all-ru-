@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Daily Horoscope every day at 06:30
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+OnCalendar=*-*-* 06:30:00
+Persistent=true
+Unit=horoscope.service
+
+[Install]
+WantedBy=timers.target
