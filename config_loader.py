@@ -85,12 +85,18 @@ def get_config():
     # Получаем секретные ключи
     gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     telegram_token = os.environ.get("TELEGRAM_TOKEN", os.environ.get("TELEGRAM_BOT_TOKEN", "")).strip()
-    telegram_chat_id = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
+    
+    # Поддержка разделения канала и личного чата
+    telegram_channel_chat_id = (os.environ.get("TELEGRAM_CHANNEL_CHAT_ID", "").strip() or 
+                                os.environ.get("TELEGRAM_CHAT_ID", "").strip())
+    telegram_personal_chat_id = os.environ.get("TELEGRAM_PERSONAL_CHAT_ID", "").strip()
 
     return {
         "gemini_api_key": gemini_api_key,
         "telegram_token": telegram_token,
-        "telegram_chat_id": telegram_chat_id,
+        "telegram_chat_id": telegram_channel_chat_id,
+        "telegram_channel_chat_id": telegram_channel_chat_id,
+        "telegram_personal_chat_id": telegram_personal_chat_id,
         "user_profile": default_config["user_profile"],
         "bot_settings": default_config["bot_settings"]
     }
@@ -109,7 +115,7 @@ def validate_secrets(cfg=None):
         errors.append("Отсутствует GEMINI_API_KEY. Получите ключ в Google AI Studio.")
     if not cfg["telegram_token"]:
         errors.append("Отсутствует TELEGRAM_TOKEN. Получите токен у @BotFather в Telegram.")
-    if not cfg["telegram_chat_id"]:
-        errors.append("Отсутствует TELEGRAM_CHAT_ID. Узнайте свой ID через @userinfobot.")
+    if not cfg.get("telegram_channel_chat_id") and not cfg.get("telegram_personal_chat_id"):
+        errors.append("Отсутствует идентификатор чата (TELEGRAM_CHAT_ID / TELEGRAM_CHANNEL_CHAT_ID или TELEGRAM_PERSONAL_CHAT_ID).")
 
     return len(errors) == 0, errors
