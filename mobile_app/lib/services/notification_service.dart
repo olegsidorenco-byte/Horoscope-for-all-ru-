@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'storage_service.dart';
 
 class NotificationService {
@@ -114,13 +114,9 @@ class NotificationService {
   /// Управление бейджем (счетчиком непрочитанных) на иконке рабочего стола
   static Future<void> updateBadge(int count) async {
     try {
-      final isSupported = await FlutterAppBadger.isAppBadgeSupported();
+      final isSupported = await AppBadgePlus.isSupported();
       if (isSupported) {
-        if (count > 0) {
-          FlutterAppBadger.updateBadgeCount(count);
-        } else {
-          FlutterAppBadger.removeBadge();
-        }
+        await AppBadgePlus.updateBadge(count);
       }
     } catch (_) {}
   }
@@ -128,9 +124,9 @@ class NotificationService {
   /// Очистка бейджа на иконке приложения
   static Future<void> clearBadge() async {
     try {
-      final isSupported = await FlutterAppBadger.isAppBadgeSupported();
+      final isSupported = await AppBadgePlus.isSupported();
       if (isSupported) {
-        FlutterAppBadger.removeBadge();
+        await AppBadgePlus.updateBadge(0);
       }
     } catch (_) {}
   }
