@@ -111,10 +111,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _testNotification() async {
     await NotificationService.sendInstantTestNotification();
+    await NotificationService.updateBadge(1);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('🔔 Тестовое уведомление отправлено в шторку Android!'),
+          content: Text('🔔 Тестовое уведомление отправлено в шторку Android и на иконку приложения!'),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
       );
@@ -189,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.8 (Release)',
+                            'Версия 1.0.15 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],

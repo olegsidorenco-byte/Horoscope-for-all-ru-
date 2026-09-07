@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../theme/cosmic_theme.dart';
 import '../../services/storage_service.dart';
+import '../../services/notification_service.dart';
 import 'home_screen.dart';
 import 'zodiac_screen.dart';
 import 'archive_screen.dart';
@@ -43,6 +44,12 @@ class _MainNavScreenState extends State<MainNavScreen> with WidgetsBindingObserv
       setState(() {
         _hasUnread = unread;
       });
+    }
+
+    if (unread) {
+      await NotificationService.updateBadge(1);
+    } else {
+      await NotificationService.clearBadge();
     }
   }
 

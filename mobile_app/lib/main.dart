@@ -18,10 +18,9 @@ void main() async {
     ),
   );
 
-  // Инициализация сервиса утренних напоминаний и запрос разрешений Android 13+
+  // Инициализация сервиса утренних напоминаний, бейджей и разрешений Android 13/14+
   try {
     await NotificationService.initialize();
-    await NotificationService.requestPermission();
   } catch (_) {}
 
   runApp(const CosmicHoroscopeApp());

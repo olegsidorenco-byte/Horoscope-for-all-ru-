@@ -74,7 +74,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (isUnread) {
         await NotificationService.showNewForecastNotification(h.date);
+        await NotificationService.updateBadge(1);
         widget.onReadStateChanged?.call();
+      } else {
+        await NotificationService.clearBadge();
       }
     } catch (e) {
       if (mounted) {
@@ -89,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _markAsRead() async {
     if (_horoscope != null && _horoscope!.date.isNotEmpty) {
       await StorageService.setLastReadDate(_horoscope!.date);
+      await NotificationService.cancelAll();
       if (mounted) {
         setState(() {
           _isNewForecast = false;
