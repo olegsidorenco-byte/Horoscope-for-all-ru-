@@ -142,6 +142,13 @@ def main():
     # 2. Забираем возможные изменения из GitHub
     sync_git_pull()
 
+    # 2.5 Проверка обновлений натального профиля (время, дата рождения, город, фокус)
+    try:
+        from update_profile import sync_from_telegram_updates
+        sync_from_telegram_updates()
+    except Exception as e:
+        log(f"ℹ️ Проверка обновлений профиля: {e}")
+
     # 3. Проверка идемпотентности
     if not force_run and is_already_generated_today():
         log(f"✨ Гороскоп на сегодня ({today_str}) уже был успешно сгенерирован ранее. Завершение.")

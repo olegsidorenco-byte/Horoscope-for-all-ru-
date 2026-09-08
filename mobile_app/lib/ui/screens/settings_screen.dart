@@ -18,8 +18,8 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   int _cachedDays = 0;
   bool _notificationsEnabled = true;
-  int _notifHour = 8;
-  int _notifMinute = 0;
+  int _notifHour = 6;
+  int _notifMinute = 45;
   UserProfile _profile = UserProfile.defaultProfile();
 
   @override
@@ -190,7 +190,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.15 (Release)',
+                            'Версия 1.0.16 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -239,7 +239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Ежедневное напоминание о готовности свежего астрологического прогноза дня в шторку смартфона.',
+                      'Ежедневное напоминание о готовности свежего астрологического прогноза дня в шторку смартфона (по умолчанию в 06:45 сразу после утреннего расчета).',
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
                     ),
                     if (_notificationsEnabled) ...[

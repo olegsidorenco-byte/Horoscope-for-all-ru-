@@ -151,12 +151,12 @@ class StorageService {
 
   static Future<int> getNotificationHour() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_keyNotifHour) ?? 8;
+    return prefs.getInt(_keyNotifHour) ?? 6;
   }
 
   static Future<int> getNotificationMinute() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(_keyNotifMinute) ?? 0;
+    return prefs.getInt(_keyNotifMinute) ?? 45;
   }
 
   static Future<void> setNotificationTime(int hour, int minute) async {

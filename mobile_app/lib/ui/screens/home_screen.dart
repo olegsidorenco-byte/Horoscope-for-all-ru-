@@ -327,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Заголовок и приветствие
           GreetingHeader(
-            greetingText: _horoscope!.greeting,
+            greetingText: _getPersonalizedGreeting(_horoscope!.greeting),
             dateStr: _horoscope!.date,
             isLoading: _isLoading,
             onRefresh: () => _fetchLatestHoroscope(forceRefresh: true),
@@ -353,6 +353,34 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  String _getPersonalizedGreeting(String rawGreeting) {
+    if (!_userProfile.isRegistered) {
+      return rawGreeting;
+    }
+    String greeting = rawGreeting;
+
+    // Персонализация имени
+    if (_userProfile.name.trim().isNotEmpty) {
+      greeting = greeting.replaceAll(
+        RegExp(r'Доброе утро,\s*[^!]+!', caseSensitive: false),
+        'Доброе утро, ${_userProfile.name.trim()}!',
+      );
+    }
+
+    // Персонализация натальных данных в скобках (дата, время, место)
+    final dateStr = _userProfile.formattedBirthDate;
+    final timeStr = _userProfile.birthTime;
+    final cityStr = _userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity;
+    final targetStr = '($dateStr, $timeStr${cityStr.isNotEmpty ? ", $cityStr" : ""})';
+
+    greeting = greeting.replaceAll(
+      RegExp(r'\(\d{2}\.\d{2}\.\d{4},\s*\d{2}:\d{2},?\s*[^)]*\)'),
+      targetStr,
+    );
+
+    return greeting;
   }
 
   Widget _buildZodiacQuickBar() {
@@ -536,12 +564,12 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '✨ Гороскоп для: ${_userProfile.name}',
+                  '✨ Натал: ${_userProfile.name}',
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_userProfile.zodiacSign} • ${_userProfile.birthPlace} → ${_userProfile.currentCity}',
+                  '${_userProfile.zodiacSign} • ${_userProfile.formattedBirthDate} (${_userProfile.birthTime}) • ${_userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),

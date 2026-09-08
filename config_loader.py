@@ -82,6 +82,28 @@ def get_config():
         except Exception as e:
             print(f"⚠️ Предупреждение: Не удалось прочитать config.json ({e}). Используются настройки по умолчанию (общий прогноз).")
 
+    # Проверяем реестр пользователей data/users/users_registry.json на предмет более свежих данных
+    registry_file = BASE_DIR / "data" / "users" / "users_registry.json"
+    if registry_file.exists():
+        try:
+            with open(registry_file, "r", encoding="utf-8") as f:
+                reg_users = json.load(f)
+            for u in reg_users:
+                if u.get("id") == "usr_oleg_main" or u.get("name", "").lower() == default_config["user_profile"].get("name", "").lower():
+                    if u.get("birth_time"):
+                        default_config["user_profile"]["birth_time"] = u["birth_time"]
+                    if u.get("birth_date"):
+                        default_config["user_profile"]["birth_date"] = u["birth_date"]
+                    if u.get("birth_place"):
+                        default_config["user_profile"]["birth_city"] = u["birth_place"]
+                    if u.get("current_city"):
+                        default_config["user_profile"]["current_city"] = u["current_city"]
+                    if u.get("focus"):
+                        default_config["user_profile"]["focus"] = u["focus"]
+                    break
+        except Exception:
+            pass
+
     # Получаем секретные ключи
     gemini_api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     telegram_token = os.environ.get("TELEGRAM_TOKEN", os.environ.get("TELEGRAM_BOT_TOKEN", "")).strip()

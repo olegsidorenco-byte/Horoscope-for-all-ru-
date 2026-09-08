@@ -140,10 +140,10 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Запланировать ежедневное утреннее уведомление
+  /// Запланировать ежедневное утреннее уведомление (по умолчанию 06:45 — сразу после расчета в 06:30)
   static Future<void> scheduleDailyNotification({
-    int hour = 8,
-    int minute = 0,
+    int hour = 6,
+    int minute = 45,
   }) async {
     try {
       await _notificationsPlugin.cancel(101); // Отменяем предыдущее расписание
