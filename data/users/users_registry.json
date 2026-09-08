@@ -19,14 +19,14 @@
     "phone": "",
     "auth_type": "email",
     "telegram_username": "olegsidorenco",
-    "birth_date": "1978-05-23",
-    "birth_time": "00:05",
+    "birth_date": "23.05.1978",
+    "birth_time": "00:50",
     "is_time_exact": true,
     "birth_place": "Кишинев",
     "current_city": "Кишинев",
     "gender": "male",
     "focus": "бизнес, деловые переговоры, финансы и здоровье",
-    "updated_at": "2026-09-04T13:05:59.448517+00:00",
+    "updated_at": "2026-09-08T11:49:49.283531+00:00",
     "created_at": "2026-09-04T13:05:59.448517+00:00"
   }
 ]
