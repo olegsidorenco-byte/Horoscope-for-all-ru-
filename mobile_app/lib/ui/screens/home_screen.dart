@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/horoscope_model.dart';
@@ -587,9 +588,17 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           IconButton(
+            icon: const Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 18),
+            padding: const EdgeInsets.only(right: 8),
+            constraints: const BoxConstraints(),
+            tooltip: 'Telegram-бот',
+            onPressed: _showTelegramBotDialog,
+          ),
+          IconButton(
             icon: const Icon(Icons.tune_rounded, color: CosmicTheme.goldSoft, size: 18),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
+            tooltip: 'Настроить профиль',
             onPressed: () async {
               final res = await Navigator.push(
                 context,
@@ -602,6 +611,91 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
+      ),
+    );
+  }
+
+  void _showTelegramBotDialog() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF131722),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Row(
+              children: [
+                Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 22),
+                SizedBox(width: 10),
+                Text(
+                  'Доставка гороскопа в Telegram',
+                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Наш официальный Telegram-бот доставляет утренний персональный прогноз точно в 06:30 со звуком, не завися от спящего режима смартфона.',
+              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0F141F),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: const Text(
+                '1. Скопируйте имя бота: @Horoscope_SiDoReCo_bot\n2. Откройте Telegram и нажмите «Запустить» (/start)\n3. Укажите логин Telegram в анкете профиля',
+                style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Clipboard.setData(const ClipboardData(text: '@Horoscope_SiDoReCo_bot'));
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('📋 Имя бота @Horoscope_SiDoReCo_bot скопировано!'),
+                      backgroundColor: Color(0xFF2AABEE),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.copy_rounded, size: 18, color: Colors.black),
+                label: const Text(
+                  'Скопировать @Horoscope_SiDoReCo_bot',
+                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2AABEE),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

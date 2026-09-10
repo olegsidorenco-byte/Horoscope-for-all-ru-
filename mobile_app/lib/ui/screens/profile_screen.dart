@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../../models/user_profile.dart';
 import '../../services/storage_service.dart';
@@ -19,6 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   late TextEditingController _nameController;
   late TextEditingController _emailController;
+  late TextEditingController _telegramController;
   late TextEditingController _birthPlaceController;
   late TextEditingController _currentCityController;
   late TextEditingController _focusController;
@@ -37,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     _nameController = TextEditingController(text: p.name);
     _emailController = TextEditingController(text: p.email);
+    _telegramController = TextEditingController(text: p.telegramUsername);
     _birthPlaceController = TextEditingController(text: p.birthPlace);
     _currentCityController = TextEditingController(text: p.currentCity);
     _focusController = TextEditingController(text: p.focus);
@@ -63,6 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _telegramController.dispose();
     _birthPlaceController.dispose();
     _currentCityController.dispose();
     _focusController.dispose();
@@ -80,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       email: _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : p.email,
       phone: p.phone,
       authType: p.authType,
-      telegramUsername: p.telegramUsername,
+      telegramUsername: _telegramController.text.replaceAll('@', '').trim(),
       passwordHash: p.passwordHash,
       birthDate: _selectedDate,
       birthTime: timeStr,
@@ -404,6 +408,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
+                // 2.1 Telegram @username
+                const Text(
+                  'Ваш Telegram (для доставки в бот)',
+                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Укажите ваш логин Telegram для синхронизации и персональной доставки',
+                  style: TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
+                ),
+                const SizedBox(height: 6),
+                TextFormField(
+                  controller: _telegramController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'например: oleg_sidorenco',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    prefixIcon: const Icon(Icons.send_rounded, color: Color(0xFF2AABEE)),
+                    filled: true,
+                    fillColor: const Color(0xFF1E2235),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
                 // 3. Дата и Время рождения
                 Row(
                   children: [
@@ -701,7 +730,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+
+                // Блок Telegram-бота
+                _buildTelegramBotCard(),
+
+                const SizedBox(height: 24),
 
                 // Кнопка сохранения
                 SizedBox(
@@ -743,6 +777,178 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTelegramBotCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            const Color(0xFF1B2A44).withOpacity(0.95),
+            const Color(0xFF131722).withOpacity(0.95),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF2AABEE).withOpacity(0.4),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2AABEE).withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2AABEE).withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.send_rounded,
+                  color: Color(0xFF2AABEE),
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Персональный Telegram-бот',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      '100% надежная утренняя доставка в 06:30',
+                      style: TextStyle(
+                        color: Color(0xFF2AABEE),
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Если на смартфоне блокируются уведомления из-за спящего режима или ограничений батареи, подключите Telegram-бота. Сообщения приходят точно в 06:30 утра со звуком и всплывающим окном.',
+            style: TextStyle(
+              color: CosmicTheme.textSecondary,
+              fontSize: 12.5,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F141F),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  '📋 Как подключить за 1 минуту:',
+                  style: TextStyle(
+                    color: CosmicTheme.goldAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildInstructionStep('1', 'Скопируйте имя бота: @Horoscope_SiDoReCo_bot'),
+                _buildInstructionStep('2', 'Откройте Telegram, найдите бота и нажмите «Запустить» (/start)'),
+                _buildInstructionStep('3', 'Укажите ваш логин Telegram в поле выше и нажмите «Сохранить»'),
+                _buildInstructionStep('4', 'В боте можно быстро менять время рождения командой /set_time'),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 44,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Clipboard.setData(const ClipboardData(text: '@Horoscope_SiDoReCo_bot'));
+                HapticFeedback.lightImpact();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('📋 Имя бота @Horoscope_SiDoReCo_bot скопировано в буфер!'),
+                    backgroundColor: Color(0xFF2AABEE),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFF2AABEE)),
+              label: const Text(
+                'Скопировать @Horoscope_SiDoReCo_bot',
+                style: TextStyle(
+                  color: Color(0xFF2AABEE),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Color(0xFF2AABEE)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInstructionStep(String number, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 18,
+            height: 18,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2AABEE),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              number,
+              style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.3),
+            ),
+          ),
+        ],
       ),
     );
   }

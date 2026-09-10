@@ -8,19 +8,40 @@ class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const String channelId = 'cosmic_horoscope_daily';
+  static const String channelId = 'cosmic_horoscope_daily_v2';
   static const String channelName = 'Ежедневный Астро Гороскоп';
   static const String channelDescription =
       'Утренние напоминания о свежем астрологическом прогнозе дня';
 
-  /// Определение правильной временной зоны на основе текущего смещения устройства
+  /// Определение правильной временной зоны строго в соответствии со смещением часов смартфона
   static tz.Location _resolveLocalLocation() {
     try {
-      final deviceOffsetMs = DateTime.now().timeZoneOffset.inMilliseconds;
-      for (final location in tz.timeZoneDatabase.locations.values) {
+      final offset = DateTime.now().timeZoneOffset;
+      final offsetHours = offset.inHours;
+
+      // Прямое сопоставление основных регионов
+      if (offsetHours == 3) {
+        return tz.getLocation('Europe/Moscow');
+      } else if (offsetHours == 2) {
+        return tz.getLocation('Europe/Chisinau');
+      } else if (offsetHours == 4) {
+        return tz.getLocation('Asia/Dubai');
+      } else if (offsetHours == 5) {
+        return tz.getLocation('Asia/Tashkent');
+      } else if (offsetHours == 6) {
+        return tz.getLocation('Asia/Almaty');
+      } else if (offsetHours == 1) {
+        return tz.getLocation('Europe/Berlin');
+      } else if (offsetHours == 0) {
+        return tz.getLocation('UTC');
+      }
+
+      // Точный поиск среди всех локаций по смещению в миллисекундах
+      final offsetMs = offset.inMilliseconds;
+      for (final loc in tz.timeZoneDatabase.locations.values) {
         try {
-          if (location.currentTimeZone.offset == deviceOffsetMs) {
-            return location;
+          if (loc.currentTimeZone.offset == offsetMs) {
+            return loc;
           }
         } catch (_) {}
       }
@@ -52,7 +73,7 @@ class NotificationService {
       await _notificationsPlugin.initialize(initSettings);
     } catch (_) {}
 
-    // Создаем канал уведомлений с максимальным приоритетом, звуком и бейджем на иконке
+    // Создаем канал уведомлений с наивысшим приоритетом, звуком и бейджем на иконке
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
       channelId,
       channelName,
@@ -60,7 +81,7 @@ class NotificationService {
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
-      showBadge: true, // Включает бейдж/точку на иконке приложения на рабочем столе
+      showBadge: true,
     );
 
     try {
@@ -134,6 +155,9 @@ class NotificationService {
   /// Снятие активных уведомлений из шторки и очистка бейджа на иконке
   static Future<void> cancelAll() async {
     try {
+      await _notificationsPlugin.cancel(101);
+      await _notificationsPlugin.cancel(102);
+      await _notificationsPlugin.cancel(103);
       await _notificationsPlugin.cancel(202);
       await _notificationsPlugin.cancel(999);
       await clearBadge();
@@ -146,7 +170,9 @@ class NotificationService {
     int minute = 45,
   }) async {
     try {
-      await _notificationsPlugin.cancel(101); // Отменяем предыдущее расписание
+      await _notificationsPlugin.cancel(101);
+      await _notificationsPlugin.cancel(102);
+      await _notificationsPlugin.cancel(103);
 
       final now = tz.TZDateTime.now(tz.local);
       var scheduledDate = tz.TZDateTime(
@@ -167,10 +193,12 @@ class NotificationService {
         channelName,
         channelDescription: channelDescription,
         importance: Importance.max,
-        priority: Priority.high,
+        priority: Priority.max,
         playSound: true,
         enableVibration: true,
         channelShowBadge: true,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.reminder,
         number: 1,
         icon: '@mipmap/ic_launcher',
         styleInformation: BigTextStyleInformation(
@@ -181,6 +209,7 @@ class NotificationService {
         ),
       );
 
+      // Основной утренний будильник (101)
       try {
         await _notificationsPlugin.zonedSchedule(
           101,
@@ -206,6 +235,32 @@ class NotificationService {
           matchDateTimeComponents: DateTimeComponents.time,
         );
       }
+
+      // Резервная утренняя точка (102) на 07:30 (если устройство спало или было отключено в 06:45)
+      var backupDate = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        7,
+        30,
+      );
+      if (backupDate.isBefore(now)) {
+        backupDate = backupDate.add(const Duration(days: 1));
+      }
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          102,
+          '🪐 Астро Гороскоп на сегодня ждет вас!',
+          'Свежий персональный прогноз дня уже доступен в приложении ✨',
+          backupDate,
+          const NotificationDetails(android: androidDetails),
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      } catch (_) {}
     } catch (_) {}
   }
 
@@ -225,10 +280,12 @@ class NotificationService {
       channelName,
       channelDescription: channelDescription,
       importance: Importance.max,
-      priority: Priority.high,
+      priority: Priority.max,
       playSound: true,
       enableVibration: true,
       channelShowBadge: true,
+      visibility: NotificationVisibility.public,
+      category: AndroidNotificationCategory.reminder,
       number: 1,
       icon: '@mipmap/ic_launcher',
       styleInformation: BigTextStyleInformation(
@@ -255,6 +312,8 @@ class NotificationService {
   static Future<void> cancelDailyNotification() async {
     try {
       await _notificationsPlugin.cancel(101);
+      await _notificationsPlugin.cancel(102);
+      await _notificationsPlugin.cancel(103);
     } catch (_) {}
   }
 
@@ -267,10 +326,12 @@ class NotificationService {
       channelName,
       channelDescription: channelDescription,
       importance: Importance.max,
-      priority: Priority.high,
+      priority: Priority.max,
       playSound: true,
       enableVibration: true,
       channelShowBadge: true,
+      visibility: NotificationVisibility.public,
+      category: AndroidNotificationCategory.reminder,
       number: 1,
       icon: '@mipmap/ic_launcher',
       styleInformation: BigTextStyleInformation(

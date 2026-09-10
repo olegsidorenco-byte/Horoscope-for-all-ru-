@@ -111,13 +111,56 @@ def sync_from_telegram_updates() -> bool:
         updated = False
         current_profile = load_config_profile()
 
+        SUBSCRIBERS_FILE = DATA_USERS_DIR / "telegram_subscribers.json"
+        subscribers = set()
+        if SUBSCRIBERS_FILE.exists():
+            try:
+                with open(SUBSCRIBERS_FILE, "r", encoding="utf-8") as sf:
+                    subscribers = set(json.load(sf))
+            except Exception:
+                subscribers = set()
+
         for u in updates:
             msg = u.get("message", {})
             text = msg.get("text", "").strip()
             from_id = str(msg.get("from", {}).get("id", ""))
+            from_name = msg.get("from", {}).get("first_name", "Пользователь")
             personal_id = str(cfg.get("telegram_personal_chat_id", ""))
 
-            # Принимаем команды от автора (personal chat id)
+            # Обработка команды /start для всех пользователей
+            if text == "/start" or text.startswith("/start"):
+                if from_id not in subscribers:
+                    subscribers.add(from_id)
+                    try:
+                        DATA_USERS_DIR.mkdir(parents=True, exist_ok=True)
+                        with open(SUBSCRIBERS_FILE, "w", encoding="utf-8") as sf:
+                            json.dump(list(subscribers), sf, ensure_ascii=False, indent=2)
+                    except Exception as se:
+                        print(f"⚠️ Ошибка сохранения подписчиков: {se}")
+
+                if token and from_id:
+                    welcome_text = (
+                        f"👋 Здравствуйте, {from_name}!\n\n"
+                        f"Добро пожаловать в официальный бот сервиса <b>«Астро Гороскоп»</b>! 🪐\n\n"
+                        f"Ваш Telegram Chat ID: <code>{from_id}</code>\n"
+                        f"Бот успешно подключен! Каждое утро ровно в <b>06:30</b> мы доставляем персональный "
+                        f"астрологический расчет дня прямо в этот диалог — без системных задержек Android.\n\n"
+                        f"💡 <b>Быстрые команды:</b>\n"
+                        f"• <code>/set_time ЧЧ:ММ</code> — скорректировать время рождения (например, <code>/set_time 00:50</code>)\n"
+                        f"• <code>/profile ДД.ММ.ГГГГ ЧЧ:ММ Город</code> — обновить полные данные анкеты\n\n"
+                        f"Укажите ваш логин Telegram в мобильном приложении для полной синхронизации профиля!"
+                    )
+                    try:
+                        requests.post(
+                            f"https://api.telegram.org/bot{token}/sendMessage",
+                            json={"chat_id": from_id, "text": welcome_text, "parse_mode": "HTML"},
+                            timeout=10
+                        )
+                    except Exception as we:
+                        print(f"⚠️ Ошибка отправки /start: {we}")
+                continue
+
+            # Принимаем команды модификации данных только от авторизованного пользователя
             if personal_id and from_id != personal_id:
                 continue
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/auth_service.dart';
@@ -190,7 +191,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.16 (Release)',
+                            'Версия 1.0.17 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -285,7 +286,146 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: const Icon(Icons.send_rounded, size: 18),
                         label: const Text('Проверить уведомление сейчас'),
                       ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF161C2C),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.info_outline_rounded, color: Colors.amberAccent, size: 16),
+                                SizedBox(width: 6),
+                                Text(
+                                  'Если уведомления в телефоне не приходят:',
+                                  style: TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              '1. В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите «Без ограничений».\n2. На смартфонах Xiaomi/Huawei включите «Автозапуск».\n3. Включите разрешения на будильники и всплывающие окна.\n4. Для 100% гарантии подключите Telegram-бота ниже.',
+                              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Карточка Telegram-бота
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF1B2A44).withOpacity(0.95),
+                      const Color(0xFF131722).withOpacity(0.95),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFF2AABEE).withOpacity(0.4), width: 1.2),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2AABEE).withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Доставка в Telegram-бот',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Мгновенные утренние пуш-сообщения',
+                                style: TextStyle(color: Color(0xFF2AABEE), fontSize: 12, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'В Telegram сообщения доставляются со 100% гарантией прямо на экран блокировки в 06:30 утра, даже если смартфон находится в глубоком сне.',
+                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F141F),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Инструкция по подключению:',
+                            style: TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12.5),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            '1. Скопируйте имя бота: @Horoscope_SiDoReCo_bot\n2. Откройте Telegram и нажмите «Запустить» (/start)\n3. Укажите логин Telegram в профиле приложения\n4. Бот присылает персональный прогноз каждое утро в 06:30',
+                            style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(const ClipboardData(text: '@Horoscope_SiDoReCo_bot'));
+                          HapticFeedback.lightImpact();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('📋 Имя бота @Horoscope_SiDoReCo_bot скопировано!'),
+                              backgroundColor: Color(0xFF2AABEE),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFF2AABEE)),
+                        label: const Text(
+                          'Скопировать @Horoscope_SiDoReCo_bot',
+                          style: TextStyle(color: Color(0xFF2AABEE), fontWeight: FontWeight.bold),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF2AABEE)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
