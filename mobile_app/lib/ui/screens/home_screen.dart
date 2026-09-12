@@ -74,7 +74,11 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       if (isUnread) {
-        await NotificationService.showNewForecastNotification(h.date);
+        final lastNotified = await StorageService.getLastNotifiedDate();
+        if (lastNotified != h.date) {
+          await NotificationService.showNewForecastNotification(h.date);
+          await StorageService.setLastNotifiedDate(h.date);
+        }
         await NotificationService.updateBadge(1);
         widget.onReadStateChanged?.call();
       } else {

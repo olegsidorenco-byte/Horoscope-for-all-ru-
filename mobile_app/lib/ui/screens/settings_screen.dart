@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/background_sync_service.dart';
 import '../../services/auth_service.dart';
 import '../../models/user_profile.dart';
 import 'profile_screen.dart';
@@ -19,6 +20,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   int _cachedDays = 0;
   bool _notificationsEnabled = true;
+  bool _backgroundServiceActive = true;
   int _notifHour = 6;
   int _notifMinute = 45;
   UserProfile _profile = UserProfile.defaultProfile();
@@ -35,15 +37,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final hour = await StorageService.getNotificationHour();
     final minute = await StorageService.getNotificationMinute();
     final profile = await StorageService.loadProfile();
+    final bgEnabled = await BackgroundSyncService.isServiceEnabled();
 
     if (mounted) {
       setState(() {
         _cachedDays = count;
         _notificationsEnabled = notifEnabled;
+        _backgroundServiceActive = bgEnabled;
         _notifHour = hour;
         _notifMinute = minute;
         _profile = profile;
       });
+    }
+  }
+
+  Future<void> _toggleBackgroundService(bool value) async {
+    setState(() {
+      _backgroundServiceActive = value;
+    });
+    await BackgroundSyncService.toggleService(value);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            value
+                ? '🪐 Фоновая служба запущена: приложение активно в памяти и мгновенно уведомит утром!'
+                : '⏸ Фоновая служба остановлена',
+          ),
+          backgroundColor: CosmicTheme.backgroundCard,
+        ),
+      );
     }
   }
 
@@ -191,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.17 (Release)',
+                            'Версия 1.0.18 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -204,6 +227,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Блок Личного Профиля пользователя
               _buildProfileSection(),
+              const SizedBox(height: 20),
+
+              // Блок фоновой службы («Висеть в фоне»)
+              _buildBackgroundServiceSection(),
               const SizedBox(height: 20),
 
               // Блок утренних уведомлений
@@ -686,6 +713,128 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackgroundServiceSection() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: CosmicTheme.backgroundCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: _backgroundServiceActive ? CosmicTheme.cyanAccent.withOpacity(0.4) : Colors.white10,
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: CosmicTheme.cyanAccent.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.all_inclusive_rounded, color: CosmicTheme.cyanAccent, size: 22),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Фоновый мониторинг («В фоне»)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: CosmicTheme.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Android Foreground Service',
+                      style: TextStyle(color: CosmicTheme.cyanAccent, fontSize: 12, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _backgroundServiceActive,
+                activeColor: CosmicTheme.cyanAccent,
+                onChanged: _toggleBackgroundService,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Поддерживает приложение активным в оперативной памяти телефона в фоновом режиме. Каждые 15 минут проверяет появление утреннего прогноза и сразу присылает громкое оповещение, даже когда экран заблокирован или приложение закрыто.',
+            style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+          ),
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: CosmicTheme.backgroundDeep,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _backgroundServiceActive ? Icons.check_circle_rounded : Icons.pause_circle_outline_rounded,
+                  color: _backgroundServiceActive ? Colors.greenAccent : Colors.grey,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _backgroundServiceActive
+                        ? 'Статус: Активно в фоне (постоянная готовность)'
+                        : 'Статус: Отключено (проверка только при открытии)',
+                    style: TextStyle(
+                      color: _backgroundServiceActive ? Colors.greenAccent : CosmicTheme.textSecondary,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF161C2C),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: CosmicTheme.goldAccent.withOpacity(0.2)),
+            ),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.info_outline_rounded, color: CosmicTheme.goldSoft, size: 16),
+                    SizedBox(width: 6),
+                    Text(
+                      'Как это устроено:',
+                      style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 6),
+                Text(
+                  '• Служба автоматически стартует при включении телефона (BootReceiver).\n• В шторке отображается тихий значок службы — благодаря этому Android не выгружает приложение из памяти.\n• При выходе утреннего прогноза мгновенно срабатывает громкое оповещение с вибрацией.',
+                  style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

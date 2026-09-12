@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'ui/theme/cosmic_theme.dart';
 import 'ui/screens/main_nav_screen.dart';
 import 'services/notification_service.dart';
+import 'services/background_sync_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +22,11 @@ void main() async {
   // Инициализация сервиса утренних напоминаний, бейджей и разрешений Android 13/14+
   try {
     await NotificationService.initialize();
+  } catch (_) {}
+
+  // Запуск службы фонового мониторинга для гарантированной доставки утреннего прогноза
+  try {
+    await BackgroundSyncService.initService();
   } catch (_) {}
 
   runApp(const CosmicHoroscopeApp());
