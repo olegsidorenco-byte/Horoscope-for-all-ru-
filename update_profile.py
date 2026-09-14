@@ -54,7 +54,7 @@ def update_registry(profile: dict):
     for u in users:
         # Ищем профиль Олега или по id
         if u.get("id") == "usr_oleg_main" or u.get("name", "").lower() == profile.get("name", "").lower():
-            u["birth_time"] = profile.get("birth_time", u.get("birth_time", "00:05"))
+            u["birth_time"] = profile.get("birth_time", u.get("birth_time", "00:50"))
             u["birth_date"] = profile.get("birth_date", u.get("birth_date", "1978-05-23"))
             u["birth_place"] = profile.get("birth_city", profile.get("birth_place", u.get("birth_place", "Кишинев")))
             u["current_city"] = profile.get("current_city", u.get("current_city", "Кишинев"))
@@ -73,7 +73,7 @@ def update_registry(profile: dict):
             "auth_type": "email",
             "telegram_username": "olegsidorenco",
             "birth_date": profile.get("birth_date", "1978-05-23"),
-            "birth_time": profile.get("birth_time", "00:05"),
+            "birth_time": profile.get("birth_time", "00:50"),
             "is_time_exact": True,
             "birth_place": profile.get("birth_city", "Кишинев"),
             "current_city": profile.get("current_city", "Кишинев"),

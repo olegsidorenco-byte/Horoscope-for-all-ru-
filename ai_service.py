@@ -167,14 +167,262 @@ def get_astronomical_context(target_date_str: str) -> dict:
 
 
 CITY_COORDS = {
+    # Молдова
     'кишинев': (47.0105, 28.8638, 'Europe/Chisinau'),
     'chisinau': (47.0105, 28.8638, 'Europe/Chisinau'),
+    'kishinev': (47.0105, 28.8638, 'Europe/Chisinau'),
+    'бельцы': (47.7617, 27.9289, 'Europe/Chisinau'),
+    'тирасполь': (46.8403, 29.6433, 'Europe/Chisinau'),
+    'бендеры': (46.8319, 29.4778, 'Europe/Chisinau'),
+    'рыбница': (47.7667, 29.0000, 'Europe/Chisinau'),
+    'кагул': (45.9075, 28.1944, 'Europe/Chisinau'),
+    'унгены': (47.2056, 27.7978, 'Europe/Chisinau'),
+    'орхей': (47.3856, 28.8239, 'Europe/Chisinau'),
+    'комрат': (46.2958, 28.6569, 'Europe/Chisinau'),
+
+    # Россия
     'москва': (55.7558, 37.6173, 'Europe/Moscow'),
+    'moscow': (55.7558, 37.6173, 'Europe/Moscow'),
     'санкт-петербург': (59.9343, 30.3351, 'Europe/Moscow'),
+    'петербург': (59.9343, 30.3351, 'Europe/Moscow'),
+    'питер': (59.9343, 30.3351, 'Europe/Moscow'),
+    'новосибирск': (55.0084, 82.9357, 'Asia/Novosibirsk'),
+    'екатеринбург': (56.8389, 60.6057, 'Asia/Yekaterinburg'),
+    'казань': (55.8304, 49.0661, 'Europe/Moscow'),
+    'нижний новгород': (56.3269, 44.0059, 'Europe/Moscow'),
+    'челябинск': (55.1644, 61.4368, 'Asia/Yekaterinburg'),
+    'красноярск': (56.0153, 92.8932, 'Asia/Krasnoyarsk'),
+    'самара': (53.1959, 50.1002, 'Europe/Moscow'),
+    'уфа': (54.7388, 55.9721, 'Asia/Yekaterinburg'),
+    'ростов-на-дону': (47.2357, 39.7015, 'Europe/Moscow'),
+    'ростов': (47.2357, 39.7015, 'Europe/Moscow'),
+    'омск': (54.9885, 73.3242, 'Asia/Omsk'),
+    'краснодар': (45.0355, 38.9753, 'Europe/Moscow'),
+    'воронеж': (51.6608, 39.2003, 'Europe/Moscow'),
+    'пермь': (58.0105, 56.2502, 'Asia/Yekaterinburg'),
+    'волгоград': (48.7080, 44.5133, 'Europe/Moscow'),
+    'саратов': (51.5336, 46.0343, 'Europe/Moscow'),
+    'тюмень': (57.1530, 65.5343, 'Asia/Yekaterinburg'),
+    'тольятти': (53.5303, 49.3461, 'Europe/Moscow'),
+    'барнаул': (53.3548, 83.7698, 'Asia/Novosibirsk'),
+    'ижевск': (56.8528, 53.2115, 'Europe/Moscow'),
+    'махачкала': (42.9849, 47.5047, 'Europe/Moscow'),
+    'хабаровск': (48.4814, 135.0721, 'Asia/Vladivostok'),
+    'ульяновск': (54.3142, 48.4031, 'Europe/Moscow'),
+    'иркутск': (52.2864, 104.3050, 'Asia/Irkutsk'),
+    'владивосток': (43.1155, 131.8855, 'Asia/Vladivostok'),
+    'ярославль': (57.6261, 39.8845, 'Europe/Moscow'),
+    'севастополь': (44.6167, 33.5254, 'Europe/Moscow'),
+    'симферополь': (44.9521, 34.1024, 'Europe/Moscow'),
+    'ставрополь': (45.0428, 41.9734, 'Europe/Moscow'),
+    'томск': (56.4977, 84.9744, 'Asia/Novosibirsk'),
+    'кемерово': (55.3547, 86.0872, 'Asia/Novosibirsk'),
+    'новокузнецк': (53.7596, 87.1216, 'Asia/Novosibirsk'),
+    'рязань': (54.6295, 39.7425, 'Europe/Moscow'),
+    'набережные челны': (55.7436, 52.4089, 'Europe/Moscow'),
+    'пенза': (53.2007, 45.0046, 'Europe/Moscow'),
+    'киров': (58.6035, 49.6679, 'Europe/Moscow'),
+    'липецк': (52.6103, 39.5947, 'Europe/Moscow'),
+    'чебоксары': (56.1439, 47.2489, 'Europe/Moscow'),
+    'калининград': (54.7104, 20.4522, 'Europe/Kaliningrad'),
+    'тула': (54.1961, 37.6182, 'Europe/Moscow'),
+    'курск': (51.7304, 36.1926, 'Europe/Moscow'),
+    'сочи': (43.6028, 39.7342, 'Europe/Moscow'),
+    'тверь': (56.8587, 35.9176, 'Europe/Moscow'),
+    'магнитогорск': (53.4186, 58.9732, 'Asia/Yekaterinburg'),
+    'иваново': (56.9972, 40.9714, 'Europe/Moscow'),
+    'брянск': (53.2436, 34.3634, 'Europe/Moscow'),
+    'белгород': (50.5954, 36.5873, 'Europe/Moscow'),
+    'сургут': (61.2540, 73.3962, 'Asia/Yekaterinburg'),
+    'владимир': (56.1290, 40.4066, 'Europe/Moscow'),
+    'чита': (52.0340, 113.4994, 'Asia/Irkutsk'),
+    'архангельск': (64.5401, 40.5433, 'Europe/Moscow'),
+    'калуга': (54.5138, 36.2612, 'Europe/Moscow'),
+    'смоленск': (54.7826, 32.0453, 'Europe/Moscow'),
+    'курган': (55.4410, 65.3411, 'Asia/Yekaterinburg'),
+    'вологда': (59.2205, 39.8915, 'Europe/Moscow'),
+    'орел': (52.9651, 36.0785, 'Europe/Moscow'),
+    'владикавказ': (43.0367, 44.6678, 'Europe/Moscow'),
+    'мурманск': (68.9707, 33.0750, 'Europe/Moscow'),
+    'тамбов': (52.7212, 41.4523, 'Europe/Moscow'),
+    'петрозаводск': (61.7850, 34.3469, 'Europe/Moscow'),
+    'кострома': (57.7679, 40.9269, 'Europe/Moscow'),
+    'новороссийск': (44.7239, 37.7689, 'Europe/Moscow'),
+    'йошкар-ола': (56.6388, 47.8868, 'Europe/Moscow'),
+    'таганрог': (47.2362, 38.8969, 'Europe/Moscow'),
+    'нальчик': (43.4853, 43.6071, 'Europe/Moscow'),
+    'благовещенск': (50.2796, 127.5405, 'Asia/Irkutsk'),
+    'псков': (57.8193, 28.3318, 'Europe/Moscow'),
+    'южно-сахалинск': (46.9591, 142.7381, 'Asia/Vladivostok'),
+    'петропавловск-камчатский': (53.0370, 158.6559, 'Asia/Kamchatka'),
+    'норильск': (69.3535, 88.2027, 'Asia/Krasnoyarsk'),
+    'якутск': (62.0355, 129.6755, 'Asia/Irkutsk'),
+    'грозный': (43.3179, 45.6982, 'Europe/Moscow'),
+
+    # Украина
     'киев': (50.4501, 30.5234, 'Europe/Kyiv'),
-    'минск': (53.9006, 27.5590, 'Europe/Minsk'),
+    'kyiv': (50.4501, 30.5234, 'Europe/Kyiv'),
+    'kiev': (50.4501, 30.5234, 'Europe/Kyiv'),
+    'харьков': (49.9935, 36.2304, 'Europe/Kyiv'),
     'одесса': (46.4825, 30.7233, 'Europe/Kyiv'),
+    'днепр': (48.4647, 35.0462, 'Europe/Kyiv'),
+    'донецк': (48.0159, 37.8029, 'Europe/Kyiv'),
+    'запорожье': (47.8388, 35.1396, 'Europe/Kyiv'),
+    'львов': (49.8397, 24.0297, 'Europe/Kyiv'),
+    'кривой рог': (47.9105, 33.3918, 'Europe/Kyiv'),
+    'николаев': (46.9750, 31.9946, 'Europe/Kyiv'),
+    'мариуполь': (47.0958, 37.5494, 'Europe/Kyiv'),
+    'луганск': (48.5740, 39.3078, 'Europe/Kyiv'),
+    'винница': (49.2331, 28.4682, 'Europe/Kyiv'),
+    'херсон': (46.6354, 32.6169, 'Europe/Kyiv'),
+    'полтава': (49.5883, 34.5514, 'Europe/Kyiv'),
+    'чернигов': (51.4982, 31.2893, 'Europe/Kyiv'),
+    'черкассы': (49.4444, 32.0598, 'Europe/Kyiv'),
+    'житомир': (50.2547, 28.6587, 'Europe/Kyiv'),
+    'сумы': (50.9077, 34.7981, 'Europe/Kyiv'),
+    'хмельницкий': (49.4230, 26.9871, 'Europe/Kyiv'),
+    'черновцы': (48.2917, 25.9352, 'Europe/Kyiv'),
+    'ровно': (50.6199, 26.2516, 'Europe/Kyiv'),
+    'ивано-франковск': (48.9226, 24.7111, 'Europe/Kyiv'),
+    'тернополь': (49.5535, 25.5948, 'Europe/Kyiv'),
+    'луцк': (50.7472, 25.3254, 'Europe/Kyiv'),
+    'ужгород': (48.6208, 22.2879, 'Europe/Kyiv'),
+
+    # Беларусь
+    'минск': (53.9006, 27.5590, 'Europe/Minsk'),
+    'minsk': (53.9006, 27.5590, 'Europe/Minsk'),
+    'гомель': (52.4345, 30.9754, 'Europe/Minsk'),
+    'могилев': (53.8981, 30.3325, 'Europe/Minsk'),
+    'витебск': (55.1904, 30.2049, 'Europe/Minsk'),
+    'гродно': (53.6884, 23.8258, 'Europe/Minsk'),
+    'брест': (52.0976, 23.7341, 'Europe/Minsk'),
+    'бобруйск': (53.1384, 29.2214, 'Europe/Minsk'),
+    'барановичи': (53.1327, 26.0139, 'Europe/Minsk'),
+
+    # Казахстан
+    'алматы': (43.2389, 76.8897, 'Asia/Almaty'),
+    'almaty': (43.2389, 76.8897, 'Asia/Almaty'),
+    'астана': (51.1694, 71.4491, 'Asia/Almaty'),
+    'astana': (51.1694, 71.4491, 'Asia/Almaty'),
+    'нур-султан': (51.1694, 71.4491, 'Asia/Almaty'),
+    'шымкент': (42.3417, 69.5901, 'Asia/Almaty'),
+    'караганда': (49.8029, 73.1025, 'Asia/Almaty'),
+    'актобе': (50.2839, 57.1670, 'Asia/Almaty'),
+    'тараз': (42.9000, 71.3667, 'Asia/Almaty'),
+    'павлодар': (52.3000, 76.9500, 'Asia/Almaty'),
+    'усть-каменогорск': (49.9500, 82.6167, 'Asia/Almaty'),
+    'семей': (50.4111, 80.2275, 'Asia/Almaty'),
+    'атырау': (47.1167, 51.8833, 'Asia/Almaty'),
+    'костанай': (53.2144, 63.6246, 'Asia/Almaty'),
+    'кызылорда': (44.8528, 65.5092, 'Asia/Almaty'),
+    'уральск': (51.2333, 51.3667, 'Asia/Almaty'),
+    'петропавловск': (54.8753, 69.1628, 'Asia/Almaty'),
+    'актау': (43.6500, 51.1667, 'Asia/Almaty'),
+
+    # Узбекистан
+    'ташкент': (41.2995, 69.2401, 'Asia/Tashkent'),
+    'tashkent': (41.2995, 69.2401, 'Asia/Tashkent'),
+    'самарканд': (39.6270, 66.9750, 'Asia/Samarkand'),
+    'бухара': (39.7747, 64.4286, 'Asia/Samarkand'),
+    'андижан': (40.7821, 72.3442, 'Asia/Tashkent'),
+    'наманган': (40.9983, 71.6726, 'Asia/Tashkent'),
+    'фергана': (40.3842, 71.7843, 'Asia/Tashkent'),
+
+    # Кавказ и Закавказье
+    'баку': (40.4093, 49.8671, 'Asia/Baku'),
+    'baku': (40.4093, 49.8671, 'Asia/Baku'),
+    'ереван': (40.1792, 44.4991, 'Asia/Yerevan'),
+    'yerevan': (40.1792, 44.4991, 'Asia/Yerevan'),
+    'тбилиси': (41.7151, 44.8271, 'Asia/Tbilisi'),
+    'tbilisi': (41.7151, 44.8271, 'Asia/Tbilisi'),
+    'батуми': (41.6168, 41.6367, 'Asia/Tbilisi'),
+    'кутаиси': (42.2679, 42.6946, 'Asia/Tbilisi'),
+
+    # Центральная Азия
+    'бишкек': (42.8746, 74.5698, 'Asia/Bishkek'),
+    'bishkek': (42.8746, 74.5698, 'Asia/Bishkek'),
+    'ош': (40.5140, 72.8161, 'Asia/Bishkek'),
+    'душанбе': (38.5598, 68.7870, 'Asia/Dushanbe'),
+    'dushanbe': (38.5598, 68.7870, 'Asia/Dushanbe'),
+    'ашхабад': (37.9601, 58.3261, 'Asia/Ashgabat'),
+
+    # Европа и Мир
+    'лондон': (51.5074, -0.1278, 'Europe/London'),
+    'london': (51.5074, -0.1278, 'Europe/London'),
+    'париж': (48.8566, 2.3522, 'Europe/Paris'),
+    'paris': (48.8566, 2.3522, 'Europe/Paris'),
+    'берлин': (52.5200, 13.4050, 'Europe/Berlin'),
+    'berlin': (52.5200, 13.4050, 'Europe/Berlin'),
+    'рим': (41.9028, 12.4964, 'Europe/Rome'),
+    'rome': (41.9028, 12.4964, 'Europe/Rome'),
+    'мадрид': (40.4168, -3.7038, 'Europe/Madrid'),
+    'madrid': (40.4168, -3.7038, 'Europe/Madrid'),
+    'варшава': (52.2297, 21.0122, 'Europe/Warsaw'),
+    'warsaw': (52.2297, 21.0122, 'Europe/Warsaw'),
+    'прага': (50.0755, 14.4378, 'Europe/Prague'),
+    'prague': (50.0755, 14.4378, 'Europe/Prague'),
+    'вена': (48.2082, 16.3738, 'Europe/Vienna'),
+    'vienna': (48.2082, 16.3738, 'Europe/Vienna'),
+    'будапешт': (47.4979, 19.0402, 'Europe/Budapest'),
+    'budapest': (47.4979, 19.0402, 'Europe/Budapest'),
+    'бухарест': (44.4268, 26.1025, 'Europe/Bucharest'),
+    'bucharest': (44.4268, 26.1025, 'Europe/Bucharest'),
+    'софия': (42.6977, 23.3219, 'Europe/Sofia'),
+    'белград': (44.7866, 20.4489, 'Europe/Belgrade'),
+    'афины': (37.9838, 23.7275, 'Europe/Athens'),
+    'вильнюс': (54.6872, 25.2797, 'Europe/Vilnius'),
+    'рига': (56.9496, 24.1052, 'Europe/Riga'),
+    'таллин': (59.4370, 24.7535, 'Europe/Tallinn'),
+    'хельсинки': (60.1699, 24.9384, 'Europe/Helsinki'),
+    'стокгольм': (59.3293, 18.0686, 'Europe/Stockholm'),
+    'осло': (59.9139, 10.7522, 'Europe/Oslo'),
+    'копенгаген': (55.6761, 12.5683, 'Europe/Copenhagen'),
+    'амстердам': (52.3676, 4.9041, 'Europe/Amsterdam'),
+    'брюссель': (50.8503, 4.3517, 'Europe/Brussels'),
+    'стамбул': (41.0082, 28.9784, 'Europe/Istanbul'),
+    'istanbul': (41.0082, 28.9784, 'Europe/Istanbul'),
+    'тель-авив': (32.0853, 34.7818, 'Asia/Jerusalem'),
+    'tel aviv': (32.0853, 34.7818, 'Asia/Jerusalem'),
+    'иерусалим': (31.7683, 35.2137, 'Asia/Jerusalem'),
+    'дубай': (25.2048, 55.2708, 'Asia/Dubai'),
+    'dubai': (25.2048, 55.2708, 'Asia/Dubai'),
+    'нью-йорк': (40.7128, -74.0060, 'America/New_York'),
+    'new york': (40.7128, -74.0060, 'America/New_York'),
+    'лос-анджелес': (34.0522, -118.2437, 'America/Los_Angeles'),
+    'чикаго': (41.8781, -87.6298, 'America/Chicago'),
+    'торонто': (43.6532, -79.3832, 'America/Toronto'),
+    'пекин': (39.9042, 116.4074, 'Asia/Shanghai'),
+    'токио': (35.6762, 139.6503, 'Asia/Tokyo'),
 }
+
+
+def resolve_city_coords(city_raw: str) -> tuple:
+    """
+    Нормализует введенное название города и возвращает (lat, lon, tz_name).
+    Очищает от префиксов ('г. ', 'город '), постфиксов ('Москва, Россия', 'London, UK')
+    и находит астрономические координаты и часовой пояс.
+    """
+    if not city_raw:
+        return (47.0105, 28.8638, 'Europe/Chisinau')
+
+    cleaned = city_raw.strip().lower()
+    if ',' in cleaned:
+        cleaned = cleaned.split(',')[0].strip()
+    if '(' in cleaned:
+        cleaned = cleaned.split('(')[0].strip()
+    for prefix in ['г.', 'город', 'гор.', 'с.', 'село', 'пос.', 'пгт']:
+        if cleaned.startswith(prefix + ' ') or cleaned.startswith(prefix):
+            cleaned = cleaned[len(prefix):].strip()
+
+    if cleaned in CITY_COORDS:
+        return CITY_COORDS[cleaned]
+
+    for name, coords in CITY_COORDS.items():
+        if name == cleaned or name in cleaned or cleaned in name:
+            return coords
+
+    # Fallback по умолчанию (Кишинев)
+    return (47.0105, 28.8638, 'Europe/Chisinau')
 
 
 def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city: str) -> dict:
@@ -197,8 +445,7 @@ def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city:
         hour = int(t_parts[0])
         minute = int(t_parts[1]) if len(t_parts) > 1 else 0
 
-        city_lower = (birth_city or 'кишинев').strip().lower()
-        lat, lon, tz_name = CITY_COORDS.get(city_lower, (47.0105, 28.8638, 'Europe/Chisinau'))
+        lat, lon, tz_name = resolve_city_coords(birth_city)
 
         try:
             import zoneinfo

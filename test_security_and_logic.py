@@ -353,6 +353,32 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 10 пройден: Астрономический расчет Асцендента и MC математически неизменен.")
 
+    def test_11_multi_user_city_resolution_and_calculation(self):
+        """Проверка расчета натальных параметров для новых пользователей из разных городов."""
+        from ai_service import calculate_natal_asc_mc, resolve_city_coords
+
+        # 1. Проверка очистки и поиска городов
+        lat, lon, tz = resolve_city_coords("г. Лондон, Великобритания")
+        self.assertEqual(tz, "Europe/London")
+        lat_ru, lon_ru, tz_ru = resolve_city_coords("Москва (Россия)")
+        self.assertEqual(tz_ru, "Europe/Moscow")
+        lat_kz, lon_kz, tz_kz = resolve_city_coords("г. Алматы")
+        self.assertEqual(tz_kz, "Asia/Almaty")
+
+        # 2. Расчет для нового пользователя: Лондон, 01.01.2000, 12:00
+        natal_london = calculate_natal_asc_mc("2000-01-01", "12:00", "г. Лондон, Великобритания")
+        self.assertIsNotNone(natal_london)
+        self.assertEqual(natal_london["asc_sign"], "Овен")
+        self.assertEqual(natal_london["mc_sign"], "Козерог")
+
+        # 3. Расчет для нового пользователя: Новосибирск, 20.03.1985, 18:45
+        natal_nsk = calculate_natal_asc_mc("1985-03-20", "18:45", "Новосибирск")
+        self.assertIsNotNone(natal_nsk)
+        self.assertEqual(natal_nsk["asc_sign"], "Дева")
+        self.assertEqual(natal_nsk["mc_sign"], "Близнецы")
+
+        print("✅ Тест 11 пройден: Новые пользователи из любых городов получают строгий математический расчет Асцендента.")
+
 
 if __name__ == "__main__":
     unittest.main()
