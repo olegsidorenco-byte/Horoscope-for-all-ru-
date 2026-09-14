@@ -38,6 +38,24 @@ class MainActivity: FlutterActivity() {
                 "isServiceRunning" -> {
                     result.success(HoroscopeBackgroundService.isRunning)
                 }
+                "openNotificationSettings" -> {
+                    try {
+                        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            Intent(android.provider.Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                                putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                                putExtra(android.provider.Settings.EXTRA_CHANNEL_ID, HoroscopeBackgroundService.SERVICE_CHANNEL_ID)
+                            }
+                        } else {
+                            Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                            }
+                        }
+                        startActivity(intent)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("OPEN_FAILED", e.message, null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }

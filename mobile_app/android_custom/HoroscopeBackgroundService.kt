@@ -23,7 +23,7 @@ class HoroscopeBackgroundService : Service() {
 
     companion object {
         var isRunning = false
-        const val SERVICE_CHANNEL_ID = "cosmic_horoscope_service_v1"
+        const val SERVICE_CHANNEL_ID = "cosmic_service_silent_v2"
         const val ALERTS_CHANNEL_ID = "cosmic_horoscope_daily_v2"
         const val SERVICE_NOTIFICATION_ID = 888
         const val ALERT_NOTIFICATION_ID = 202
@@ -74,14 +74,23 @@ class HoroscopeBackgroundService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            // 1. Постоянный канал фоновой службы (минимальный приоритет)
+            // Удаляем старый канал v1 с IMPORTANCE_LOW, чтобы он не оставался в системе
+            try {
+                nm.deleteNotificationChannel("cosmic_horoscope_service_v1")
+            } catch (_: Exception) {}
+
+            // 1. Абсолютно тихий, минимизированный канал фоновой службы (IMPORTANCE_MIN)
             val serviceChannel = NotificationChannel(
                 SERVICE_CHANNEL_ID,
-                "Фоновый мониторинг гороскопа",
-                NotificationManager.IMPORTANCE_LOW
+                "Фоновый мониторинг (служба)",
+                NotificationManager.IMPORTANCE_MIN
             ).apply {
-                description = "Поддерживает приложение активным в фоне для мгновенного получения утреннего прогноза"
+                description = "Техническая служба для работы в фоне"
                 setShowBadge(false)
+                lockscreenVisibility = Notification.VISIBILITY_SECRET
+                enableLights(false)
+                enableVibration(false)
+                setSound(null, null)
             }
             nm.createNotificationChannel(serviceChannel)
 
@@ -108,13 +117,34 @@ class HoroscopeBackgroundService : Service() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
         )
 
+        // Интент для перехода в системные настройки отключения значка службы в 1 клик
+        val hideSettingsIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent(android.provider.Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+                putExtra(android.provider.Settings.EXTRA_CHANNEL_ID, SERVICE_CHANNEL_ID)
+            }
+        } else {
+            Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, packageName)
+            }
+        }
+        val hidePendingIntent = PendingIntent.getActivity(
+            this,
+            2,
+            hideSettingsIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        )
+
         return NotificationCompat.Builder(this, SERVICE_CHANNEL_ID)
-            .setContentTitle("🪐 Астро Гороскоп")
-            .setContentText("Фоновое отслеживание утреннего прогноза активно")
+            .setContentTitle("🪐 Астро Гороскоп (в фоне)")
+            .setContentText("Работает в фоне. Нажмите «Скрыть», чтобы убрать из шторки.")
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setOngoing(true)
+            .setOngoing(false) // Разрешает смахнуть уведомление из шторки вбок!
             .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Скрыть из шторки", hidePendingIntent)
             .build()
     }
 

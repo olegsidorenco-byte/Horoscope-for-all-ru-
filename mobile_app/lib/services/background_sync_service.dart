@@ -61,4 +61,14 @@ class BackgroundSyncService {
       await startService();
     }
   }
+
+  /// Открытие системных настроек уведомлений для отключения значка службы в шторке
+  static Future<bool> openNotificationSettings() async {
+    try {
+      final res = await _channel.invokeMethod<bool>('openNotificationSettings');
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
 }

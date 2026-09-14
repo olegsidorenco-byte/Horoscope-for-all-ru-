@@ -214,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.18 (Release)',
+                            'Версия 1.0.19 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -806,6 +806,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                await BackgroundSyncService.openNotificationSettings();
+              },
+              icon: const Icon(Icons.visibility_off_outlined, size: 18, color: CosmicTheme.cyanAccent),
+              label: const Text(
+                'Скрыть значок службы из шторки',
+                style: TextStyle(color: CosmicTheme.cyanAccent, fontWeight: FontWeight.bold),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: CosmicTheme.cyanAccent.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
@@ -822,14 +841,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Icon(Icons.info_outline_rounded, color: CosmicTheme.goldSoft, size: 16),
                     SizedBox(width: 6),
                     Text(
-                      'Как это устроено:',
+                      'Как убрать значок службы из шторки:',
                       style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 SizedBox(height: 6),
                 Text(
-                  '• Служба автоматически стартует при включении телефона (BootReceiver).\n• В шторке отображается тихий значок службы — благодаря этому Android не выгружает приложение из памяти.\n• При выходе утреннего прогноза мгновенно срабатывает громкое оповещение с вибрацией.',
+                  '• В шторке уведомлений вы можете просто смахнуть значок службы вбок (влево или вправо).\n• Чтобы значок больше никогда не появлялся в шторке: нажмите кнопку «Скрыть значок службы из шторки» выше и выключите тумблер в открывшихся системных настройках Android.\n• Служба продолжит надежно работать в фоне, а громкие оповещения о новом гороскопе будут приходить как обычно!',
                   style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
                 ),
               ],
