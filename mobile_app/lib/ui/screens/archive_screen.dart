@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/horoscope_model.dart';
+import '../../models/user_profile.dart';
 import '../../services/horoscope_sync_service.dart';
+import '../../services/storage_service.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 import '../widgets/greeting_header.dart';
@@ -195,6 +197,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
   HoroscopeDay? _day;
   bool _loading = true;
   String? _error;
+  UserProfile _userProfile = UserProfile.defaultProfile();
 
   @override
   void initState() {
@@ -205,9 +208,11 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
   Future<void> _loadDay() async {
     try {
       final d = await HoroscopeSyncService.fetchArchiveDay(widget.item.isoDate, widget.item.date);
+      final profile = await StorageService.loadProfile();
       if (mounted) {
         setState(() {
           _day = d;
+          _userProfile = profile;
           _loading = false;
         });
       }
@@ -300,7 +305,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
       physics: const BouncingScrollPhysics(),
       children: [
         GreetingHeader(
-          greetingText: _day!.greeting,
+          greetingText: _userProfile.formatGreeting(_day!.greeting),
           dateStr: _day!.date,
           isLoading: false,
           onRefresh: _loadDay,

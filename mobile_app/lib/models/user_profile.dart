@@ -137,6 +137,75 @@ class UserProfile {
     }
   }
 
+  /// Форматирует приветствие с учетом статуса регистрации и имени пользователя.
+  /// Если пользователь не зарегистрирован, возвращается нейтральное гостевое приветствие
+  /// без чужих персональных данных (имени, даты рождения и натальных аспектов).
+  String formatGreeting(String rawGreeting) {
+    if (!isRegistered) {
+      return '☕✨ Добро пожаловать в Астро Гороскоп!\n\n'
+          'Пусть этот день подарит вам гармонию, ясность мыслей и вдохновение 🌿 '
+          'Выберите свой знак зодиака для просмотра актуального прогноза или заполните анкету натального профиля.';
+    }
+
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      return '☕✨ Добро пожаловать в Астро Гороскоп!\n\n'
+          'Пусть этот день подарит вам гармонию, ясность мыслей и вдохновение 🌿';
+    }
+
+    // Если имя пользователя — Олег, сохраняем оригинальное натальное приветствие
+    if (trimmedName.toLowerCase() == 'олег') {
+      return rawGreeting;
+    }
+
+    String greeting = rawGreeting;
+
+    // Заменяем любые формулы приветствия на персонализированное обращение
+    final isFemale = gender == 'female';
+    final honorific = isFemale ? 'уважаемая' : 'уважаемый';
+
+    // 1. "Здравствуйте, уважаемый ...!" / "Здравствуйте, ...!"
+    greeting = greeting.replaceAll(
+      RegExp(r'Здравствуйте,?\s*(уважаемый|уважаемая)?\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
+      'Здравствуйте, $honorific $trimmedName!',
+    );
+
+    // 2. "Доброе утро, ...!"
+    greeting = greeting.replaceAll(
+      RegExp(r'Доброе утро,?\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
+      'Доброе утро, $trimmedName!',
+    );
+
+    // 3. "Добрый день, ...!"
+    greeting = greeting.replaceAll(
+      RegExp(r'Добрый день,?\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
+      'Добрый день, $trimmedName!',
+    );
+
+    // 4. "Приветствую( Вас), ...!"
+    greeting = greeting.replaceAll(
+      RegExp(r'Приветствую(,\s*Вас)?,\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
+      'Приветствую Вас, $trimmedName!',
+    );
+
+    // Персонализация натальных данных в скобках (дата, время, место)
+    final cityStr = birthPlace.isNotEmpty ? birthPlace : currentCity;
+    final targetStr = '($formattedBirthDate, $birthTime${cityStr.isNotEmpty ? ", $cityStr" : ""})';
+
+    greeting = greeting.replaceAll(
+      RegExp(r'\(\d{2}\.\d{2}\.\d{4},\s*\d{2}:\d{2},?\s*[^)]*\)'),
+      targetStr,
+    );
+
+    // Если в тексте упоминается чужой асцендент Олега, заменяем на знак пользователя
+    greeting = greeting.replaceAll(
+      RegExp(r'с неизменным восходящим знаком Водолей[^\s,]*(\s*\([^)]*\))?', caseSensitive: false),
+      'для вашего знака зодиака $zodiacSign',
+    );
+
+    return greeting;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       "id": id,

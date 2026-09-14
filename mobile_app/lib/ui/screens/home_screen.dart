@@ -361,31 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _getPersonalizedGreeting(String rawGreeting) {
-    if (!_userProfile.isRegistered) {
-      return rawGreeting;
-    }
-    String greeting = rawGreeting;
-
-    // Персонализация имени
-    if (_userProfile.name.trim().isNotEmpty) {
-      greeting = greeting.replaceAll(
-        RegExp(r'Доброе утро,\s*[^!]+!', caseSensitive: false),
-        'Доброе утро, ${_userProfile.name.trim()}!',
-      );
-    }
-
-    // Персонализация натальных данных в скобках (дата, время, место)
-    final dateStr = _userProfile.formattedBirthDate;
-    final timeStr = _userProfile.birthTime;
-    final cityStr = _userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity;
-    final targetStr = '($dateStr, $timeStr${cityStr.isNotEmpty ? ", $cityStr" : ""})';
-
-    greeting = greeting.replaceAll(
-      RegExp(r'\(\d{2}\.\d{2}\.\d{4},\s*\d{2}:\d{2},?\s*[^)]*\)'),
-      targetStr,
-    );
-
-    return greeting;
+    return _userProfile.formatGreeting(rawGreeting);
   }
 
   Widget _buildZodiacQuickBar() {
