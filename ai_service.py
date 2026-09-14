@@ -15,8 +15,11 @@ from datetime import datetime
 import requests
 
 
-# Резервный список моделей на случай сбоя автопоиска
+# Резервный список моделей на случай сбоя автопоиска (приоритет легковесным и экономичным моделям Lite)
 DEFAULT_MODELS_PRIORITY = [
+    "gemini-3.1-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash-lite",
     "gemini-3.7-flash",
     "gemini-2.5-flash",
     "gemini-2.0-flash",
@@ -29,7 +32,7 @@ DEFAULT_MODELS_PRIORITY = [
 def discover_models(api_key: str) -> list:
     """
     Опрашивает Google AI API и находит актуальные модели Gemini.
-    Сортирует их по приоритету новизны (3.7 -> 2.5 -> 2.0 -> 1.5, Flash предпочтительнее).
+    Сортирует их с приоритетом экономичных и быстрых моделей (Lite -> Flash -> Pro).
     """
     url = "https://generativelanguage.googleapis.com/v1beta/models"
     headers = {"x-goog-api-key": api_key}
@@ -51,7 +54,7 @@ def discover_models(api_key: str) -> list:
                 
                 # Исключаем устаревшие, экспериментальные без версий и специализированные модели
                 lower_name = name.lower()
-                if any(x in lower_name for x in ["embedding", "aqa", "bison", "tts", "imagen", "vision"]):
+                if any(x in lower_name for x in ["embedding", "aqa", "bison", "tts", "imagen", "vision", "2.5-flash-lite"]):
                     continue
                 if "gemini" in lower_name:
                     valid_models.append(name)
@@ -61,23 +64,38 @@ def discover_models(api_key: str) -> list:
                 def model_score(m_name: str):
                     score = 0
                     m_lower = m_name.lower()
-                    if "3.7" in m_lower:
-                        score += 500
-                    elif "3.5" in m_lower or "3.1" in m_lower:
-                        score += 400
-                    elif "2.5" in m_lower:
-                        score += 300
-                    elif "2.0" in m_lower:
-                        score += 200
-                    elif "1.5" in m_lower:
-                        score += 100
                     
-                    if "flash" in m_lower:
+                    # ПРИОРИТЕТ 1: Стабильные сверхбыстрые Lite-модели (экономия квот до 70%, ответ за 3-5 сек)
+                    if "3.1" in m_lower and "lite" in m_lower and "preview" not in m_lower:
+                        score += 1200
+                    elif "flash-lite-latest" in m_lower:
+                        score += 1100
+                    elif "lite" in m_lower:
+                        score += 1000
+                    
+                    if "3.8" in m_lower or "3.7" in m_lower:
                         score += 50
-                    if "pro" in m_lower:
+                    elif "3.5" in m_lower:
+                        score += 45
+                    elif "3.1" in m_lower:
+                        score += 40
+                    elif "2.5" in m_lower:
                         score += 30
+                    elif "2.0" in m_lower:
+                        score += 20
+                    elif "1.5" in m_lower:
+                        score += 10
+                    
+                    if "latest" in m_lower:
+                        score += 25
+                    if "flash" in m_lower:
+                        score += 15
+                    if "pro" in m_lower:
+                        score += 5
                     if "exp" in m_lower or "preview" in m_lower:
-                        score -= 20
+                        score -= 50
+                    if any(x in m_lower for x in ["tts", "image", "vision", "audio"]):
+                        score -= 2000
                     return score
 
                 valid_models.sort(key=model_score, reverse=True)
@@ -929,8 +947,8 @@ def build_zodiac_prompt(target_date: str = None) -> str:
 2. БЛОКИ ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА (СТРОГО ПО ПОРЯДКУ):
 Каждый знак оформляй строго по образцу:
 <b>♈️ Овен. {day_month_str}.</b>
-✨ [2 емких психологических предложения: опиши реальное психоэмоциональное состояние знака сегодня с учетом транзита Луны в {astro['moon_sign']}, тонкую ловушку или уязвимость восприятия (раздражение, спешка, усталость, ревность, желание закрыться) и как обернуть это в силу].
-<b>СОВЕТ ДНЯ ☝️</b> [1 четкое, конкретное практическое действие на сегодня без воды].
+✨ [Ровно 1-2 кратких емких психологических предложения о фоне дня и возможностях знака].
+<b>СОВЕТ ДНЯ ☝️</b> [1 четкое практическое действие, строго до 8-10 слов].
 
 Список знаков строго по порядку:
 1. <b>♈️ Овен. {day_month_str}.</b>
@@ -951,8 +969,8 @@ def build_zodiac_prompt(target_date: str = None) -> str:
 ✨✨✨ <i>[Текст мудрой притчи/метафоры дня]</i> ✨✨✨
 
 СТРОГИЕ ТРЕБОВАНИЯ К ФОРМАТУ И ОБЪЕМУ:
-1. КРИТИЧЕСКИ ВАЖНО — СТРОГО ОДНО СООБЩЕНИЕ TELEGRAM: Общий объем всего текста сообщения должен быть СТРОГО от 2800 до 3500 символов (ни в коем случае не превышать 3700 символов!). Telegram жестко блокирует длинные посты, текст обязан целиком помещаться в ОДИН пост.
-2. ОБЪЕМ НА КАЖДЫЙ ЗНАК: строго 180–230 символов на каждый знак! Ровно 2 компактных психологических предложения + 1 короткая строка «СОВЕТ ДНЯ ☝️» (не длиннее 10-12 слов).
+1. КРИТИЧЕСКИ ВАЖНО — СТРОГО ОДНО СООБЩЕНИЕ TELEGRAM: Общий объем всего текста сообщения должен быть СТРОГО от 2400 до 3200 символов (максимум 3400 символов!). Telegram жестко блокирует длинные посты, текст обязан целиком помещаться в ОДИН пост.
+2. ОБЪЕМ НА КАЖДЫЙ ЗНАК: строго 150–190 символов на каждый знак! Ровно 1–2 компактных емких психологических предложения + 1 короткая строка «СОВЕТ ДНЯ ☝️» (не длиннее 8–10 слов).
 3. ПОЛНОТА: Текст ОБЯЗАТЕЛЬНО должен содержать ВСЕ 12 знаков зодиака (от ♈️ Овен до ♓️ Рыбы) без сокращений и обрывов!
 4. ФОРМАТИРОВАНИЕ: Используй ТОЛЬКО разрешенные HTML теги <b> и <i>. Запрещены Markdown символы (*, **, #, ##, -) и теги <p>, <br>, <h1>. Между блоками делай два переноса строки (\\n\\n)."""
 
