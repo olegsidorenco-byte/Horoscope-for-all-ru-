@@ -388,7 +388,7 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
         self.assertIn("14 сентября", prompt)
         self.assertIn("СОВЕТ ДНЯ ☝️", prompt)
         self.assertIn("притч", prompt)
-        self.assertIn("3200 до 3700 символов", prompt)
+        self.assertIn("2800 до 3500 символов", prompt)
 
         # Тест парсинга нового формата
         new_sample = (
