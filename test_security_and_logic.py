@@ -334,6 +334,25 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 9 пройден: Промпт высшей натальной категории строго соблюдает астрологическую методологию.")
 
+    def test_10_natal_asc_mc_exact_calculation(self):
+        """Проверка строгости астрономического расчета Асцендента и Середины Неба."""
+        from ai_service import calculate_natal_asc_mc
+
+        # Олег: 23 мая 1978, 00:50, Кишинев
+        natal_ru = calculate_natal_asc_mc("23.05.1978", "00:50", "Кишинев")
+        natal_iso = calculate_natal_asc_mc("1978-05-23", "00:50", "Кишинев")
+
+        self.assertIsNotNone(natal_ru)
+        self.assertIsNotNone(natal_iso)
+        self.assertEqual(natal_ru["asc_sign"], "Водолей")
+        self.assertEqual(natal_iso["asc_sign"], "Водолей")
+        self.assertEqual(natal_ru["asc_degree"], "1°32'")
+        self.assertEqual(natal_iso["asc_degree"], "1°32'")
+        self.assertEqual(natal_ru["mc_sign"], "Скорпион")
+        self.assertEqual(natal_ru["mc_degree"], "28°46'")
+
+        print("✅ Тест 10 пройден: Астрономический расчет Асцендента и MC математически неизменен.")
+
 
 if __name__ == "__main__":
     unittest.main()

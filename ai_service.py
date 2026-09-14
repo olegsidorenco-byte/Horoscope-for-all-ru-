@@ -10,6 +10,7 @@
 import json
 import re
 import time
+import math
 from datetime import datetime
 import requests
 
@@ -165,6 +166,102 @@ def get_astronomical_context(target_date_str: str) -> dict:
     }
 
 
+CITY_COORDS = {
+    'кишинев': (47.0105, 28.8638, 'Europe/Chisinau'),
+    'chisinau': (47.0105, 28.8638, 'Europe/Chisinau'),
+    'москва': (55.7558, 37.6173, 'Europe/Moscow'),
+    'санкт-петербург': (59.9343, 30.3351, 'Europe/Moscow'),
+    'киев': (50.4501, 30.5234, 'Europe/Kyiv'),
+    'минск': (53.9006, 27.5590, 'Europe/Minsk'),
+    'одесса': (46.4825, 30.7233, 'Europe/Kyiv'),
+}
+
+
+def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city: str) -> dict:
+    """
+    Вычисляет точный астрономический Асцендент (Asc) и Середину Неба (MC)
+    по формулам сферической тригонометрии с учетом географических координат и исторического часового пояса.
+    """
+    try:
+        parts = [p.strip() for p in re.split(r'[\.\-\/]', birth_date_str.strip()) if p.strip()]
+        if len(parts) != 3:
+            return None
+        if len(parts[0]) == 4:
+            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
+        else:
+            day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
+            if year < 100:
+                year += 1900
+
+        t_parts = birth_time_str.strip().split(':')
+        hour = int(t_parts[0])
+        minute = int(t_parts[1]) if len(t_parts) > 1 else 0
+
+        city_lower = (birth_city or 'кишинев').strip().lower()
+        lat, lon, tz_name = CITY_COORDS.get(city_lower, (47.0105, 28.8638, 'Europe/Chisinau'))
+
+        try:
+            import zoneinfo
+            tz = zoneinfo.ZoneInfo(tz_name)
+            dt = datetime(year, month, day, hour, minute, tzinfo=tz)
+            tz_offset = dt.utcoffset().total_seconds() / 3600.0
+        except Exception:
+            tz_offset = 3.0 if year < 1990 else 2.0
+
+        utc_hour = hour + minute / 60.0 - tz_offset
+        day_calc = day
+        if utc_hour < 0:
+            utc_hour += 24.0
+            day_calc -= 1
+        elif utc_hour >= 24.0:
+            utc_hour -= 24.0
+            day_calc += 1
+
+        y, m = year, month
+        a = math.floor(y / 100)
+        b = 2 - a + math.floor(a / 4)
+        jd0 = math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + day_calc + b - 1524.5
+        jd = jd0 + utc_hour / 24.0
+
+        t = (jd - 2451545.0) / 36525.0
+        gmst = (280.46061837 + 360.98564736629 * (jd - 2451545.0) + 0.000387933 * t**2 - (t**3) / 38710000.0) % 360.0
+        lst = (gmst + lon) % 360.0
+        eps = 23.441884 - 0.0130125 * t
+        eps_rad = math.radians(eps)
+        ramc_rad = math.radians(lst)
+        lat_rad = math.radians(lat)
+
+        # Середина Неба (MC)
+        mc_rad = math.atan2(math.sin(ramc_rad), math.cos(ramc_rad) * math.cos(eps_rad))
+        mc_deg = (math.degrees(mc_rad) + 360.0) % 360.0
+
+        # Асцендент (Asc)
+        y_asc = math.cos(ramc_rad)
+        x_asc = - math.sin(ramc_rad) * math.cos(eps_rad) - math.tan(lat_rad) * math.sin(eps_rad)
+        asc_deg = (math.degrees(math.atan2(y_asc, x_asc)) + 360.0) % 360.0
+
+        zodiac_gen = ['Овна', 'Тельца', 'Близнецов', 'Рака', 'Льва', 'Девы', 'Весов', 'Скорпиона', 'Стрельца', 'Козерога', 'Водолея', 'Рыб']
+        zodiac_nom = ['Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева', 'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы']
+
+        asc_idx = int(asc_deg // 30) % 12
+        asc_in_sign = asc_deg % 30
+        mc_idx = int(mc_deg // 30) % 12
+        mc_in_sign = mc_deg % 30
+
+        return {
+            'asc_deg_total': asc_deg,
+            'asc_sign': zodiac_nom[asc_idx],
+            'asc_sign_gen': zodiac_gen[asc_idx],
+            'asc_degree': f"{int(asc_in_sign)}°{int(round((asc_in_sign % 1) * 60)):02d}'",
+            'mc_deg_total': mc_deg,
+            'mc_sign': zodiac_nom[mc_idx],
+            'mc_sign_gen': zodiac_gen[mc_idx],
+            'mc_degree': f"{int(mc_in_sign)}°{int(round((mc_in_sign % 1) * 60)):02d}'",
+        }
+    except Exception:
+        return None
+
+
 def build_horoscope_prompt(user_profile: dict, target_date: str = None) -> str:
     """
     Формирует структурированный промпт высшей натальной категории (стаж 60 лет)
@@ -197,20 +294,38 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None) -> str:
 
     astro = get_astronomical_context(target_date)
 
+    natal = None
+    if not is_general and birth_date and birth_time:
+        natal = calculate_natal_asc_mc(birth_date, birth_time, birth_city)
+
     if not is_general:
+        if natal:
+            natal_calc_text = (
+                f"• ТОЧНЫЙ АСТРОНОМИЧЕСКИЙ АСЦЕНДЕНТ: {natal['asc_sign']} ({natal['asc_degree']} {natal['asc_sign_gen']})\n"
+                f"• ТОЧНАЯ СЕРЕДИНА НЕБА (МС, 10 ДОМ КАРЬЕРЫ): {natal['mc_sign']} ({natal['mc_degree']} {natal['mc_sign_gen']})\n"
+                f"• СТРОЖАЙШИЙ ЗАПРЕТ НА ГАЛЛЮЦИНАЦИИ: Восходящий знак натальной карты {name} — СТРОГО {natal['asc_sign'].upper()} ({natal['asc_degree']})! Середина Неба — в {natal['mc_sign_gen']}. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО называть любой другой знак (никаких Рыб, Овна, Тельца и т.д.)! Расчет зафиксирован астрономически.\n"
+            )
+            asc_str = f"{natal['asc_sign']} ({natal['asc_degree']} {natal['asc_sign_gen']})"
+            mc_str = f"{natal['mc_sign']} ({natal['mc_degree']} {natal['mc_sign_gen']})"
+        else:
+            natal_calc_text = ""
+            asc_str = "восходящий знак по времени рождения"
+            mc_str = "Середина Неба (МС)"
+
         natal_precision_rules = (
             f"КРИТИЧЕСКИ ВАЖНО (ВЫСШАЯ НАТАЛЬНАЯ ТОЧНОСТЬ):\n"
             f"• Имя: {name}\n"
             f"• Точная дата рождения: {birth_date}\n"
             f"• Точное время рождения: {birth_time if birth_time else 'не указано (расчет на полдень)'}\n"
-            f"• Город рождения (координаты натальной карты): {birth_city if birth_city else 'Не указан'}\n"
-            f"• Текущее местонахождение (локальные транзиты): {current_city if current_city else 'Не указан'}\n"
+            f"• Город рождения (координаты натальной карты): {birth_city if birth_city else 'Кишинев'}\n"
+            f"{natal_calc_text}"
+            f"• Текущее местонахождение (локальные транзиты): {current_city if current_city else 'Кишинев'}\n"
             f"• Пол: {gender_display} ({gender_instruction})\n"
             f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
             "СТРОГИЕ АСТРОЛОГИЧЕСКИЕ ПРАВИЛА РАСЧЕТА:\n"
-            "1. Рассчитай точный Асцендент (восходящий градус и знак на восточном горизонте в момент рождения) и Середину Неба (10 дом МС карьеры и статуса).\n"
-            "2. Рассчитай проекцию текущих транзитных планет в дома натала пользователя: 1 дом (личность и тонус), 2 дом (личные финансы и доходы), 6 дом (здоровье и работа), 7 дом (партнерство, брак и переговоры), 10 дом (профессиональные цели).\n"
-            f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия ОБЯЗАТЕЛЬНО включи персональный натальный расчет: назови восходящий знак (Асцендент) или ключевой транзитный дом/аспект, активированный сегодня для натальной карты {name} ({birth_date}" + (f", {birth_time}" if birth_time else "") + "). Пользователь должен сразу видеть, что прогноз составлен по его минуте рождения!\n"
+            f"1. Восходящий знак Асцендента — строго {asc_str}! Учитывай Середину Неба (МС) — {mc_str}.\n"
+            "2. Рассчитай проекцию текущих транзитных планет в дома натала пользователя: 1 дом (личность и тонус), 2 дом (личные финансы и доходы), 6 дом (здоровье и работа), 7 дом (партнерство, брак и переговоры), 8 дом (чужие ресурсы, аудит, инвестиции), 10 дом (профессиональные цели).\n"
+            f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия ОБЯЗАТЕЛЬНО включи персональный натальный расчет: назови восходящий знак ({asc_str}) и активированный сегодня транзитный дом/аспект для натальной карты {name} ({birth_date}" + (f", {birth_time}" if birth_time else "") + "). Пользователь должен сразу видеть неизменную астрономическую точность!\n"
             f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике 'Работа, бизнес и финансы' (стратегия, переговоры, сделки) и 'Здоровье и тонус'.\n"
         )
     else:
