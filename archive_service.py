@@ -90,11 +90,11 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         sign_name = meta["name"]
         symbol = meta["symbol"]
         
-        pattern = re.compile(rf"{symbol}\s*{sign_name}[^<]*</b>(.*?)(?=<b>[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
+        pattern = re.compile(rf"(?:<b>)?\s*{symbol}[^<]*\s*{sign_name}[^<]*</b>(.*?)(?=(?:<b>)?\s*[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
         match = pattern.search(clean_text)
         
         block_text = ""
-        focus = "Гармония и развитие"
+        focus = "Гармония и осознанность"
         energy = "85%"
         lucky_hours = "10:00–12:00"
         forecast = ""
@@ -113,6 +113,10 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
             for line in lines:
                 if "Фокус:" in line:
                     focus = line.replace("•", "").replace("Фокус:", "").strip()
+                elif "СОВЕТ ДНЯ" in line or "СОВЕТ ДНЯ ☝️" in line or "СОВЕТ ДНЯ☝️" in line:
+                    clean_adv = re.sub(r'<[^>]*>', '', line).replace("СОВЕТ ДНЯ ☝️", "").replace("СОВЕТ ДНЯ☝️", "").replace("СОВЕТ ДНЯ", "").strip()
+                    focus = f"Совет: {clean_adv[:60]}" if clean_adv else "Практический совет дня"
+                    forecast_lines.append(line)
                 elif "Энергия:" in line or "Часы удачи:" in line:
                     parts = line.split("|")
                     for p in parts:
@@ -123,7 +127,7 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
                 else:
                     forecast_lines.append(line)
             
-            forecast = " ".join(forecast_lines).strip()
+            forecast = "\n\n".join(forecast_lines).strip()
             forecast = re.sub(r'<[^>]*>', '', forecast).strip()
 
         if not forecast:

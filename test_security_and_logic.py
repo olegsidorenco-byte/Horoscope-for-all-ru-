@@ -379,6 +379,51 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 11 пройден: Новые пользователи из любых городов получают строгий математический расчет Асцендента.")
 
+    def test_12_new_zodiac_psychological_format(self):
+        """Проверка нового формата гороскопа по 12 знакам: утренняя шапка, СОВЕТ ДНЯ и притча."""
+        from ai_service import build_zodiac_prompt
+        from archive_service import parse_zodiac_structure
+
+        prompt = build_zodiac_prompt("14.09.2026")
+        self.assertIn("14 сентября", prompt)
+        self.assertIn("СОВЕТ ДНЯ ☝️", prompt)
+        self.assertIn("притч", prompt)
+        self.assertIn("3200 до 3700 символов", prompt)
+
+        # Тест парсинга нового формата
+        new_sample = (
+            "☀️☕️🍁 Доброе утро тем, кто смешивает хорошее настроение с кофе! 🍁\n\n"
+            "☀️🌿 <b>Гороскоп на 14 сентября (Понедельник)</b> 🌿☀️\n"
+            "♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n"
+            + "\n\n".join([
+                f"<b>{meta['symbol']} {meta['name']}. 14 сентября.</b>\n"
+                f"✨ Эмоциональный фон дня спокоен, но требует внимания к деталям и уважения к чужим границам.\n"
+                f"<b>СОВЕТ ДНЯ ☝️</b> Сосредоточьтесь на главном деле и не суетитесь."
+                for meta in [
+                    {"symbol": "♈️", "name": "Овен"},
+                    {"symbol": "♉️", "name": "Телец"},
+                    {"symbol": "♊️", "name": "Близнецы"},
+                    {"symbol": "♋️", "name": "Рак"},
+                    {"symbol": "♌️", "name": "Лев"},
+                    {"symbol": "♍️", "name": "Дева"},
+                    {"symbol": "♎️", "name": "Весы"},
+                    {"symbol": "♏️", "name": "Скорпион"},
+                    {"symbol": "♐️", "name": "Стрелец"},
+                    {"symbol": "♑️", "name": "Козерог"},
+                    {"symbol": "♒️", "name": "Водолей"},
+                    {"symbol": "♓️", "name": "Рыбы"},
+                ]
+            ])
+            + "\n\n✨✨✨ <i>Уступать — фундамент связи.</i> ✨✨✨"
+        )
+        parsed = parse_zodiac_structure(new_sample, "14.09.2026")
+        self.assertEqual(len(parsed["signs"]), 12)
+        for s in parsed["signs"]:
+            self.assertIn("СОВЕТ ДНЯ", s["forecast"])
+            self.assertIn("Совет:", s["focus"])
+
+        print("✅ Тест 12 пройден: Новый психологический формат гороскопа по 12 знакам успешно формируется и парсится.")
+
 
 if __name__ == "__main__":
     unittest.main()
