@@ -61,8 +61,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SnackBar(
           content: Text(
             value
-                ? '🪐 Фоновая служба запущена: приложение активно в памяти и мгновенно уведомит утром!'
-                : '⏸ Фоновая служба остановлена',
+                ? '🪐 Фоновый мониторинг включен: проверяет сервер каждые 15 мин и уведомит только о новом гороскопе!'
+                : '⏸ Фоновый мониторинг отключен',
           ),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
@@ -214,7 +214,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.19 (Release)',
+                            'Версия 1.0.21 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -748,7 +748,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Фоновый мониторинг («В фоне»)',
+                      'Фоновый мониторинг прогнозов',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -757,7 +757,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      'Android Foreground Service',
+                      'Системный планировщик (AlarmManager)',
                       style: TextStyle(color: CosmicTheme.cyanAccent, fontSize: 12, fontWeight: FontWeight.w500),
                     ),
                   ],
@@ -772,7 +772,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Поддерживает приложение активным в оперативной памяти телефона в фоновом режиме. Каждые 15 минут проверяет появление утреннего прогноза и сразу присылает громкое оповещение, даже когда экран заблокирован или приложение закрыто.',
+            'Приложение автоматически проверяет появление свежего утреннего прогноза в фоновом режиме каждые 15 минут. Шторка смартфона остается абсолютно чистой — уведомление появляется ТОЛЬКО когда готов новый гороскоп дня!',
             style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 14),
@@ -794,7 +794,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Expanded(
                   child: Text(
                     _backgroundServiceActive
-                        ? 'Статус: Активно в фоне (постоянная готовность)'
+                        ? 'Статус: Активно в фоне (без лишних значков в шторке)'
                         : 'Статус: Отключено (проверка только при открытии)',
                     style: TextStyle(
                       color: _backgroundServiceActive ? Colors.greenAccent : CosmicTheme.textSecondary,
@@ -807,23 +807,56 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () async {
-                await BackgroundSyncService.openNotificationSettings();
-              },
-              icon: const Icon(Icons.visibility_off_outlined, size: 18, color: CosmicTheme.cyanAccent),
-              label: const Text(
-                'Скрыть значок службы из шторки',
-                style: TextStyle(color: CosmicTheme.cyanAccent, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final ok = await BackgroundSyncService.triggerImmediateCheck();
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            ok
+                                ? '📡 Проверка сервера запущена: если есть новый прогноз, он появится!'
+                                : '⚠️ Не удалось запустить фоновую проверку',
+                          ),
+                          backgroundColor: CosmicTheme.backgroundCard,
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.refresh_rounded, size: 16, color: CosmicTheme.cyanAccent),
+                  label: const Text(
+                    'Проверить сейчас',
+                    style: TextStyle(color: CosmicTheme.cyanAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: CosmicTheme.cyanAccent.withOpacity(0.5)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
               ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: CosmicTheme.cyanAccent.withOpacity(0.5)),
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    await BackgroundSyncService.openBatterySettings();
+                  },
+                  icon: const Icon(Icons.battery_charging_full_rounded, size: 16, color: Colors.amberAccent),
+                  label: const Text(
+                    'Режим батареи',
+                    style: TextStyle(color: Colors.amberAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.amberAccent.withOpacity(0.5)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           const SizedBox(height: 12),
           Container(
@@ -841,14 +874,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Icon(Icons.info_outline_rounded, color: CosmicTheme.goldSoft, size: 16),
                     SizedBox(width: 6),
                     Text(
-                      'Как убрать значок службы из шторки:',
+                      'Чистая шторка и надежная доставка:',
                       style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 SizedBox(height: 6),
                 Text(
-                  '• В шторке уведомлений вы можете просто смахнуть значок службы вбок (влево или вправо).\n• Чтобы значок больше никогда не появлялся в шторке: нажмите кнопку «Скрыть значок службы из шторки» выше и выключите тумблер в открывшихся системных настройках Android.\n• Служба продолжит надежно работать в фоне, а громкие оповещения о новом гороскопе будут приходить как обычно!',
+                  '• В шторке смартфона больше нет постоянных служебных значков.\n• Оповещение появляется ТОЛЬКО при выходе свежего прогноза дня.\n• Смахивание уведомления о новом гороскопе не отключает фоновый цикл проверки.\n• Для максимальной надежности в настройках телефона выберите режим батареи «Без ограничений».',
                   style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
                 ),
               ],

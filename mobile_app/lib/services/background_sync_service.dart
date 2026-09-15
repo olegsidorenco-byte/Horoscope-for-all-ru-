@@ -5,7 +5,7 @@ class BackgroundSyncService {
   static const MethodChannel _channel = MethodChannel('com.cosmic/background_service');
   static const String _keyForegroundServiceEnabled = 'cosmic_foreground_service_enabled';
 
-  /// Запуск нативной фоновой службы мониторинга
+  /// Запуск нативного системного планировщика фонового мониторинга
   static Future<bool> startService() async {
     try {
       final res = await _channel.invokeMethod<bool>('startService');
@@ -17,7 +17,7 @@ class BackgroundSyncService {
     }
   }
 
-  /// Остановка нативной службы
+  /// Остановка нативного планировщика
   static Future<bool> stopService() async {
     try {
       final res = await _channel.invokeMethod<bool>('stopService');
@@ -29,7 +29,7 @@ class BackgroundSyncService {
     }
   }
 
-  /// Проверка активности службы в системе
+  /// Проверка активности планировщика в системе
   static Future<bool> isServiceRunning() async {
     try {
       final res = await _channel.invokeMethod<bool>('isServiceRunning');
@@ -39,10 +39,10 @@ class BackgroundSyncService {
     }
   }
 
-  /// Проверка, включена ли служба в настройках пользователя
+  /// Проверка, включен ли мониторинг в настройках пользователя
   static Future<bool> isServiceEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyForegroundServiceEnabled) ?? true; // По умолчанию включена!
+    return prefs.getBool(_keyForegroundServiceEnabled) ?? true; // По умолчанию включен!
   }
 
   /// Включение / выключение службы с сохранением
@@ -62,10 +62,30 @@ class BackgroundSyncService {
     }
   }
 
-  /// Открытие системных настроек уведомлений для отключения значка службы в шторке
+  /// Запуск немедленной фоновой проверки свежего прогноза
+  static Future<bool> triggerImmediateCheck() async {
+    try {
+      final res = await _channel.invokeMethod<bool>('triggerSync');
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Открытие системных настроек уведомлений
   static Future<bool> openNotificationSettings() async {
     try {
       final res = await _channel.invokeMethod<bool>('openNotificationSettings');
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Открытие настроек оптимизации батареи приложения (выбор «Без ограничений»)
+  static Future<bool> openBatterySettings() async {
+    try {
+      final res = await _channel.invokeMethod<bool>('openBatterySettings');
       return res ?? false;
     } catch (_) {
       return false;

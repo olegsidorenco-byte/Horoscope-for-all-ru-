@@ -3,7 +3,6 @@ package com.cosmic.cosmic_horoscope
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
@@ -14,16 +13,19 @@ class BootReceiver : BroadcastReceiver() {
             action == "com.htc.intent.action.QUICKBOOT_POWERON") {
             
             try {
-                // Проверяем, не отключил ли пользователь фоновую службу в настройках приложения
+                // Проверяем, не отключил ли пользователь фоновый мониторинг в настройках
                 val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
                 val isEnabled = prefs.getBoolean("flutter.cosmic_foreground_service_enabled", true)
+                
+                // Очищаем старые служебные уведомления 888 из шторки
+                HoroscopeAlarmReceiver.cleanupLegacyForegroundService(context)
+                HoroscopeAlarmReceiver.createNotificationChannels(context)
+
                 if (isEnabled) {
-                    val serviceIntent = Intent(context, HoroscopeBackgroundService::class.java)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        context.startForegroundService(serviceIntent)
-                    } else {
-                        context.startService(serviceIntent)
-                    }
+                    // Планируем AlarmManager через 10 секунд после загрузки системы
+                    HoroscopeAlarmReceiver.scheduleAlarm(context, 10000L)
+                    // Запускаем быструю проверку на случай, если за время сна вышел новый гороскоп
+                    HoroscopeAlarmReceiver.triggerImmediateCheck(context)
                 }
             } catch (_: Exception) {}
         }
