@@ -23,7 +23,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   HoroscopeDay? _horoscope;
   bool _isLoading = false;
   String? _errorMessage;
@@ -48,7 +48,30 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fetchLatestHoroscope();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _reloadProfile();
+    }
+  }
+
+  Future<void> _reloadProfile() async {
+    final profile = await StorageService.loadProfile();
+    if (mounted) {
+      setState(() {
+        _userProfile = profile;
+      });
+    }
   }
 
   Future<void> _fetchLatestHoroscope({bool forceRefresh = false}) async {
@@ -179,11 +202,12 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: CosmicTheme.cyanAccent),
             tooltip: 'Настройки',
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
+              await _reloadProfile();
             },
           ),
         ],
@@ -349,8 +373,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ..._horoscope!.topics.asMap().entries.map((entry) {
             final idx = entry.key;
             final topic = entry.value;
+            final personalizedTopic = HoroscopeTopic(
+              title: topic.title,
+              content: _userProfile.formatTopicContent(topic.content),
+              icon: topic.icon,
+            );
             return TopicCard(
-              topic: topic,
+              topic: personalizedTopic,
               index: idx,
             ).animate().fadeIn(delay: (60 * idx).ms, duration: 400.ms).slideY(begin: 0.1, end: 0);
           }),

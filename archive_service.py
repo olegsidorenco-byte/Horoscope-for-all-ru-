@@ -211,6 +211,32 @@ def prune_archive(max_days: int = MAX_ARCHIVE_DAYS):
         print(f"🧹 Серверный архив очищен: удалено {len(removed_entries)} старых записей. Хранится: {len(kept_entries)} дн. (макс. {max_days})")
 
 
+def generate_archive_preview(greeting: str, display_date: str = "") -> str:
+    """
+    Генерирует нейтральное публичное превью архива без персональных данных автора (Олег, 1978, Кишинев).
+    """
+    clean = greeting.strip()
+    clean = re.sub(r'^(☀️|🌿|🕊️|☕|🌤️|🍀|🌅|✨|🍃|\s)*(Приветствую( Вас)?|Здравствуйте|Доброе утро|Добрый день|Доброго утра),?\s*(уважаемый|уважаемая)?\s*Олег[а-яА-Я]*[!.]?\s*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\bОлег[а-яА-Я]*\b', '', clean, flags=re.IGNORECASE)
+    # Удаляем натальные выкладки автора
+    clean = re.sub(r'(В этот [^.]*персональный астрологический паспорт[^.]*:\s*|Ваш персональный астрологический[^.]*подтверждает[^,.]*,\s*)', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'Ваш восходящий знак[^,.]*,\s*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'восходящий знак Асцендента[^,.]*,\s*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\(1°32\' Водолея\),?\s*', '', clean)
+    clean = re.sub(r'при этом транзитная Луна[^.]*\.\s*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'а текущая транзитная Луна[^.]*\.\s*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'При (Вашем рождении|расчете Вашей натальной карты)[^.]*\.\s*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'23\.05\.1978|00:05|00:50|Кишинев[а-яА-Я]*|Кишинёв[а-яА-Я]*', '', clean, flags=re.IGNORECASE)
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    if not clean or len(clean) < 20:
+        return f"✨ Астрологический прогноз на {display_date}: ключевые аспекты планет, лунный день и рекомендации для всех знаков зодиака."
+    
+    if len(clean) > 150:
+        clean = clean[:147].rstrip() + "..."
+    return clean
+
+
 def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
     """Сохраняет персональный прогноз в data/latest_horoscope.json и data/archive/."""
     ensure_directories()
@@ -246,11 +272,12 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
             index_data = []
 
     existing_entry = next((item for item in index_data if item.get("date") == display_date), None)
+    preview_text = generate_archive_preview(data_payload["greeting"], display_date)
     new_entry = {
         "date": display_date,
         "iso_date": iso_key,
         "file": f"archive/{archive_file_name}",
-        "preview": data_payload["greeting"][:160] + "...",
+        "preview": preview_text,
         "updated_at": data_payload["updated_at"]
     }
     

@@ -138,8 +138,10 @@ class UserProfile {
   }
 
   /// Форматирует приветствие с учетом статуса регистрации и имени пользователя.
-  /// Если пользователь не зарегистрирован, возвращается нейтральное гостевое приветствие
-  /// без чужих персональных данных (имени, даты рождения и натальных аспектов).
+  /// Для неавторизованных возвращается нейтральное гостевое приветствие.
+  /// Для автора (Олег, 23.05.1978) возвращается его персональный расчет.
+  /// Для всех остальных зарегистрированных формируется персональное обращение
+  /// с их собственным знаком зодиака, датой рождения и общепланетарным контекстом дня.
   String formatGreeting(String rawGreeting) {
     if (!isRegistered) {
       return '☕✨ Добро пожаловать в Астро Гороскоп!\n\n'
@@ -150,60 +152,126 @@ class UserProfile {
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
       return '☕✨ Добро пожаловать в Астро Гороскоп!\n\n'
-          'Пусть этот день подарит вам гармонию, ясность мыслей и вдохновение 🌿';
+          'Пусть этот день подарит вам гармонию, ясность мыслей и вдохновение 🌿 '
+          'Выберите свой знак зодиака для просмотра актуального прогноза или заполните анкету натального профиля.';
     }
 
-    // Если имя пользователя — Олег, сохраняем оригинальное натальное приветствие
-    if (trimmedName.toLowerCase() == 'олег') {
+    // Только для реального автора сохраняем оригинальный натальный расчет 1978 года
+    final isAuthorOleg = trimmedName.toLowerCase() == 'олег' &&
+        birthDate.year == 1978 &&
+        birthDate.month == 5 &&
+        birthDate.day == 23;
+
+    if (isAuthorOleg) {
       return rawGreeting;
     }
 
-    String greeting = rawGreeting;
+    // 1. Извлекаем вступительные эмодзи из начала сырого приветствия (напр. ☀️🌿🕊️, ☕🌤️🍀, 🌅✨🍃)
+    final emojiMatch = RegExp(r'^([\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\s]+)', unicode: true).firstMatch(rawGreeting);
+    final emojis = (emojiMatch != null && emojiMatch.group(1)!.trim().isNotEmpty)
+        ? emojiMatch.group(1)!.trim()
+        : '☀️🌿🕊️';
 
-    // Заменяем любые формулы приветствия на персонализированное обращение
-    final isFemale = gender == 'female';
-    final honorific = isFemale ? 'уважаемая' : 'уважаемый';
+    // 2. Персональная фраза приветствия
+    String greetingPhrase;
+    final lowerRaw = rawGreeting.toLowerCase();
+    if (lowerRaw.contains('доброе утро') || lowerRaw.contains('доброго утра')) {
+      greetingPhrase = 'Доброе утро, $trimmedName!';
+    } else if (lowerRaw.contains('добрый день')) {
+      greetingPhrase = 'Добрый день, $trimmedName!';
+    } else if (lowerRaw.contains('добрый вечер')) {
+      greetingPhrase = 'Добрый вечер, $trimmedName!';
+    } else if (lowerRaw.contains('здравствуйте')) {
+      final honorific = gender == 'female' ? 'уважаемая ' : (gender == 'male' ? 'уважаемый ' : '');
+      greetingPhrase = 'Здравствуйте, $honorific$trimmedName!';
+    } else {
+      greetingPhrase = 'Приветствую Вас, $trimmedName!';
+    }
 
-    // 1. "Здравствуйте, уважаемый ...!" / "Здравствуйте, ...!"
-    greeting = greeting.replaceAll(
-      RegExp(r'Здравствуйте,?\s*(уважаемый|уважаемая)?\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
-      'Здравствуйте, $honorific $trimmedName!',
-    );
-
-    // 2. "Доброе утро, ...!"
-    greeting = greeting.replaceAll(
-      RegExp(r'Доброе утро,?\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
-      'Доброе утро, $trimmedName!',
-    );
-
-    // 3. "Добрый день, ...!"
-    greeting = greeting.replaceAll(
-      RegExp(r'Добрый день,?\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
-      'Добрый день, $trimmedName!',
-    );
-
-    // 4. "Приветствую( Вас), ...!"
-    greeting = greeting.replaceAll(
-      RegExp(r'Приветствую(,\s*Вас)?,\s*[^!,\n]+(!|,|\.)', caseSensitive: false),
-      'Приветствую Вас, $trimmedName!',
-    );
-
-    // Персонализация натальных данных в скобках (дата, время, место)
+    // 3. Натальный бейдж пользователя
     final cityStr = birthPlace.isNotEmpty ? birthPlace : currentCity;
-    final targetStr = '($formattedBirthDate, $birthTime${cityStr.isNotEmpty ? ", $cityStr" : ""})';
+    final detailsList = <String>[];
+    if (formattedBirthDate.isNotEmpty) detailsList.add(formattedBirthDate);
+    if (birthTime.isNotEmpty) detailsList.add(birthTime);
+    if (cityStr.isNotEmpty) detailsList.add(cityStr);
 
-    greeting = greeting.replaceAll(
-      RegExp(r'\(\d{2}\.\d{2}\.\d{4},\s*\d{2}:\d{2},?\s*[^)]*\)'),
-      targetStr,
+    final natalBadge = detailsList.isNotEmpty
+        ? '($zodiacSymbol $zodiacSign • ${detailsList.join(", ")})'
+        : '($zodiacSymbol $zodiacSign)';
+
+    // 4. Извлекаем общепланетарный контекст текущего дня (день недели, планета-управитель, лунные сутки)
+    final sentences = rawGreeting
+        .replaceAll('\n', ' ')
+        .split(RegExp(r'(?<=[.!?])\s+'))
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+
+    final daySentences = <String>[];
+    for (final s in sentences) {
+      // Пропускаем формулы приветствия
+      if (RegExp(r'^(☀️|🌿|🕊️|☕|🌤️|🍀|🌅|✨|🍃|\s)*(Доброе утро|Добрый день|Добрый вечер|Здравствуйте|Приветствую)', caseSensitive: false).hasMatch(s) && s.length < 60) {
+        continue;
+      }
+      // Пропускаем предложения с натальными данными автора
+      if (RegExp(r'(1978|кишинев|кишинёв|паспорт подтверждает|расчет на|расчете вашей натальной|при вашем рождении|при рождении|восходящ|асцендент|середина неба|\bмс\b|10 дом|10-й дом|5-й дом|7-й дом|8-й дом|6-й дом|олег)', caseSensitive: false).hasMatch(s)) {
+        continue;
+      }
+      daySentences.add(s);
+    }
+
+    String dayContext = daySentences.join(' ').trim();
+    if (dayContext.isEmpty || dayContext.length < 15) {
+      dayContext = 'Пусть космические энергии сегодняшнего дня раскроют потенциал вашего знака зодиака $zodiacSign и подарят ясность мыслей, вдохновение и гармонию во всех начинаниях.';
+    }
+
+    var finalGreeting = '$emojis $greetingPhrase $natalBadge\n\n$dayContext';
+
+    // 5. Железный предохранитель: зачищаем любые возможные остатки данных автора
+    finalGreeting = finalGreeting.replaceAll(RegExp(r'\bОлег[а-яА-Я]*\b', caseSensitive: false), trimmedName);
+    finalGreeting = finalGreeting.replaceAll(RegExp(r'кишинев[а-яА-Я]*|кишинёв[а-яА-Я]*', caseSensitive: false), cityStr.isNotEmpty ? cityStr : '');
+    finalGreeting = finalGreeting.replaceAll(RegExp(r'23\.05\.1978|00:05|00:50', caseSensitive: false), formattedBirthDate);
+    finalGreeting = finalGreeting.replaceAll(RegExp(r'\(1°32\x27 Водолея\),?\s*', caseSensitive: false), '');
+    finalGreeting = finalGreeting.replaceAll(RegExp(r'Ваш восходящий знак — [^,.]*,\s*', caseSensitive: false), '');
+
+    return finalGreeting;
+  }
+
+  /// Форматирует текст тематических карточек дня, заменяя натальные ссылки автора на данные пользователя
+  String formatTopicContent(String content) {
+    final trimmedName = name.trim();
+    final isAuthorOleg = isRegistered &&
+        trimmedName.toLowerCase() == 'олег' &&
+        birthDate.year == 1978 &&
+        birthDate.month == 5 &&
+        birthDate.day == 23;
+
+    if (isAuthorOleg) return content;
+
+    var res = content;
+    // Заменяем натальные аспекты автора в тексте
+    res = res.replaceAll(
+      RegExp(r'\(Солнце в Близнецах с восходящим Водолеем\)', caseSensitive: false),
+      '(знак $zodiacSign)',
+    );
+    res = res.replaceAll(
+      RegExp(r'Вашего натального Водолея', caseSensitive: false),
+      'вашего знака зодиака $zodiacSign',
+    );
+    res = res.replaceAll(
+      RegExp(r'сдержанности Водолея', caseSensitive: false),
+      'сдержанности',
+    );
+    res = res.replaceAll(
+      RegExp(r'восходящ[а-я]* Водоле[а-я]*', caseSensitive: false),
+      'знака $zodiacSign',
     );
 
-    // Если в тексте упоминается чужой асцендент Олега, заменяем на знак пользователя
-    greeting = greeting.replaceAll(
-      RegExp(r'с неизменным восходящим знаком Водолей[^\s,]*(\s*\([^)]*\))?', caseSensitive: false),
-      'для вашего знака зодиака $zodiacSign',
-    );
+    // Принудительно заменяем имя Олег в тексте тем на имя пользователя
+    final targetName = trimmedName.isNotEmpty ? trimmedName : 'Пользователь';
+    res = res.replaceAll(RegExp(r'\bОлег[а-яА-Я]*\b', caseSensitive: false), targetName);
 
-    return greeting;
+    return res;
   }
 
   Map<String, dynamic> toJson() {

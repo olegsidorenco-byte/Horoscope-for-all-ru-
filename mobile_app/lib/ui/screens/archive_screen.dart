@@ -19,6 +19,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
   List<ArchiveIndexItem> _archiveList = [];
   bool _isLoading = true;
   String? _error;
+  UserProfile _userProfile = UserProfile.defaultProfile();
 
   @override
   void initState() {
@@ -34,9 +35,11 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
 
     try {
       final items = await HoroscopeSyncService.fetchArchiveIndex();
+      final profile = await StorageService.loadProfile();
       if (mounted) {
         setState(() {
           _archiveList = items;
+          _userProfile = profile;
           _isLoading = false;
         });
       }
@@ -169,7 +172,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
-                item.preview,
+                _formatArchivePreview(item.preview, _userProfile),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 12.5),
@@ -181,6 +184,37 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
         );
       },
     );
+  }
+
+  String _formatArchivePreview(String rawPreview, UserProfile profile) {
+    final trimmedName = profile.name.trim();
+    final isAuthorOleg = profile.isRegistered &&
+        trimmedName.toLowerCase() == 'олег' &&
+        profile.birthDate.year == 1978 &&
+        profile.birthDate.month == 5 &&
+        profile.birthDate.day == 23;
+
+    if (isAuthorOleg) {
+      return rawPreview;
+    }
+
+    var clean = rawPreview;
+    clean = clean.replaceAll(RegExp(r'^(☀️|🌿|🕊️|☕|🌤️|🍀|🌅|✨|🍃|\s)*(Приветствую( Вас)?|Здравствуйте|Доброе утро|Добрый день|Доброго утра),?\s*(уважаемый|уважаемая)?\s*Олег[а-яА-Я]*[!.]?\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'\bОлег[а-яА-Я]*\b', caseSensitive: false), profile.isRegistered && trimmedName.isNotEmpty ? trimmedName : 'Пользователь');
+    clean = clean.replaceAll(RegExp(r'(В этот [^.]*персональный астрологический паспорт[^.]*:\s*|Ваш персональный астрологический[^.]*подтверждает[^,.]*,\s*)', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'Ваш восходящий знак[^,.]*,\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'восходящий знак Асцендента[^,.]*,\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'\(1°32\x27 Водолея\),?\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'при этом транзитная Луна[^.]*\.\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'а текущая транзитная Луна[^.]*\.\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'При (Вашем рождении|расчете Вашей натальной карты)[^.]*\.\s*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'23\.05\.1978|00:05|00:50|Кишинев[а-яА-Я]*|Кишинёв[а-яА-Я]*', caseSensitive: false), '');
+    clean = clean.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    if (clean.isEmpty || clean.length < 20) {
+      return '✨ Астрологический прогноз: ключевые аспекты планет, лунный день и рекомендации для всех знаков зодиака.';
+    }
+    return clean;
   }
 }
 
@@ -311,8 +345,13 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
           onRefresh: _loadDay,
         ),
         ..._day!.topics.asMap().entries.map((entry) {
+          final personalizedTopic = HoroscopeTopic(
+            title: entry.value.title,
+            content: _userProfile.formatTopicContent(entry.value.content),
+            icon: entry.value.icon,
+          );
           return TopicCard(
-            topic: entry.value,
+            topic: personalizedTopic,
             index: entry.key,
           );
         }),
