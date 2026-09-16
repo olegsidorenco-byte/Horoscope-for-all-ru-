@@ -443,6 +443,34 @@ def resolve_city_coords(city_raw: str) -> tuple:
     return (47.0105, 28.8638, 'Europe/Chisinau')
 
 
+def get_sun_zodiac_sign(birth_date_str: str) -> str:
+    """
+    Определяет основной солнечный знак зодиака по дате рождения.
+    """
+    try:
+        parts = [p.strip() for p in re.split(r'[\.\-\/]', birth_date_str.strip()) if p.strip()]
+        if len(parts) != 3:
+            return ""
+        if len(parts[0]) == 4:
+            m, d = int(parts[1]), int(parts[2])
+        else:
+            d, m = int(parts[0]), int(parts[1])
+        if (m == 3 and d >= 21) or (m == 4 and d <= 19): return "Овен"
+        if (m == 4 and d >= 20) or (m == 5 and d <= 20): return "Телец"
+        if (m == 5 and d >= 21) or (m == 6 and d <= 21): return "Близнецы"
+        if (m == 6 and d >= 22) or (m == 7 and d <= 22): return "Рак"
+        if (m == 7 and d >= 23) or (m == 8 and d <= 22): return "Лев"
+        if (m == 8 and d >= 23) or (m == 9 and d <= 22): return "Дева"
+        if (m == 9 and d >= 23) or (m == 10 and d <= 22): return "Весы"
+        if (m == 10 and d >= 23) or (m == 11 and d <= 21): return "Скорпион"
+        if (m == 11 and d >= 22) or (m == 12 and d <= 21): return "Стрелец"
+        if (m == 12 and d >= 22) or (m == 1 and d <= 19): return "Козерог"
+        if (m == 1 and d >= 20) or (m == 2 and d <= 18): return "Водолей"
+        return "Рыбы"
+    except Exception:
+        return ""
+
+
 def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city: str) -> dict:
     """
     Вычисляет точный астрономический Асцендент (Asc) и Середину Неба (MC)
@@ -577,13 +605,24 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None) -> str:
             asc_str = "восходящий знак по времени рождения"
             mc_str = "Середина Неба (МС)"
 
+        sun_sign = get_sun_zodiac_sign(birth_date) if birth_date else ""
+        sun_info = f"• ОСНОВНОЙ СОЛНЕЧНЫЙ ЗНАК ЗОДИАКА: {sun_sign.upper()} (родился {birth_date})\n" if sun_sign else ""
+        distinction_rule = (
+            f"• СТРОГОЕ РАЗЛИЧЕНИЕ ЗНАКА ЗОДИАКА И АСЦЕНДЕНТА: По знаку зодиака (по Солнцу) {name} — строго {sun_sign.upper()}! "
+            f"А {natal['asc_sign']} — это ИСКЛЮЧИТЕЛЬНО восходящий знак (Асцендент / куспид 1 дома)! "
+            f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО называть пользователя 'Водолеем' или 'натальным Водолеем' (или приписывать ему знак Асцендента как основной)! "
+            f"Пользователь — представитель знака {sun_sign.upper()} с восходящим знаком {natal['asc_sign']}.\n"
+        ) if (sun_sign and natal) else ""
+
         natal_precision_rules = (
             f"КРИТИЧЕСКИ ВАЖНО (ВЫСШАЯ НАТАЛЬНАЯ ТОЧНОСТЬ):\n"
             f"• Имя: {name}\n"
             f"• Точная дата рождения: {birth_date}\n"
+            f"{sun_info}"
             f"• Точное время рождения: {birth_time if birth_time else 'не указано (расчет на полдень)'}\n"
             f"• Город рождения (координаты натальной карты): {birth_city if birth_city else 'Кишинев'}\n"
             f"{natal_calc_text}"
+            f"{distinction_rule}"
             f"• Текущее местонахождение (локальные транзиты): {current_city if current_city else 'Кишинев'}\n"
             f"• Пол: {gender_display} ({gender_instruction})\n"
             f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
