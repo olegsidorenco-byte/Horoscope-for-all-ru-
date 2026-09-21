@@ -87,7 +87,7 @@ def register_or_update_user(user_data: dict) -> dict:
                 break
 
     user_entry = {
-        "id": user_id or (users[match_index].get("id") if match_index != -1 else f"usr_{int(datetime.now(timezone.utc).timestamp())}"),
+        "id": user_id or (users[match_index].get("id") if match_index != -1 else f"usr_{int(datetime.now(timezone.utc).timestamp() * 1000)}"),
         "name": user_data.get("name", "").strip(),
         "email": email,
         "phone": phone,
@@ -120,3 +120,69 @@ def register_or_update_user(user_data: dict) -> dict:
     contact_display = email or phone or f"@{telegram_username}"
     print(f"👤 Пользователь {user_entry['name']} ({contact_display}) успешно {action_str} в реестре.")
     return user_entry
+
+
+def delete_user_by_id(user_id: str) -> bool:
+    """
+    Удаляет пользователя по идентификатору из реестра (требование Google Play Policy).
+    Возвращает True если пользователь найден и удален, иначе False.
+    """
+    ensure_users_dir()
+    users = get_all_users()
+    initial_len = len(users)
+    users = [u for u in users if u.get("id") != user_id]
+    if len(users) < initial_len:
+        with open(USERS_REGISTRY_FILE, "w", encoding="utf-8") as f:
+            json.dump(users, f, ensure_ascii=False, indent=2)
+        print(f"🗑️ Пользователь с ID '{user_id}' успешно удален из реестра.")
+        return True
+    return False
+
+
+def delete_user_by_contact(contact: str) -> bool:
+    """
+    Удаляет пользователя по любому контакту (email, phone, telegram).
+    """
+    ensure_users_dir()
+    users = get_all_users()
+    raw = contact.strip().lower()
+    norm_tg = raw.replace("@", "")
+    initial_len = len(users)
+    filtered = []
+    for u in users:
+        u_email = u.get("email", "").strip().lower()
+        u_phone = u.get("phone", "").strip()
+        u_tg = u.get("telegram_username", "").strip().lower().replace("@", "")
+        if (u_email and u_email == raw) or (u_phone and u_phone == raw) or (norm_tg and u_tg == norm_tg):
+            continue
+        filtered.append(u)
+
+    if len(filtered) < initial_len:
+        with open(USERS_REGISTRY_FILE, "w", encoding="utf-8") as f:
+            json.dump(filtered, f, ensure_ascii=False, indent=2)
+        print(f"🗑️ Пользователь с контактом '{contact}' успешно удален.")
+        return True
+    return False
+
+
+def reset_user_password(email: str, new_password_hash: str) -> bool:
+    """
+    Обновляет хэш пароля пользователя по адресу электронной почты.
+    """
+    ensure_users_dir()
+    users = get_all_users()
+    norm_email = email.strip().lower()
+    updated = False
+    for u in users:
+        if u.get("email", "").strip().lower() == norm_email:
+            u["password_hash"] = new_password_hash
+            u["updated_at"] = datetime.now(timezone.utc).isoformat()
+            updated = True
+            break
+    if updated:
+        with open(USERS_REGISTRY_FILE, "w", encoding="utf-8") as f:
+            json.dump(users, f, ensure_ascii=False, indent=2)
+        print(f"🔑 Пароль пользователя '{email}' успешно сброшен.")
+        return True
+    return False
+

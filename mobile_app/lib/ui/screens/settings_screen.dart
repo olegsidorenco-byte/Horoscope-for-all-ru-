@@ -9,6 +9,7 @@ import 'profile_screen.dart';
 import 'auth_screen.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
+import '../widgets/privacy_policy_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -214,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.21 (Release)',
+                            'Версия 1.0.23 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -558,8 +559,166 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> _showLogoutDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E2235),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          title: const Text('Выход из аккаунта', style: TextStyle(color: Colors.white)),
+          content: const Text(
+            'Вы действительно хотите выйти из текущего профиля?',
+            style: TextStyle(color: CosmicTheme.textSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: CosmicTheme.goldAccent,
+                foregroundColor: Colors.black,
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Выйти', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await AuthService.logout();
+      await _loadSettings();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF1E2235),
+            content: Text('✨ Вы вышли из профиля'),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _showDeleteAccountDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E2235),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.redAccent, width: 1.2),
+          ),
+          title: Row(
+            children: const [
+              Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 26),
+              SizedBox(width: 10),
+              Text(
+                'Удаление аккаунта',
+                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Вы уверены, что хотите удалить свой аккаунт?\n\n'
+            'Согласно требованиям Google Play Policy и Политике конфиденциальности, будут безвозвратно удалены:\n'
+            '• Ваш аккаунт и персональные данные;\n'
+            '• Натальная карта и индивидуальные расчеты;\n'
+            '• Локальный кэш прогнозов.\n\n'
+            'Это действие необратимо.',
+            style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Удалить навсегда', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true) {
+      await AuthService.deleteAccount();
+      await _loadSettings();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF1E2235),
+            content: Text(
+              '🗑️ Аккаунт и персональные данные безвозвратно удалены.',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildProfileSection() {
     final isRegistered = _profile.isRegistered;
+
+    // Бейдж способа входа
+    Widget authBadge() {
+      IconData icon;
+      Color color;
+      String label;
+      switch (_profile.authType) {
+        case 'google':
+          icon = Icons.g_mobiledata_rounded;
+          color = const Color(0xFF4285F4);
+          label = 'Google';
+          break;
+        case 'telegram':
+          icon = Icons.send_rounded;
+          color = const Color(0xFF29B6F6);
+          label = 'Telegram';
+          break;
+        case 'phone':
+          icon = Icons.phone_android_rounded;
+          color = CosmicTheme.cyanAccent;
+          label = 'Телефон';
+          break;
+        case 'email':
+        default:
+          icon = Icons.alternate_email_rounded;
+          color = CosmicTheme.goldAccent;
+          label = 'Email';
+      }
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withOpacity(0.4), width: 0.8),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -614,9 +773,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           if (isRegistered) ...[
-            Text(
-              '👤 Имя: ${_profile.name}',
-              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    '👤 Имя: ${_profile.name}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                authBadge(),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
@@ -682,9 +849,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => showPrivacyPolicyDialog(context),
+                    icon: const Icon(Icons.shield_outlined, size: 16, color: Colors.white70),
+                    label: const Text('Политика', style: TextStyle(color: Colors.white70, fontSize: 12.5)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white24),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _showLogoutDialog,
+                    icon: const Icon(Icons.logout_rounded, size: 16, color: Colors.white70),
+                    label: const Text('Выйти', style: TextStyle(color: Colors.white70, fontSize: 12.5)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.white24),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _showDeleteAccountDialog,
+                icon: const Icon(Icons.delete_outline_rounded, size: 17, color: Colors.redAccent),
+                label: const Text(
+                  'Удалить аккаунт (Google Play Policy)',
+                  style: TextStyle(color: Colors.redAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.redAccent.withOpacity(0.5), width: 1.1),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
           ] else ...[
             const Text(
-              'Авторизуйтесь по номеру телефона, почте или через Telegram, чтобы закрепить за собой персональную натальную анкету.',
+              'Авторизуйтесь по email, номеру телефона или через Google/Telegram, чтобы закрепить за собой персональную натальную анкету.',
               style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 16),
@@ -709,6 +921,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   backgroundColor: CosmicTheme.goldAccent,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton.icon(
+                onPressed: () => showPrivacyPolicyDialog(context),
+                icon: const Icon(Icons.shield_outlined, size: 15, color: CosmicTheme.textSecondary),
+                label: const Text(
+                  'Политика конфиденциальности',
+                  style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 12, decoration: TextDecoration.underline),
                 ),
               ),
             ),

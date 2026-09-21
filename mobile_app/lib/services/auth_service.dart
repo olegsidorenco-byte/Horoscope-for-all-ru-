@@ -269,6 +269,123 @@ class AuthService {
     return profile;
   }
 
+  /// Опциональный быстрый вход через аккаунт Google
+  static Future<UserProfile> loginWithGoogle({
+    required String email,
+    required String name,
+    String? googleId,
+  }) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail.isEmpty || !isEmail(cleanEmail)) {
+      throw Exception('Некорректный адрес Google аккаунта');
+    }
+
+    final accounts = await _getAllAccounts();
+    Map<String, dynamic>? existing;
+    for (final a in accounts) {
+      final aEmail = normalizeContact(a['email'] ?? '');
+      if (aEmail == cleanEmail) {
+        existing = a;
+        break;
+      }
+    }
+
+    UserProfile profile;
+    if (existing != null) {
+      profile = UserProfile.fromJson(Map<String, dynamic>.from(existing['profile']));
+      if (profile.authType != 'google') {
+        profile = profile.copyWith(authType: 'google');
+      }
+    } else {
+      final userId = 'usr_g_${googleId ?? DateTime.now().millisecondsSinceEpoch}';
+      final finalName = name.trim().isNotEmpty ? name.trim() : cleanEmail.split('@')[0];
+      profile = UserProfile(
+        id: userId,
+        name: finalName,
+        email: cleanEmail,
+        phone: '',
+        authType: 'google',
+        passwordHash: '',
+        birthDate: DateTime(2000, 1, 1),
+        birthTime: '12:00',
+        isTimeExact: false,
+        birthPlace: '',
+        currentCity: '',
+        gender: 'female',
+        updatedAt: DateTime.now(),
+      );
+
+      accounts.add({
+        'id': userId,
+        'email': cleanEmail,
+        'phone': '',
+        'name': profile.name,
+        'authType': 'google',
+        'passwordHash': '',
+        'telegramUsername': '',
+        'profile': profile.toJson(),
+      });
+      await _saveAllAccounts(accounts);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyCurrentSessionUserId, profile.id);
+    await StorageService.saveProfile(profile);
+
+    return profile;
+  }
+
+  /// Восстановление / сброс пароля по электронной почте
+  static Future<void> resetPassword({
+    required String email,
+    required String newPassword,
+  }) async {
+    final cleanEmail = email.trim().toLowerCase();
+    if (!isEmail(cleanEmail)) {
+      throw Exception('Укажите корректный адрес электронной почты');
+    }
+    if (newPassword.length < 6) {
+      throw Exception('Новый пароль должен содержать не менее 6 символов');
+    }
+
+    final accounts = await _getAllAccounts();
+    int matchIdx = -1;
+    for (int i = 0; i < accounts.length; i++) {
+      final aEmail = normalizeContact(accounts[i]['email'] ?? '');
+      if (aEmail == cleanEmail) {
+        matchIdx = i;
+        break;
+      }
+    }
+
+    if (matchIdx == -1) {
+      throw Exception('Аккаунт с почтой "$cleanEmail" не найден');
+    }
+
+    final newHash = hashPassword(newPassword);
+    accounts[matchIdx]['passwordHash'] = newHash;
+    if (accounts[matchIdx]['profile'] != null) {
+      final pMap = Map<String, dynamic>.from(accounts[matchIdx]['profile']);
+      pMap['passwordHash'] = newHash;
+      accounts[matchIdx]['profile'] = pMap;
+    }
+    await _saveAllAccounts(accounts);
+  }
+
+  /// Полное удаление аккаунта и персональных данных (Требование Google Play Policy)
+  static Future<void> deleteAccount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final uid = prefs.getString(_keyCurrentSessionUserId);
+    if (uid != null && uid.isNotEmpty) {
+      final accounts = await _getAllAccounts();
+      accounts.removeWhere((acc) => acc['id'] == uid);
+      await _saveAllAccounts(accounts);
+    }
+    await prefs.remove(_keyCurrentSessionUserId);
+    await StorageService.clearProfile();
+    await StorageService.clearAllCache();
+  }
+
   /// Обновление анкеты текущего авторизованного пользователя
   static Future<void> syncCurrentProfile(UserProfile updatedProfile) async {
     final accounts = await _getAllAccounts();

@@ -12,7 +12,13 @@ import re
 import unittest
 from datetime import datetime
 from ai_service import get_astronomical_context, clean_markdown_formatting, split_into_topic_messages
-from user_service import register_or_update_user, get_all_users
+from user_service import (
+    register_or_update_user,
+    get_all_users,
+    delete_user_by_id,
+    delete_user_by_contact,
+    reset_user_password,
+)
 
 
 class SecurityAndLogicAuditTest(unittest.TestCase):
@@ -453,6 +459,76 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
                     self.assertNotIn("Олег", p, f"В файле {idx_file} для даты {entry.get('date')} найдено имя Олег: {p}")
 
         print("✅ Тест 13 пройден: Превью архива гарантированно очищены от имени автора «Олег» и натальных аспектов.")
+
+    def test_14_email_and_google_auth_compliance(self):
+        """Проверка соответствия требованиям Google Play: регистрация по Email, вход через Google, сброс пароля и удаление аккаунта."""
+        # 1. Регистрация нового аккаунта по Email
+        test_email = "play_store_user_2026@testmail.com"
+        # Предварительная очистка на случай предыдущих тестов
+        delete_user_by_contact(test_email)
+
+        created_user = register_or_update_user({
+            "name": "Тестовый Пользователь",
+            "email": test_email,
+            "auth_type": "email",
+            "birth_date": "1995-05-15",
+            "birth_time": "14:30",
+            "birth_place": "Алматы",
+            "current_city": "Астана",
+        })
+        self.assertEqual(created_user["email"], test_email)
+        self.assertEqual(created_user["auth_type"], "email")
+        self.assertTrue(created_user["id"].startswith("usr_"))
+
+        # 2. Проверка строгого запрета дубликата контакта
+        with self.assertRaises(ValueError):
+            register_or_update_user({
+                "name": "Дубликат",
+                "email": test_email,
+            })
+
+        # 3. Восстановление / сброс пароля
+        fake_hash = "sha256_mocked_hash_value_987654"
+        reset_ok = reset_user_password(test_email, fake_hash)
+        self.assertTrue(reset_ok, "Сброс пароля должен вернуть True")
+        # Проверяем, что в реестре сохранился новый хэш
+        users = get_all_users()
+        user_in_reg = next((u for u in users if u.get("email") == test_email), None)
+        self.assertIsNotNone(user_in_reg)
+        self.assertEqual(user_in_reg.get("password_hash"), fake_hash)
+
+        # 4. Опциональный вход через Google
+        google_email = "play_google_user_2026@gmail.com"
+        delete_user_by_contact(google_email)
+        g_user = register_or_update_user({
+            "name": "Google User",
+            "email": google_email,
+            "auth_type": "google",
+            "birth_date": "1998-11-20",
+        })
+        self.assertEqual(g_user["auth_type"], "google")
+
+        # 5. Обязательное удаление аккаунта (Google Play Policy & GDPR)
+        del_ok = delete_user_by_id(created_user["id"])
+        self.assertTrue(del_ok, "Удаление по ID должно пройти успешно")
+        del_g_ok = delete_user_by_contact(google_email)
+        self.assertTrue(del_g_ok, "Удаление Google профиля должно пройти успешно")
+
+        # Проверяем отсутствие удаленных аккаунтов в реестре
+        updated_users = get_all_users()
+        self.assertIsNone(next((u for u in updated_users if u.get("id") == created_user["id"]), None))
+        self.assertIsNone(next((u for u in updated_users if u.get("email") == google_email), None))
+
+        # 6. Проверка наличия файла Политики конфиденциальности и ключевых разделов
+        policy_path = os.path.join(os.path.dirname(__file__), "PRIVACY_POLICY.md")
+        self.assertTrue(os.path.exists(policy_path), "Файл PRIVACY_POLICY.md должен существовать в корне проекта")
+        with open(policy_path, "r", encoding="utf-8") as f:
+            policy_text = f.read()
+        self.assertIn("Политика конфиденциальности", policy_text)
+        self.assertIn("Удаление аккаунта и данных", policy_text)
+        self.assertIn("support@horoscope-for-all.ru", policy_text)
+
+        print("✅ Тест 14 пройден: Полное соответствие требованиям Google Play (Email, Google, сброс пароля, удаление аккаунта, Privacy Policy).")
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../models/user_profile.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
+import '../widgets/privacy_policy_dialog.dart';
 import 'profile_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -143,6 +144,293 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     }
   }
 
+  void _showForgotPasswordDialog() {
+    final emailCtrl = TextEditingController(text: _loginContactController.text.trim());
+    final newPassCtrl = TextEditingController();
+    final confirmPassCtrl = TextEditingController();
+    String? localError;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E2235),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: CosmicTheme.goldAccent, width: 1.2),
+              ),
+              title: Row(
+                children: const [
+                  Icon(Icons.lock_reset_rounded, color: CosmicTheme.goldAccent, size: 24),
+                  SizedBox(width: 10),
+                  Text(
+                    'Восстановление пароля',
+                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Введите адрес электронной почты, указанный при регистрации, и установите новый пароль:',
+                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                    ),
+                    const SizedBox(height: 14),
+                    if (localError != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(localError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                      ),
+                    TextField(
+                      controller: emailCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.email_outlined, color: CosmicTheme.goldAccent),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: newPassCtrl,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Новый пароль (от 6 символов)',
+                        prefixIcon: const Icon(Icons.key_outlined, color: CosmicTheme.cyanAccent),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: confirmPassCtrl,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Повторите новый пароль',
+                        prefixIcon: const Icon(Icons.check_circle_outline, color: CosmicTheme.cyanAccent),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CosmicTheme.goldAccent,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () async {
+                    final email = emailCtrl.text.trim();
+                    final pass = newPassCtrl.text;
+                    final confirm = confirmPassCtrl.text;
+
+                    if (email.isEmpty || !AuthService.isEmail(email)) {
+                      setDialogState(() => localError = 'Введите корректный адрес электронной почты');
+                      return;
+                    }
+                    if (pass.length < 6) {
+                      setDialogState(() => localError = 'Пароль должен быть не менее 6 символов');
+                      return;
+                    }
+                    if (pass != confirm) {
+                      setDialogState(() => localError = 'Пароли не совпадают');
+                      return;
+                    }
+
+                    try {
+                      await AuthService.resetPassword(email: email, newPassword: pass);
+                      if (context.mounted) {
+                        Navigator.pop(ctx);
+                        _loginContactController.text = email;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            backgroundColor: Color(0xFF1E2235),
+                            content: Text(
+                              '✅ Пароль успешно обновлен! Теперь выполните вход с новым паролем.',
+                              style: TextStyle(color: CosmicTheme.goldAccent),
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      setDialogState(() => localError = e.toString().replaceAll('Exception: ', ''));
+                    }
+                  },
+                  child: const Text('Сохранить пароль', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showGoogleLoginDialog() {
+    final emailController = TextEditingController();
+    final nameController = TextEditingController();
+    String? localError;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1E2235),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: const BorderSide(color: Color(0xFF4285F4), width: 1.2),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 28),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Вход через Google',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Опциональный быстрый вход для устройств с аккаунтом Google. Данные профиля синхронизируются локально:',
+                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                    ),
+                    const SizedBox(height: 16),
+                    if (localError != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(localError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                      ),
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Email Google аккаунта',
+                        hintText: 'user@gmail.com',
+                        hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
+                        prefixIcon: const Icon(Icons.alternate_email, color: Color(0xFF4285F4)),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: nameController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Ваше имя в профиле',
+                        prefixIcon: const Icon(Icons.person_outline, color: CosmicTheme.goldAccent),
+                        filled: true,
+                        fillColor: Colors.black26,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF1F1F1F),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  onPressed: () async {
+                    final email = emailController.text.trim();
+                    final name = nameController.text.trim();
+
+                    if (email.isEmpty || !AuthService.isEmail(email)) {
+                      setDialogState(() => localError = 'Введите корректный адрес Google почты (@gmail.com)');
+                      return;
+                    }
+
+                    Navigator.pop(ctx);
+                    setState(() => _isLoading = true);
+
+                    try {
+                      final profile = await AuthService.loginWithGoogle(
+                        email: email,
+                        name: name.isNotEmpty ? name : email.split('@')[0],
+                      );
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            backgroundColor: const Color(0xFF1E2235),
+                            content: Text('✨ Вы успешно вошли через Google (${profile.email})!'),
+                          ),
+                        );
+                        Navigator.pop(context, profile);
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        setState(() {
+                          _errorMessage = e.toString().replaceAll('Exception: ', '');
+                          _isLoading = false;
+                        });
+                      }
+                    }
+                  },
+                  child: const Text('Войти', style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _showTelegramLoginDialog() {
     final tgController = TextEditingController();
     final nameController = TextEditingController();
@@ -257,6 +545,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       appBar: AppBar(
         title: const Text('Личный профиль'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shield_outlined, color: CosmicTheme.goldAccent),
+            tooltip: 'Политика конфиденциальности',
+            onPressed: () => showPrivacyPolicyDialog(context),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: CosmicTheme.goldAccent,
@@ -328,11 +623,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             Center(
               child: Container(
-                width: 72,
-                height: 72,
+                width: 68,
+                height: 68,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
@@ -341,48 +636,48 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   boxShadow: [
                     BoxShadow(
                       color: CosmicTheme.goldAccent.withOpacity(0.35),
-                      blurRadius: 20,
-                      offset: const Offset(0, 6),
+                      blurRadius: 18,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
-                child: const Icon(Icons.lock_person_rounded, size: 38, color: Colors.black),
+                child: const Icon(Icons.mail_lock_rounded, size: 36, color: Colors.black),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             const Text(
-              'Вход в аккаунт',
+              'Вход по Email',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             const Text(
-              'Один телефон или почта — один аккаунт',
+              'Основной независимый вход по электронной почте или телефону',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: CosmicTheme.textSecondary),
+              style: TextStyle(fontSize: 12.5, color: CosmicTheme.textSecondary),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Поле Контакт
+            // Поле Email / Контакт
             TextFormField(
               controller: _loginContactController,
               keyboardType: TextInputType.emailAddress,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Email или номер телефона',
-                hintText: 'example@mail.ru или +79991234567',
+                labelText: 'Email (или номер телефона)',
+                hintText: 'user@example.com или +79991234567',
                 hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
-                prefixIcon: const Icon(Icons.contact_mail_outlined, color: CosmicTheme.goldAccent),
+                prefixIcon: const Icon(Icons.alternate_email, color: CosmicTheme.goldAccent),
                 filled: true,
                 fillColor: const Color(0xFF191D2E),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Введите телефон или email';
+                if (v == null || v.trim().isEmpty) return 'Введите ваш Email или телефон';
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
             // Поле Пароль
             TextFormField(
@@ -391,7 +686,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Пароль',
-                prefixIcon: const Icon(Icons.key_outlined, color: CosmicTheme.cyanAccent),
+                prefixIcon: const Icon(Icons.lock_outline, color: CosmicTheme.cyanAccent),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _loginObscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -408,7 +703,23 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 return null;
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 6),
+
+            // Кнопка Забыли пароль?
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: _showForgotPasswordDialog,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                ),
+                child: const Text(
+                  'Забыли пароль?',
+                  style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
 
             // Кнопка Войти
             ElevatedButton(
@@ -416,7 +727,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               style: ElevatedButton.styleFrom(
                 backgroundColor: CosmicTheme.goldAccent,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 6,
               ),
@@ -431,7 +742,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 18),
 
             // Разделитель
             Row(
@@ -439,25 +750,74 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 Expanded(child: Divider(color: Colors.white12)),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('ИЛИ', style: TextStyle(color: Colors.white38, fontSize: 12)),
+                  child: Text('ИЛИ ДРУГИЕ СПОСОБЫ', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
                 Expanded(child: Divider(color: Colors.white12)),
               ],
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: 16),
+
+            // Опциональный вход через Google
+            ElevatedButton(
+              onPressed: _isLoading ? null : _showGoogleLoginDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF1F1F1F),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black12),
+                    ),
+                    child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 24),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Войти через Google',
+                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF1F1F1F)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
 
             // Быстрый вход через Telegram
             OutlinedButton.icon(
               onPressed: _isLoading ? null : _showTelegramLoginDialog,
-              icon: const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 20),
+              icon: const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 19),
               label: const Text(
                 'Войти через Telegram',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFF29B6F6), width: 1.2),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            // Ссылка на Политику конфиденциальности
+            Center(
+              child: TextButton.icon(
+                onPressed: () => showPrivacyPolicyDialog(context),
+                icon: const Icon(Icons.shield_outlined, color: CosmicTheme.textSecondary, size: 16),
+                label: const Text(
+                  'Политика конфиденциальности',
+                  style: TextStyle(
+                    color: CosmicTheme.textSecondary,
+                    fontSize: 12,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
               ),
             ),
           ],
@@ -477,13 +837,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           children: [
             const SizedBox(height: 6),
             const Text(
-              'Регистрация профиля',
+              'Регистрация по Email',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 4),
             const Text(
-              'Один телефон или почта закрепляется за одним аккаунтом',
+              'Один аккаунт надежно защищает вашу персональную натальную карту',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.5, color: CosmicTheme.textSecondary),
             ),
@@ -505,22 +865,22 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             ),
             const SizedBox(height: 14),
 
-            // Контакт
+            // Контакт / Email
             TextFormField(
               controller: _regContactController,
               keyboardType: TextInputType.emailAddress,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Телефон или Email (уникальный контакт)',
-                hintText: '+79991234567 или user@mail.ru',
+                labelText: 'Email (или номер телефона)',
+                hintText: 'user@example.com или +79991234567',
                 hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
-                prefixIcon: const Icon(Icons.contact_phone_outlined, color: CosmicTheme.cyanAccent),
+                prefixIcon: const Icon(Icons.email_outlined, color: CosmicTheme.cyanAccent),
                 filled: true,
                 fillColor: const Color(0xFF191D2E),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Укажите телефон или email';
+                if (v == null || v.trim().isEmpty) return 'Укажите email или телефон';
                 if (!AuthService.isEmail(v) && !AuthService.isPhone(v)) {
                   return 'Укажите корректный email или номер телефона (+7...)';
                 }
@@ -562,7 +922,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Повторите пароль',
-                prefixIcon: const Icon(Icons.lock_clock_outlined, color: CosmicTheme.cyanAccent),
+                prefixIcon: const Icon(Icons.check_circle_outline, color: CosmicTheme.cyanAccent),
                 filled: true,
                 fillColor: const Color(0xFF191D2E),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
@@ -572,7 +932,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 return null;
               },
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 20),
 
             // Кнопка Создать аккаунт
             ElevatedButton(
@@ -580,7 +940,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               style: ElevatedButton.styleFrom(
                 backgroundColor: CosmicTheme.goldAccent,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: const EdgeInsets.symmetric(vertical: 15),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 6,
               ),
@@ -595,20 +955,94 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
             ),
+            const SizedBox(height: 18),
+
+            // Разделитель
+            Row(
+              children: const [
+                Expanded(child: Divider(color: Colors.white12)),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('ИЛИ ДРУГИЕ СПОСОБЫ', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+                Expanded(child: Divider(color: Colors.white12)),
+              ],
+            ),
             const SizedBox(height: 16),
+
+            // Регистрация через Google
+            ElevatedButton(
+              onPressed: _isLoading ? null : _showGoogleLoginDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: const Color(0xFF1F1F1F),
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black12),
+                    ),
+                    child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 24),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Регистрация через Google',
+                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF1F1F1F)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
 
             // Быстрый вход через Telegram
             OutlinedButton.icon(
               onPressed: _isLoading ? null : _showTelegramLoginDialog,
-              icon: const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 20),
+              icon: const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 19),
               label: const Text(
                 'Быстрая регистрация через Telegram',
                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFF29B6F6), width: 1.2),
-                padding: const EdgeInsets.symmetric(vertical: 14),
+                padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Принятие Политики конфиденциальности
+            Center(
+              child: InkWell(
+                onTap: () => showPrivacyPolicyDialog(context),
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Text.rich(
+                    TextSpan(
+                      text: 'Регистрируясь, вы принимаете ',
+                      style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5),
+                      children: const [
+                        TextSpan(
+                          text: 'Политику конфиденциальности',
+                          style: TextStyle(
+                            color: CosmicTheme.goldAccent,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
               ),
             ),
           ],
