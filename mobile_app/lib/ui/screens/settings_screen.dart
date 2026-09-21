@@ -215,7 +215,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.23 (Release)',
+                            'Версия 1.0.24 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -337,7 +337,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             const SizedBox(height: 6),
                             const Text(
-                              '1. В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите «Без ограничений».\n2. На смартфонах Xiaomi/Huawei включите «Автозапуск».\n3. Включите разрешения на будильники и всплывающие окна.\n4. Для 100% гарантии подключите Telegram-бота ниже.',
+                              '1. В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите «Без ограничений».\n2. На смартфонах Xiaomi/Huawei включите «Автозапуск».\n3. Включите разрешения на будильники и всплывающие окна.'
+                              // '\n4. Для 100% гарантии подключите Telegram-бота ниже.',
+                              ,
                               style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
                             ),
                           ],
@@ -349,6 +351,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 20),
 
+              /*
               // Карточка Telegram-бота
               Container(
                 padding: const EdgeInsets.all(20),
@@ -458,6 +461,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+              */
 
               // Карточка синхронизации и кэша
               Container(
@@ -486,7 +490,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Прогнозы рассчитываются автономной астрологической системой и публикуются каждое утро. Приложение работает автономно без API-ключей.',
+                      'Прогнозы рассчитываются автономной астрологической системой и публикуются каждое утро.'
+                      // ' Приложение работает автономно без API-ключей.',
+                      ,
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.45),
                     ),
                     const SizedBox(height: 14),
@@ -546,7 +552,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     SizedBox(height: 10),
                     Text(
-                      '🌌 Автономный астрологический комплекс\nРасчет планетарных транзитов, аспектов и домов на базе фундаментальной классической астрологии и современных нейросетевых моделей искусственного интеллекта.',
+                      '🌌 Автономный астрологический комплекс\nРасчет планетарных транзитов, аспектов и домов на базе фундаментальной классической астрологии.'
+                      // ' и современных нейросетевых моделей искусственного интеллекта.',
+                      ,
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.5),
                     ),
                   ],
@@ -995,7 +1003,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Приложение автоматически проверяет появление свежего утреннего прогноза в фоновом режиме каждые 15 минут. Шторка смартфона остается абсолютно чистой — уведомление появляется ТОЛЬКО когда готов новый гороскоп дня!',
+            'Приложение автоматически проверяет появление свежего утреннего прогноза в фоновом режиме каждые 15 минут.'
+            // ' Шторка смартфона остается абсолютно чистой — уведомление появляется ТОЛЬКО когда готов новый гороскоп дня!',
+            ,
             style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
           ),
           const SizedBox(height: 14),
@@ -1017,8 +1027,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Expanded(
                   child: Text(
                     _backgroundServiceActive
-                        ? 'Статус: Активно в фоне (без лишних значков в шторке)'
-                        : 'Статус: Отключено (проверка только при открытии)',
+                        ? 'Статус: Активно в фоне' // (без лишних значков в шторке)
+                        : 'Статус: Отключено', // (проверка только при открытии)
                     style: TextStyle(
                       color: _backgroundServiceActive ? Colors.greenAccent : CosmicTheme.textSecondary,
                       fontSize: 12.5,
@@ -1081,6 +1091,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
+          /*
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
@@ -1110,6 +1121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
+          */
         ],
       ),
     );
