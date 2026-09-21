@@ -327,19 +327,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           children: [
                             const Row(
                               children: [
-                                Icon(Icons.info_outline_rounded, color: Colors.amberAccent, size: 16),
+                                Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
                                 SizedBox(width: 6),
                                 Text(
-                                  'Если уведомления в телефоне не приходят:',
+                                  'Рекомендации по питанию и работе в фоновом режиме:',
                                   style: TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
                             const Text(
-                              '1. В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите «Без ограничений».\n2. На смартфонах Xiaomi/Huawei включите «Автозапуск».\n3. Включите разрешения на будильники и всплывающие окна.'
-                              // '\n4. Для 100% гарантии подключите Telegram-бота ниже.',
-                              ,
+                              '1. В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите «Без ограничений».\n2. На смартфонах Xiaomi/Huawei/Samsung включите «Автозапуск» в фоне.\n3. Включите разрешения на будильники и работу в фоновом режиме.',
                               style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
                             ),
                           ],
@@ -1091,37 +1089,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-          /*
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: const Color(0xFF161C2C),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: CosmicTheme.goldAccent.withOpacity(0.2)),
+              border: Border.all(color: Colors.amberAccent.withOpacity(0.25)),
             ),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    Icon(Icons.info_outline_rounded, color: CosmicTheme.goldSoft, size: 16),
+                    Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
                     SizedBox(width: 6),
                     Text(
-                      'Чистая шторка и надежная доставка:',
-                      style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 12, fontWeight: FontWeight.bold),
+                      'Рекомендации по питанию и работе в фоновом режиме:',
+                      style: TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
                 SizedBox(height: 6),
                 Text(
-                  '• В шторке смартфона больше нет постоянных служебных значков.\n• Оповещение появляется ТОЛЬКО при выходе свежего прогноза дня.\n• Смахивание уведомления о новом гороскопе не отключает фоновый цикл проверки.\n• Для максимальной надежности в настройках телефона выберите режим батареи «Без ограничений».',
+                  '• В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите режим «Без ограничений».\n• На смартфонах Xiaomi, Huawei, Samsung включите «Автозапуск» и фоновую работу.\n• Смахивание уведомления о новом гороскопе не отключает фоновый цикл проверки.\n• Для быстрого перехода используйте кнопку «Режим батареи» выше.',
                   style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
                 ),
               ],
             ),
           ),
-          */
         ],
       ),
     );
