@@ -237,8 +237,8 @@ def generate_archive_preview(greeting: str, display_date: str = "") -> str:
     return clean
 
 
-def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
-    """Сохраняет персональный прогноз в data/latest_horoscope.json и data/archive/."""
+def save_horoscope_to_archive(raw_text: str, target_date: str = None, lang: str = "ru") -> dict:
+    """Сохраняет персональный прогноз в data/latest_horoscope[_<lang>].json и data/archive/."""
     ensure_directories()
     if not target_date:
         target_date = datetime.now().strftime("%d.%m.%Y")
@@ -253,11 +253,21 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
 
     data_payload = parse_horoscope_structure(raw_text, display_date)
 
-    latest_path = os.path.join(DATA_DIR, "latest_horoscope.json")
+    latest_file_name = "latest_horoscope.json" if lang == "ru" else f"latest_horoscope_{lang}.json"
+    latest_path = os.path.join(DATA_DIR, latest_file_name)
     with open(latest_path, "w", encoding="utf-8") as f:
         json.dump(data_payload, f, ensure_ascii=False, indent=2)
 
-    archive_file_name = f"horoscope_{iso_key}.json"
+    # Синхронизируем со встроенными ассетами мобильного приложения
+    assets_dir = os.path.join(os.path.dirname(__file__), "mobile_app", "assets", "data")
+    if os.path.exists(assets_dir):
+        try:
+            with open(os.path.join(assets_dir, latest_file_name), "w", encoding="utf-8") as f:
+                json.dump(data_payload, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    archive_file_name = f"horoscope_{iso_key}.json" if lang == "ru" else f"horoscope_{iso_key}_{lang}.json"
     archive_file_path = os.path.join(ARCHIVE_DIR, archive_file_name)
     with open(archive_file_path, "w", encoding="utf-8") as f:
         json.dump(data_payload, f, ensure_ascii=False, indent=2)
@@ -292,12 +302,12 @@ def save_horoscope_to_archive(raw_text: str, target_date: str = None) -> dict:
     # Применение правила 60 дней
     prune_archive(MAX_ARCHIVE_DAYS)
 
-    print(f"🗄️ Персональный гороскоп на {display_date} сохранен в архив: {archive_file_name} (период хранения: {MAX_ARCHIVE_DAYS} дн.)")
+    print(f"🗄️ Персональный гороскоп на {display_date} ({lang}) сохранен в архив: {archive_file_name}")
     return data_payload
 
 
-def save_zodiac_to_archive(raw_text: str, target_date: str = None) -> dict:
-    """Сохраняет гороскоп по 12 знакам зодиака в data/latest_zodiac.json и data/archive/."""
+def save_zodiac_to_archive(raw_text: str, target_date: str = None, lang: str = "ru") -> dict:
+    """Сохраняет гороскоп по 12 знакам зодиака в data/latest_zodiac[_<lang>].json и data/archive/."""
     ensure_directories()
     if not target_date:
         target_date = datetime.now().strftime("%d.%m.%Y")
@@ -312,11 +322,21 @@ def save_zodiac_to_archive(raw_text: str, target_date: str = None) -> dict:
 
     zodiac_payload = parse_zodiac_structure(raw_text, display_date)
 
-    latest_zodiac_path = os.path.join(DATA_DIR, "latest_zodiac.json")
+    latest_zodiac_file_name = "latest_zodiac.json" if lang == "ru" else f"latest_zodiac_{lang}.json"
+    latest_zodiac_path = os.path.join(DATA_DIR, latest_zodiac_file_name)
     with open(latest_zodiac_path, "w", encoding="utf-8") as f:
         json.dump(zodiac_payload, f, ensure_ascii=False, indent=2)
 
-    archive_zodiac_name = f"zodiac_{iso_key}.json"
+    # Синхронизируем со встроенными ассетами мобильного приложения
+    assets_dir = os.path.join(os.path.dirname(__file__), "mobile_app", "assets", "data")
+    if os.path.exists(assets_dir):
+        try:
+            with open(os.path.join(assets_dir, latest_zodiac_file_name), "w", encoding="utf-8") as f:
+                json.dump(zodiac_payload, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+
+    archive_zodiac_name = f"zodiac_{iso_key}.json" if lang == "ru" else f"zodiac_{iso_key}_{lang}.json"
     archive_zodiac_path = os.path.join(ARCHIVE_DIR, archive_zodiac_name)
     with open(archive_zodiac_path, "w", encoding="utf-8") as f:
         json.dump(zodiac_payload, f, ensure_ascii=False, indent=2)

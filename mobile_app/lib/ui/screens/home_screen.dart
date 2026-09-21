@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 import '../../models/horoscope_model.dart';
 import '../../models/user_profile.dart';
 import '../../services/horoscope_sync_service.dart';
@@ -49,13 +51,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    CosmicHoroscopeApp.localeNotifier.addListener(_onLocaleChanged);
     _fetchLatestHoroscope();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    CosmicHoroscopeApp.localeNotifier.removeListener(_onLocaleChanged);
     super.dispose();
+  }
+
+  void _onLocaleChanged() {
+    if (mounted) {
+      _fetchLatestHoroscope(forceRefresh: false);
+    }
   }
 
   @override
@@ -139,6 +149,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -155,9 +167,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
             const SizedBox(width: 10),
-            const Text(
-              'Астро Гороскоп',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              l10n.appTitle,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -181,14 +193,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.circle, color: Colors.white, size: 7),
-                    SizedBox(width: 5),
+                    const Icon(Icons.circle, color: Colors.white, size: 7),
+                    const SizedBox(width: 5),
                     Text(
-                      'НОВОЕ',
-                      style: TextStyle(
+                      l10n.newBadge,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
@@ -201,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(begin: const Offset(1, 1), end: const Offset(1.06, 1.06), duration: 800.ms),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: CosmicTheme.cyanAccent),
-            tooltip: 'Настройки',
+            tooltip: l10n.settingsTitle,
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -219,6 +231,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildBody() {
+    final l10n = AppLocalizations.of(context);
+
     if (_isLoading && _horoscope == null) {
       return Center(
         child: Column(
@@ -233,9 +247,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               child: const CircularProgressIndicator(color: CosmicTheme.goldAccent),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Загрузка свежего прогноза дня...',
-              style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 14),
+            Text(
+              l10n.loading,
+              style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 14),
             ),
           ],
         ),
@@ -259,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => _fetchLatestHoroscope(forceRefresh: true),
-                child: const Text('Обновить'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -469,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      item['name']!,
+                      AppLocalizations.of(context).zodiacSignName(item['id']!),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

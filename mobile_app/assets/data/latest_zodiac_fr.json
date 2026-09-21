@@ -1,0 +1,151 @@
+{
+  "date": "21.09.2026",
+  "raw_text": "Bonjour ! Abordez cette journée avec sérénité, confiance et harmonie céleste. ☕️✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Bélier",
+      "symbol": "♈",
+      "dates": "21 mars – 19 avr",
+      "element": "Feu",
+      "color": "0xFFE63946",
+      "focus": "Conseil: Établissez un plan précis et suivez-le avec rigueur.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Votre énergie demande de la méthode. La Lune en Capricorne récompense la constance sur l'agitation.\n\nCONSEIL DU JOUR ☝️ Fixez vos priorités et avancez étape par étape."
+    },
+    {
+      "id": "taurus",
+      "name": "Taureau",
+      "symbol": "♉",
+      "dates": "20 avr – 20 mai",
+      "element": "Terre",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Consolidez vos compétences et vos bases matérielles.",
+      "energy": "88%",
+      "lucky_hours": "11:00–13:00",
+      "forecast": "Journée parfaite pour poser des bases durables. Votre bon sens éclaire des solutions rentables.\n\nCONSEIL DU JOUR ☝️ Investissez du temps dans votre perfectionnement professionnel."
+    },
+    {
+      "id": "gemini",
+      "name": "Gémeaux",
+      "symbol": "♊",
+      "dates": "21 mai – 20 juin",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Évitez la dispersion et focalisez-vous sur l'essentiel.",
+      "energy": "82%",
+      "lucky_hours": "09:30–11:30",
+      "forecast": "Concentration requise. Déployez vos efforts sur un objectif majeur pour préserver votre énergie.\n\nCONSEIL DU JOUR ☝️ Remettez les bavardages futiles à un moment plus opportun."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21 juin – 22 juil",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Témoignez de l'attention et de la bienveillance à vos proches.",
+      "energy": "86%",
+      "lucky_hours": "14:00–16:00",
+      "forecast": "Votre intuition s'associe harmonieusement à la logique terrienne pour renforcer vos partenariats.\n\nCONSEIL DU JOUR ☝️ Prenez soin de votre entourage intime avec tendresse."
+    },
+    {
+      "id": "leo",
+      "name": "Lion",
+      "symbol": "♌",
+      "dates": "23 juil – 22 août",
+      "element": "Feu",
+      "color": "0xFFF4A261",
+      "focus": "Conseil: Agissez avec calme et prouvez votre valeur par vos actes.",
+      "energy": "84%",
+      "lucky_hours": "12:00–14:00",
+      "forecast": "Gardez une dignité souveraine. Laissez la qualité de votre travail témoigner pour vous.\n\nCONSEIL DU JOUR ☝️ Travaillez patiemment sans exiger d'acclamations hâtives."
+    },
+    {
+      "id": "virgo",
+      "name": "Vierge",
+      "symbol": "♍",
+      "dates": "23 août – 22 sept",
+      "element": "Terre",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Ordonnez votre espace de travail pour libérer votre clarté.",
+      "energy": "92%",
+      "lucky_hours": "08:30–10:30",
+      "forecast": "Le Soleil dans votre signe affûte votre discernement. Un cadre ordonné décuple votre efficacité.\n\nCONSEIL DU JOUR ☝️ Organisez impeccablement vos dossiers et outils."
+    },
+    {
+      "id": "libra",
+      "name": "Balance",
+      "symbol": "♎",
+      "dates": "23 sept – 22 oct",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Trouvez un juste équilibre avantageux pour tous.",
+      "energy": "83%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "Votre doigté diplomatique permet de dénouer avec tact les situations délicates.\n\nCONSEIL DU JOUR ☝️ Visez un accord équitable et harmonieux."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpion",
+      "symbol": "♏",
+      "dates": "23 oct – 21 nov",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Allégez-vous des fardeaux du passé pour avancer.",
+      "energy": "90%",
+      "lucky_hours": "16:00–18:00",
+      "forecast": "Période idéale pour une transformation stratégique. Libérez-vous des distractions superflues.\n\nCONSEIL DU JOUR ☝️ Écartez résolument ce qui entrave votre envol."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittaire",
+      "symbol": "♐",
+      "dates": "22 nov – 21 déc",
+      "element": "Feu",
+      "color": "0xFFE76F51",
+      "focus": "Conseil: Examinez soigneusement chaque clause avant de vous engager.",
+      "energy": "80%",
+      "lucky_hours": "11:30–13:30",
+      "forecast": "Alliez enthousiasme et rigueur calculée. Prenez le temps de tout vérifier.\n\nCONSEIL DU JOUR ☝️ Relisez attentivement les documents avant signature."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorne",
+      "symbol": "♑",
+      "dates": "22 déc – 19 janv",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Prenez la tête des initiatives les plus complexes.",
+      "energy": "95%",
+      "lucky_hours": "09:00–11:00",
+      "forecast": "La Lune dans votre signe confère une endurance remarquable. Le moment est venu de concrétiser de grands desseins.\n\nCONSEIL DU JOUR ☝️ Assumez la direction des projets stratégiques."
+    },
+    {
+      "id": "aquarius",
+      "name": "Verseau",
+      "symbol": "♒",
+      "dates": "20 janv – 18 févr",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Fiez-vous à votre vision créative pour les questions d'argent.",
+      "energy": "87%",
+      "lucky_hours": "13:00–15:00",
+      "forecast": "Écoutez votre voix intérieure plutôt que le consensus. Votre originalité dénoue les blocages.\n\nCONSEIL DU JOUR ☝️ Faites confiance à vos idées novatrices."
+    },
+    {
+      "id": "pisces",
+      "name": "Poissons",
+      "symbol": "♓",
+      "dates": "19 févr – 20 mars",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Structurez vos inspirations en jalons concrets.",
+      "energy": "84%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Le pragmatisme est à l'honneur. Déclinez vos belles intuitions en étapes d'action concrètes.\n\nCONSEIL DU JOUR ☝️ Notez vos objectifs par écrit pour les matérialiser."
+    }
+  ],
+  "updated_at": "2026-09-21T16:52:11.169298Z"
+}

@@ -1,0 +1,151 @@
+{
+  "date": "21.09.2026",
+  "raw_text": "Guten Morgen! Starten Sie voller Zuversicht und im Einklang mit den kosmischen Energien in den Tag. ☕️✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Widder",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Feuer",
+      "color": "0xFFE63946",
+      "focus": "Rat: Erstellen Sie einen klaren Tagesplan und folgen Sie ihm konsequent.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Ihre Tatkraft verlangt nach Ausrichtung. Der Steinbock-Mond belohnt Disziplin und strategisches Vorgehen.\n\nRAT DES TAGES ☝️ Setzen Sie klare Prioritäten und arbeiten Sie diese strukturiert ab."
+    },
+    {
+      "id": "taurus",
+      "name": "Stier",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Erde",
+      "color": "0xFF2A9D8F",
+      "focus": "Rat: Investieren Sie in Fachwissen und nachhaltige Grundlagen.",
+      "energy": "88%",
+      "lucky_hours": "11:00–13:00",
+      "forecast": "Ein idealer Tag zur Absicherung künftiger Erfolge. Ihr Realitätssinn deckt beste Chancen auf.\n\nRAT DES TAGES ☝️ Nutzen Sie den Tag für berufliche Weiterentwicklung."
+    },
+    {
+      "id": "gemini",
+      "name": "Zwillinge",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Luft",
+      "color": "0xFFE9C46A",
+      "focus": "Rat: Vermeiden Sie Ablenkungen und vertiefen Sie ein Kernziel.",
+      "energy": "82%",
+      "lucky_hours": "09:30–11:30",
+      "forecast": "Fokussierung ist der Schlüssel. Konzentrieren Sie sich auf eine wichtige Kernaufgabe, um Kräfte zu schonen.\n\nRAT DES TAGES ☝️ Verschieben Sie Nebensächlichkeiten auf den Feierabend."
+    },
+    {
+      "id": "cancer",
+      "name": "Krebs",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Wasser",
+      "color": "0xFF457B9D",
+      "focus": "Rat: Schenken Sie Familie und Partnern aufmerksame Fürsorge.",
+      "energy": "86%",
+      "lucky_hours": "14:00–16:00",
+      "forecast": "Intuition und Erdung wirken optimal zusammen, um Partnerschaften und Vertrauen zu festigen.\n\nRAT DES TAGES ☝️ Zeigen Sie Ihren Nächsten Wertschätzung; es stärkt Ihre Bande."
+    },
+    {
+      "id": "leo",
+      "name": "Löwe",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Feuer",
+      "color": "0xFFF4A261",
+      "focus": "Rat: Handeln Sie souverän und überzeugen Sie durch Resultate.",
+      "energy": "84%",
+      "lucky_hours": "12:00–14:00",
+      "forecast": "Wahren Sie gelassene Würde. Lassen Sie Arbeitsqualität sprechen statt Worte.\n\nRAT DES TAGES ☝️ Arbeiten Sie stetig ohne Drang nach sofortigem Lob."
+    },
+    {
+      "id": "virgo",
+      "name": "Jungfrau",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Erde",
+      "color": "0xFF2A9D8F",
+      "focus": "Rat: Bringen Sie Arbeitsbereich und Dokumente in perfekte Ordnung.",
+      "energy": "92%",
+      "lucky_hours": "08:30–10:30",
+      "forecast": "Die Sonne in Ihrem Zeichen schärft den Verstand. Äußere Ordnung beflügelt Ihre mentale Klarheit.\n\nRAT DES TAGES ☝️ Schaffen Sie eine aufgeräumte Arbeitsatmosphäre."
+    },
+    {
+      "id": "libra",
+      "name": "Waage",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Luft",
+      "color": "0xFFE9C46A",
+      "focus": "Rat: Finden Sie faire Kompromisse für alle Beteiligten.",
+      "energy": "83%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "Ihr diplomatisches Geschick löst komplexe geschäftliche Herausforderungen souverän.\n\nRAT DES TAGES ☝️ Setzen Sie auf ausgewogene Einigungen."
+    },
+    {
+      "id": "scorpio",
+      "name": "Skorpion",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Wasser",
+      "color": "0xFF457B9D",
+      "focus": "Rat: Lösen Sie sich von Überholtem für kraftvollen Neubeginn.",
+      "energy": "90%",
+      "lucky_hours": "16:00–18:00",
+      "forecast": "Günstige Konstellation für strategische Erneuerung. Schaffen Sie Raum für zukunftsträchtige Projekte.\n\nRAT DES TAGES ☝️ Trennen Sie sich mutig von Ballast."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Schütze",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Feuer",
+      "color": "0xFFE76F51",
+      "focus": "Rat: Prüfen Sie Verträge und Abmachungen mit größter Sorgfalt.",
+      "energy": "80%",
+      "lucky_hours": "11:30–13:30",
+      "forecast": "Optimismus gepaart mit kühlem Verstand führt zum Erfolg. Wägen Sie Entscheidungen gründlich ab.\n\nRAT DES TAGES ☝️ Lesen Sie Vereinbarungen vor der Unterschrift genau durch."
+    },
+    {
+      "id": "capricorn",
+      "name": "Steinbock",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Erde",
+      "color": "0xFF2A9D8F",
+      "focus": "Rat: Übernehmen Sie die Regie bei den anspruchsvollsten Zielen.",
+      "energy": "95%",
+      "lucky_hours": "09:00–11:00",
+      "forecast": "Der Mond in Ihrem Zeichen verleiht enorme Ausdauer. Ein Tag der Bestätigung für zielstrebige Macher.\n\nRAT DES TAGES ☝️ Packen Sie die komplexesten Aufgaben an."
+    },
+    {
+      "id": "aquarius",
+      "name": "Wassermann",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Luft",
+      "color": "0xFFE9C46A",
+      "focus": "Rat: Vertrauen Sie bei Finanzthemen auf innovative Ideen.",
+      "energy": "87%",
+      "lucky_hours": "13:00–15:00",
+      "forecast": "Vertrauen Sie Ihrer Intuition statt Konventionen. Ein kreativer Blickwinkel löst scheinbare Sackgassen.\n\nRAT DES TAGES ☝️ Setzen Sie auf originelle Lösungsansätze."
+    },
+    {
+      "id": "pisces",
+      "name": "Fische",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Wasser",
+      "color": "0xFF457B9D",
+      "focus": "Rat: Formulieren Sie Träume in konkrete Aktionsschritte.",
+      "energy": "84%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Pragmatismus ist heute gefragt. Bringen Sie Ihre feinen Visionen strukturiert auf Papier.\n\nRAT DES TAGES ☝️ Halten Sie Ihre Ziele schriftlich fest."
+    }
+  ],
+  "updated_at": "2026-09-21T16:52:11.169298Z"
+}

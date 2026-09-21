@@ -13,7 +13,19 @@ class StorageService {
   static const String _keyNotifEnabled = 'cosmic_notif_enabled';
   static const String _keyNotifHour = 'cosmic_notif_hour';
   static const String _keyNotifMinute = 'cosmic_notif_minute';
+  static const String _keyLanguage = 'cosmic_selected_language';
   static const String _prefixDay = 'cosmic_day_json_';
+
+  // Выбранный язык приложения (ru, en, es, de, fr)
+  static Future<String> getLanguageCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyLanguage) ?? 'ru';
+  }
+
+  static Future<void> setLanguageCode(String langCode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyLanguage, langCode);
+  }
 
   // Сохранение и получение профиля
   static Future<void> saveProfile(UserProfile profile) async {
@@ -39,15 +51,24 @@ class StorageService {
     await prefs.remove(_keyProfile);
   }
 
-  // Кэширование последнего актуального персонального прогноза
-  static Future<void> cacheLatestHoroscope(Map<String, dynamic> data) async {
+  // Кэширование последнего актуального персонального прогноза (с учетом языка)
+  static Future<void> cacheLatestHoroscope(Map<String, dynamic> data, [String? langCode]) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyLatest, jsonEncode(data));
+    final lang = langCode ?? await getLanguageCode();
+    await prefs.setString('${_keyLatest}_$lang', jsonEncode(data));
+    // Сохраняем и в дефолтный ключ для обратной совместимости
+    if (lang == 'ru') {
+      await prefs.setString(_keyLatest, jsonEncode(data));
+    }
   }
 
-  static Future<HoroscopeDay?> getLatestCachedHoroscope() async {
+  static Future<HoroscopeDay?> getLatestCachedHoroscope([String? langCode]) async {
     final prefs = await SharedPreferences.getInstance();
-    final str = prefs.getString(_keyLatest);
+    final lang = langCode ?? await getLanguageCode();
+    var str = prefs.getString('${_keyLatest}_$lang');
+    if ((str == null || str.isEmpty) && lang == 'ru') {
+      str = prefs.getString(_keyLatest);
+    }
     if (str != null && str.isNotEmpty) {
       try {
         return HoroscopeDay.fromJson(jsonDecode(str));
@@ -56,15 +77,24 @@ class StorageService {
     return null;
   }
 
-  // Кэширование гороскопа по 12 знакам зодиака
-  static Future<void> cacheZodiacJson(String jsonStr) async {
+  // Кэширование гороскопа по 12 знакам зодиака (с учетом языка)
+  static Future<void> cacheZodiacJson(String jsonStr, [String? langCode]) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyLatestZodiac, jsonStr);
+    final lang = langCode ?? await getLanguageCode();
+    await prefs.setString('${_keyLatestZodiac}_$lang', jsonStr);
+    if (lang == 'ru') {
+      await prefs.setString(_keyLatestZodiac, jsonStr);
+    }
   }
 
-  static Future<String?> getCachedZodiacJson() async {
+  static Future<String?> getCachedZodiacJson([String? langCode]) async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyLatestZodiac);
+    final lang = langCode ?? await getLanguageCode();
+    var str = prefs.getString('${_keyLatestZodiac}_$lang');
+    if ((str == null || str.isEmpty) && lang == 'ru') {
+      str = prefs.getString(_keyLatestZodiac);
+    }
+    return str;
   }
 
   // Выбранный пользователем знак зодиака (например: 'aries', 'leo')

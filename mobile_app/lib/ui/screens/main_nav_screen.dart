@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../theme/cosmic_theme.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
@@ -62,6 +63,7 @@ class _MainNavScreenState extends State<MainNavScreen> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final screens = [
       HomeScreen(onReadStateChanged: _checkUnreadStatus),
       const ZodiacScreen(),
@@ -112,9 +114,9 @@ class _MainNavScreenState extends State<MainNavScreen> with WidgetsBindingObserv
                   NavigationDestination(
                     icon: Badge(
                       isLabelVisible: _hasUnread,
-                      label: const Text(
-                        'NEW',
-                        style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
+                      label: Text(
+                        l10n.newBadge,
+                        style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       backgroundColor: const Color(0xFFFF3D71),
                       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
@@ -122,25 +124,25 @@ class _MainNavScreenState extends State<MainNavScreen> with WidgetsBindingObserv
                     ),
                     selectedIcon: Badge(
                       isLabelVisible: _hasUnread,
-                      label: const Text(
-                        'NEW',
-                        style: TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
+                      label: Text(
+                        l10n.newBadge,
+                        style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       backgroundColor: const Color(0xFFFF3D71),
                       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                       child: const Icon(Icons.stars_rounded, color: CosmicTheme.goldAccent),
                     ),
-                    label: 'Мой день',
+                    label: l10n.navMyDay,
                   ),
-                  const NavigationDestination(
-                    icon: Icon(Icons.auto_awesome_outlined, color: CosmicTheme.textSecondary),
-                    selectedIcon: Icon(Icons.auto_awesome, color: CosmicTheme.cyanAccent),
-                    label: 'Знаки зодиака',
+                  NavigationDestination(
+                    icon: const Icon(Icons.auto_awesome_outlined, color: CosmicTheme.textSecondary),
+                    selectedIcon: const Icon(Icons.auto_awesome, color: CosmicTheme.cyanAccent),
+                    label: l10n.navZodiac,
                   ),
-                  const NavigationDestination(
-                    icon: Icon(Icons.calendar_month_outlined, color: CosmicTheme.textSecondary),
-                    selectedIcon: Icon(Icons.calendar_month_rounded, color: CosmicTheme.goldSoft),
-                    label: 'Архив',
+                  NavigationDestination(
+                    icon: const Icon(Icons.calendar_month_outlined, color: CosmicTheme.textSecondary),
+                    selectedIcon: const Icon(Icons.calendar_month_rounded, color: CosmicTheme.goldSoft),
+                    label: l10n.navArchive,
                   ),
                 ],
               ),

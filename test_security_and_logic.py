@@ -530,6 +530,63 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 14 пройден: Полное соответствие требованиям Google Play (Email, Google, сброс пароля, удаление аккаунта, Privacy Policy).")
 
+    def test_15_multilingual_data_and_logic(self):
+        """Проверка целостности мультиязычной поддержки (RU, EN, ES, DE, FR) в данных и бэкенде."""
+        import json
+        from ai_service import build_horoscope_prompt, build_zodiac_prompt
+
+        project_root = os.path.dirname(__file__)
+        data_dir = os.path.join(project_root, "data")
+        assets_dir = os.path.join(project_root, "mobile_app", "assets", "data")
+        languages = ["ru", "en", "es", "de", "fr"]
+
+        # 1. Проверка наличия и валидности JSON файлов для всех языков
+        for lang in languages:
+            h_name = "latest_horoscope.json" if lang == "ru" else f"latest_horoscope_{lang}.json"
+            z_name = "latest_zodiac.json" if lang == "ru" else f"latest_zodiac_{lang}.json"
+
+            for base_dir in [data_dir, assets_dir]:
+                h_path = os.path.join(base_dir, h_name)
+                z_path = os.path.join(base_dir, z_name)
+
+                self.assertTrue(os.path.exists(h_path), f"Файл {h_name} должен существовать в {base_dir}")
+                self.assertTrue(os.path.exists(z_path), f"Файл {z_name} должен существовать в {base_dir}")
+
+                with open(h_path, "r", encoding="utf-8") as f:
+                    h_data = json.load(f)
+                self.assertIn("date", h_data)
+                self.assertIn("greeting", h_data)
+                self.assertIn("topics", h_data)
+                self.assertGreaterEqual(len(h_data["topics"]), 5)
+
+                with open(z_path, "r", encoding="utf-8") as f:
+                    z_data = json.load(f)
+                self.assertIn("date", z_data)
+                self.assertIn("signs", z_data)
+                self.assertEqual(len(z_data["signs"]), 12, f"В файле {z_name} должно быть ровно 12 знаков зодиака")
+                for s in z_data["signs"]:
+                    self.assertTrue(s.get("id"), "Каждый знак обязан иметь id")
+                    self.assertTrue(s.get("name"), "Каждый знак обязан иметь name")
+                    self.assertTrue(s.get("element"), "Каждый знак обязан иметь element")
+                    self.assertTrue(s.get("forecast"), "Каждый знак обязан иметь forecast")
+
+        # 2. Проверка генерации языковых директив в промптах
+        dummy_profile = {
+            "name": "Alex",
+            "birth_date": "15.05.1990",
+            "birth_time": "14:30",
+            "birth_city": "Berlin",
+            "current_city": "Berlin",
+        }
+        for lang, expected_keyword in [("en", "ENGLISH"), ("es", "ESPAÑOL"), ("de", "DEUTSCH"), ("fr", "FRANÇAIS")]:
+            prompt = build_horoscope_prompt(dummy_profile, "21.09.2026", lang=lang)
+            self.assertIn(expected_keyword, prompt, f"Промпт персонального гороскопа для {lang} должен содержать {expected_keyword}")
+
+            z_prompt = build_zodiac_prompt("21.09.2026", lang=lang)
+            self.assertIn(expected_keyword, z_prompt, f"Промпт гороскопа по знакам для {lang} должен содержать {expected_keyword}")
+
+        print("✅ Тест 15 пройден: Полная валидность мультиязычных файлов (RU, EN, ES, DE, FR) и директив генерации.")
+
 
 if __name__ == "__main__":
     unittest.main()

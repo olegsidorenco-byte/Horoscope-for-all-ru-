@@ -1,0 +1,151 @@
+{
+  "date": "21.09.2026",
+  "raw_text": "Good morning! May this day start with clarity, calm confidence, and deep trust in cosmic rhythms. The Universe is supporting your dedicated efforts today. ☕️✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "Mar 21 – Apr 19",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Advice: Organize a structured schedule and follow through methodically.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your vibrant energy requires a clear vector today. The Capricorn Moon calls for disciplined momentum rather than scattered hustle. Channel your drive into core projects.\n\nADVICE OF THE DAY ☝️ Establish a clear action plan and honor each step."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "Apr 20 – May 20",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Advice: Invest time in building professional mastery and practical skills.",
+      "energy": "88%",
+      "lucky_hours": "11:00–13:00",
+      "forecast": "A superb day for laying resilient foundations for lasting prosperity. Your calm practicality illuminates opportunities where others see obstacles.\n\nADVICE OF THE DAY ☝️ Invest focused attention into professional learning today."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "May 21 – Jun 20",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Advice: Set aside superficial chatter and dive deeply into one vital goal.",
+      "energy": "82%",
+      "lucky_hours": "09:30–11:30",
+      "forecast": "Today invites intellectual depth over fleeting exchanges. Zero in on one essential deliverable to conserve vital momentum.\n\nADVICE OF THE DAY ☝️ Postpone unproductive dialogue until a relaxed evening."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "Jun 21 – Jul 22",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Advice: Cultivate mutual trust and extend heartfelt warmth to partners.",
+      "energy": "86%",
+      "lucky_hours": "14:00–16:00",
+      "forecast": "Your intuition pairs harmoniously with earth-sign logic today. An ideal moment to fortify loyal alliances and resolve long-standing domestic questions.\n\nADVICE OF THE DAY ☝️ Show thoughtful care to loved ones; it deepens your natural bond."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "Jul 23 – Aug 22",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Advice: Work with quiet dignity and let your achievements speak loudly.",
+      "energy": "84%",
+      "lucky_hours": "12:00–14:00",
+      "forecast": "Maintain royal composure. Sidestep pointless debates and demonstrate your caliber through impeccable execution rather than boastful words.\n\nADVICE OF THE DAY ☝️ Build value quietly without demanding instant acclaim."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "Aug 23 – Sep 22",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Advice: Create immaculate order in your workspace to liberate mental clarity.",
+      "energy": "92%",
+      "lucky_hours": "08:30–10:30",
+      "forecast": "The Sun energizes your sign with exceptional analytical clarity. Streamlining your physical surroundings brings swift order to complex objectives.\n\nADVICE OF THE DAY ☝️ Bring pristine order to your workspace and tools."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "Sep 23 – Oct 22",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Advice: Seek graceful compromises that honor every party's interests.",
+      "energy": "83%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "Balance personal desires with practical realities. Your diplomatic finesse is the golden key to unlocking complex professional negotiations.\n\nADVICE OF THE DAY ☝️ Construct an elegant win-win agreement."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "Oct 23 – Nov 21",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Advice: Release outdated burdens to clear room for high-impact growth.",
+      "energy": "90%",
+      "lucky_hours": "16:00–18:00",
+      "forecast": "Today supports profound inner strategy and personal evolution. Decisively release unnecessary clutter to empower your most lucrative plans.\n\nADVICE OF THE DAY ☝️ Shed what no longer serves your elevated horizon."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "Nov 22 – Dec 21",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Advice: Verify every clause carefully before signing or committing resources.",
+      "energy": "80%",
+      "lucky_hours": "11:30–13:30",
+      "forecast": "Your natural optimism shines brightest when anchored in careful math. Take your time with responsible decisions—double-check details.\n\nADVICE OF THE DAY ☝️ Review every document meticulously before signing."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "Dec 22 – Jan 19",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Advice: Embrace leadership responsibility for the most challenging tasks.",
+      "energy": "95%",
+      "lucky_hours": "09:00–11:00",
+      "forecast": "The Moon in your sign grants formidable endurance and unyielding focus. A triumphant stretch for those patient enough to pursue ambitious summits.\n\nADVICE OF THE DAY ☝️ Take command of the most complex strategic assignments."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "Jan 20 – Feb 18",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Advice: Trust your innovative intuition on vital financial choices.",
+      "energy": "87%",
+      "lucky_hours": "13:00–15:00",
+      "forecast": "Listen to your inner spark rather than consensus. Your inventive perspective unlocks elegant solutions to seemingly intractable roadblocks.\n\nADVICE OF THE DAY ☝️ Trust your intuitive insight on critical business choices."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "Feb 19 – Mar 20",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Advice: Ground your beautiful visions onto paper with realistic action steps.",
+      "energy": "84%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Today calls for practical grounding. Your visions are inspiring, yet they require clear, sequential action steps to manifest into reality.\n\nADVICE OF THE DAY ☝️ Write out concrete milestones for your creative ideas."
+    }
+  ],
+  "updated_at": "2026-09-21T16:52:11.169298Z"
+}

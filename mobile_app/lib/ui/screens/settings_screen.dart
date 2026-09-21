@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/background_sync_service.dart';
@@ -25,6 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _notifHour = 6;
   int _notifMinute = 45;
   UserProfile _profile = UserProfile.defaultProfile();
+  String _currentLanguageCode = 'ru';
 
   @override
   void initState() {
@@ -39,6 +42,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final minute = await StorageService.getNotificationMinute();
     final profile = await StorageService.loadProfile();
     final bgEnabled = await BackgroundSyncService.isServiceEnabled();
+    final lang = await StorageService.getLanguageCode();
 
     if (mounted) {
       setState(() {
@@ -48,6 +52,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _notifHour = hour;
         _notifMinute = minute;
         _profile = profile;
+        _currentLanguageCode = lang;
       });
     }
   }
@@ -162,12 +167,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final timeStr =
         '${_notifHour.toString().padLeft(2, '0')}:${_notifMinute.toString().padLeft(2, '0')}';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Настройки и система'),
+        title: Text(l10n.settingsTitle),
       ),
       body: CosmicBackground(
         child: SingleChildScrollView(
@@ -215,7 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.24 (Release)',
+                            'Версия 1.0.25 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -224,6 +230,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
+              const SizedBox(height: 20),
+
+              // Блок выбора языка приложения и гороскопов
+              _buildLanguageSection(l10n),
               const SizedBox(height: 20),
 
               // Блок Личного Профиля пользователя
@@ -672,6 +682,202 @@ class _SettingsScreenState extends State<SettingsScreen> {
         );
       }
     }
+  }
+
+  Widget _buildLanguageSection(AppLocalizations l10n) {
+    final currentLang = AppLocalizations.supportedLanguages.firstWhere(
+      (item) => item['code'] == _currentLanguageCode,
+      orElse: () => AppLocalizations.supportedLanguages.first,
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: CosmicTheme.backgroundCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: CosmicTheme.goldAccent.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.language_rounded, color: CosmicTheme.cyanAccent),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.languageSectionTitle,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: CosmicTheme.textPrimary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          InkWell(
+            onTap: () => _showLanguageDialog(l10n),
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: CosmicTheme.backgroundDeep,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        currentLang['flag'] ?? '🌐',
+                        style: const TextStyle(fontSize: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentLang['nativeName'] ?? 'Русский',
+                            style: const TextStyle(
+                              color: CosmicTheme.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          Text(
+                            currentLang['name'] ?? '',
+                            style: const TextStyle(
+                              color: CosmicTheme.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const Row(
+                    children: [
+                      Icon(Icons.arrow_forward_ios_rounded, color: CosmicTheme.goldAccent, size: 14),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: CosmicTheme.backgroundDeep,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.translate_rounded, color: CosmicTheme.goldAccent),
+                      const SizedBox(width: 10),
+                      Text(
+                        l10n.selectLanguageTitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: CosmicTheme.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...AppLocalizations.supportedLanguages.map((lang) {
+                  final isSelected = lang['code'] == _currentLanguageCode;
+                  return InkWell(
+                    onTap: () async {
+                      final code = lang['code']!;
+                      Navigator.pop(ctx);
+                      await StorageService.setLanguageCode(code);
+                      CosmicHoroscopeApp.localeNotifier.value = Locale(code);
+                      setState(() {
+                        _currentLanguageCode = code;
+                      });
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations(Locale(code)).languageChangedSnackbar,
+                            ),
+                            backgroundColor: CosmicTheme.backgroundCard,
+                          ),
+                        );
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? CosmicTheme.goldAccent.withOpacity(0.15)
+                            : CosmicTheme.backgroundCard,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: isSelected ? CosmicTheme.goldAccent : Colors.white10,
+                          width: isSelected ? 1.5 : 1.0,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(lang['flag'] ?? '', style: const TextStyle(fontSize: 24)),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  lang['nativeName'] ?? '',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? CosmicTheme.goldAccent : CosmicTheme.textPrimary,
+                                  ),
+                                ),
+                                Text(
+                                  lang['name'] ?? '',
+                                  style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isSelected)
+                            const Icon(Icons.check_circle_rounded, color: CosmicTheme.goldAccent),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildProfileSection() {

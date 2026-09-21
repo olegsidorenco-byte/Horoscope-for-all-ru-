@@ -1,0 +1,151 @@
+{
+  "date": "21.09.2026",
+  "raw_text": "¡Buenos días! Que este lunes comience con serenidad, entusiasmo y total sintonía con las energías cósmicas. ☕️🍂✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21 mar – 19 abr",
+      "element": "Fuego",
+      "color": "0xFFE63946",
+      "focus": "Consejo: Diseñe un plan metódico y cúmplalo con constancia.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Su vitalidad requiere un rumbo definido. La Luna en Capricornio premia la constancia sobre la impulsividad.\n\nCONSEJO DEL DÍA ☝️ Defina prioridades claras y avance paso a paso."
+    },
+    {
+      "id": "taurus",
+      "name": "Tauro",
+      "symbol": "♉",
+      "dates": "20 abr – 20 may",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Invierta en conocimientos y cimientos profesionales sólidos.",
+      "energy": "88%",
+      "lucky_hours": "11:00–13:00",
+      "forecast": "Jornada magnífica para consolidar cimientos de prosperidad. Su sentido práctico le permite detectar ventajas valiosas.\n\nCONSEJO DEL DÍA ☝️ Dedique tiempo a perfeccionar sus habilidades técnicas."
+    },
+    {
+      "id": "gemini",
+      "name": "Géminis",
+      "symbol": "♊",
+      "dates": "21 may – 20 jun",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Evite dispersiones y profundice en un solo objetivo crucial.",
+      "energy": "82%",
+      "lucky_hours": "09:30–11:30",
+      "forecast": "El día exige concentración profunda. Concéntrese en una meta principal para economizar valiosas energías.\n\nCONSEJO DEL DÍA ☝️ Posterga charlas intrascendentes para un momento más tranquilo."
+    },
+    {
+      "id": "cancer",
+      "name": "Cáncer",
+      "symbol": "♋",
+      "dates": "21 jun – 22 jul",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Fortalezca lazos de afecto y demuestre empatía sincera.",
+      "energy": "86%",
+      "lucky_hours": "14:00–16:00",
+      "forecast": "Su intuición se combina a la perfección con la lógica de Capricornio para afianzar alianzas y armonía familiar.\n\nCONSEJO DEL DÍA ☝️ Cuide con calidez a sus seres queridos; reforzará su vínculo."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23 jul – 22 ago",
+      "element": "Fuego",
+      "color": "0xFFF4A261",
+      "focus": "Consejo: Trabaje con serenidad y demuestre su valor con hechos.",
+      "energy": "84%",
+      "lucky_hours": "12:00–14:00",
+      "forecast": "Mantenga una presencia distinguida. Evite discusiones innecesarias y deje que la calidad de su labor hable por usted.\n\nCONSEJO DEL DÍA ☝️ Avance con calma sin exigir aplausos inmediatos."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23 ago – 22 sep",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Ordene su entorno de trabajo para despejar sus pensamientos.",
+      "energy": "92%",
+      "lucky_hours": "08:30–10:30",
+      "forecast": "El Sol en su signo otorga una gran lucidez. Estructurar el espacio a su alrededor potenciará al máximo su rendimiento.\n\nCONSEJO DEL DÍA ☝️ Organice impecablemente su puesto de trabajo."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23 sep – 22 oct",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Busque un acuerdo equilibrado que satisfaga a ambas partes.",
+      "energy": "83%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "Su tacto diplomático es la clave para resolver asuntos profesionales con elegancia y serenidad.\n\nCONSEJO DEL DÍA ☝️ Plantee soluciones donde todos los involucrados salgan ganando."
+    },
+    {
+      "id": "scorpio",
+      "name": "Escorpio",
+      "symbol": "♏",
+      "dates": "23 oct – 21 nov",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Despréndase de cargas pasadas para abrir paso al porvenir.",
+      "energy": "90%",
+      "lucky_hours": "16:00–18:00",
+      "forecast": "Momento oportuno para transformaciones estratégicas. Elimine distracciones para centrarse en proyectos de gran calibre.\n\nCONSEJO DEL DÍA ☝️ Suelte definitivamente lo que frene su desarrollo."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagitario",
+      "symbol": "♐",
+      "dates": "22 nov – 21 dic",
+      "element": "Fuego",
+      "color": "0xFFE76F51",
+      "focus": "Consejo: Revise minuciosamente cualquier documento antes de firmar.",
+      "energy": "80%",
+      "lucky_hours": "11:30–13:30",
+      "forecast": "El optimismo debe acompañarse de cálculo prudente. Tómese el tiempo necesario para evaluar contratos y trámites.\n\nCONSEJO DEL DÍA ☝️ Compruebe cada detalle legal antes de comprometerse."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricornio",
+      "symbol": "♑",
+      "dates": "22 dic – 19 ene",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Asuma el liderazgo de los retos más ambiciosos.",
+      "energy": "95%",
+      "lucky_hours": "09:00–11:00",
+      "forecast": "La Luna en su signo le brinda una determinación inquebrantable. Es la hora de consolidar logros de envergadura.\n\nCONSEJO DEL DÍA ☝️ Acepte con convicción la responsabilidad de proyectos clave."
+    },
+    {
+      "id": "aquarius",
+      "name": "Acuario",
+      "symbol": "♒",
+      "dates": "20 ene – 18 feb",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Confíe en su visión innovadora en materia financiera.",
+      "energy": "87%",
+      "lucky_hours": "13:00–15:00",
+      "forecast": "Escuche su voz interior antes que las opiniones ajenas. Su perspectiva original resolverá situaciones complejas.\n\nCONSEJO DEL DÍA ☝️ Apueste por soluciones creativas en sus asuntos económicos."
+    },
+    {
+      "id": "pisces",
+      "name": "Piscis",
+      "symbol": "♓",
+      "dates": "19 feb – 20 mar",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Plasme sus inspiraciones en metas concretas y realizables.",
+      "energy": "84%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "El día invita al pragmatismo. Sus bellos proyectos necesitan un plan de acción tangible para cobrar vida.\n\nCONSEJO DEL DÍA ☝️ Escriba sus metas en papel para comenzar su ejecución."
+    }
+  ],
+  "updated_at": "2026-09-21T16:52:11.169298Z"
+}

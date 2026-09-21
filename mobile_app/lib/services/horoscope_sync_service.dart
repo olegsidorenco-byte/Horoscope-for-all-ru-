@@ -9,61 +9,81 @@ class HoroscopeSyncService {
   static const String repoBaseUrl =
       'https://raw.githubusercontent.com/olegsidorenco-byte/Horoscope-for-all-ru-/main/data';
 
-  /// Загружает самый свежий опубликованный персональный прогноз дня
-  static Future<HoroscopeDay> fetchLatestHoroscope({bool forceRefresh = false}) async {
-    // 1. Всегда пробуем запросить свежие данные из сети с тайм-аутом 4 сек и анти-кэш параметром
+  /// Загружает самый свежий опубликованный персональный прогноз дня для выбранного языка
+  static Future<HoroscopeDay> fetchLatestHoroscope({
+    bool forceRefresh = false,
+    String? langCode,
+  }) async {
+    final lang = langCode ?? await StorageService.getLanguageCode();
+    final fileName = (lang == 'ru') ? 'latest_horoscope.json' : 'latest_horoscope_$lang.json';
+    final assetPath = (lang == 'ru') ? 'assets/data/latest_horoscope.json' : 'assets/data/latest_horoscope_$lang.json';
+
+    // 1. Пробуем запросить свежие данные из сети с тайм-аутом 4 сек и анти-кэш параметром
     try {
       final cacheBuster = DateTime.now().millisecondsSinceEpoch;
-      final url = Uri.parse('$repoBaseUrl/latest_horoscope.json?t=$cacheBuster');
+      final url = Uri.parse('$repoBaseUrl/$fileName?t=$cacheBuster');
       final response = await http.get(url).timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
         final horoscope = HoroscopeDay.fromJson(decoded);
         
-        await StorageService.cacheLatestHoroscope(decoded);
+        await StorageService.cacheLatestHoroscope(decoded, lang);
         await StorageService.cacheDayHoroscope(horoscope.date, decoded);
         
         return horoscope;
       }
     } catch (_) {}
 
-    // 2. Если сеть недоступна (оффлайн) или ошибка сервера, используем локальный кэш
-    final cached = await StorageService.getLatestCachedHoroscope();
+    // 2. Если сеть недоступна (оффлайн) или ошибка сервера, используем локальный кэш этого языка
+    final cached = await StorageService.getLatestCachedHoroscope(lang);
     if (cached != null) {
       return cached;
     }
 
-    // 3. Если кэша еще нет (первый запуск в оффлайн-режиме), берем встроенный asset
+    // 3. Если кэша еще нет (первый запуск в оффлайн-режиме), берем встроенный локализованный asset
     try {
-      final assetJsonStr = await rootBundle.loadString('assets/data/latest_horoscope.json');
+      String assetJsonStr;
+      try {
+        assetJsonStr = await rootBundle.loadString(assetPath);
+      } catch (_) {
+        // Fallback на базовый asset, если отдельный языковой asset не найден
+        assetJsonStr = await rootBundle.loadString('assets/data/latest_horoscope.json');
+      }
       final decoded = jsonDecode(assetJsonStr);
       final horoscope = HoroscopeDay.fromJson(decoded);
-      await StorageService.cacheLatestHoroscope(decoded);
+      await StorageService.cacheLatestHoroscope(decoded, lang);
       return horoscope;
     } catch (e) {
       throw Exception('Не удалось загрузить прогноз дня. Проверьте соединение.');
     }
   }
 
-  /// Загружает актуальный гороскоп по 12 знакам зодиака
-  static Future<ZodiacDayData> fetchLatestZodiac({bool forceRefresh = false}) async {
+  /// Загружает актуальный гороскоп по 12 знакам зодиака для выбранного языка
+  static Future<ZodiacDayData> fetchLatestZodiac({
+    bool forceRefresh = false,
+    String? langCode,
+  }) async {
+    final lang = langCode ?? await StorageService.getLanguageCode();
+    final fileName = (lang == 'ru') ? 'latest_zodiac.json' : 'latest_zodiac_$lang.json';
+    final assetPath = (lang == 'ru') ? 'assets/data/latest_zodiac.json' : 'assets/data/latest_zodiac_$lang.json';
+
     // 1. Запрос свежего гороскопа по знакам из сети
     try {
       final cacheBuster = DateTime.now().millisecondsSinceEpoch;
-      final url = Uri.parse('$repoBaseUrl/latest_zodiac.json?t=$cacheBuster');
+      final url = Uri.parse('$repoBaseUrl/$fileName?t=$cacheBuster');
       final response = await http.get(url).timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(utf8.decode(response.bodyBytes));
         final zodiacData = ZodiacDayData.fromJson(decoded);
-        await StorageService.cacheZodiacJson(jsonEncode(decoded));
+        await StorageService.cacheZodiacJson(jsonEncode(decoded), lang);
         return zodiacData;
       }
     } catch (_) {}
 
     // 2. Откат на кэш при оффлайне
-    final cachedStr = await StorageService.getCachedZodiacJson();
+    final cachedStr = await StorageService.getCachedZodiacJson(lang);
     if (cachedStr != null && cachedStr.isNotEmpty) {
       try {
         return ZodiacDayData.fromJson(jsonDecode(cachedStr));
@@ -72,10 +92,15 @@ class HoroscopeSyncService {
 
     // 3. Откат на встроенный asset
     try {
-      final assetStr = await rootBundle.loadString('assets/data/latest_zodiac.json');
+      String assetStr;
+      try {
+        assetStr = await rootBundle.loadString(assetPath);
+      } catch (_) {
+        assetStr = await rootBundle.loadString('assets/data/latest_zodiac.json');
+      }
       final decoded = jsonDecode(assetStr);
       final zodiacData = ZodiacDayData.fromJson(decoded);
-      await StorageService.cacheZodiacJson(jsonEncode(decoded));
+      await StorageService.cacheZodiacJson(jsonEncode(decoded), lang);
       return zodiacData;
     } catch (_) {}
 

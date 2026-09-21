@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 import '../../models/zodiac_model.dart';
 import '../../services/horoscope_sync_service.dart';
 import '../../services/storage_service.dart';
@@ -20,10 +22,8 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  String _selectedElement = 'Все';
+  String _selectedElementCategory = 'all';
   String _activeSignId = 'aries';
-
-  final List<String> _elements = ['Все', 'Огонь', 'Земля', 'Воздух', 'Вода'];
 
   @override
   void initState() {
@@ -31,7 +31,20 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     if (widget.initialSignId != null) {
       _activeSignId = widget.initialSignId!;
     }
+    CosmicHoroscopeApp.localeNotifier.addListener(_onLocaleChanged);
     _loadZodiacData();
+  }
+
+  @override
+  void dispose() {
+    CosmicHoroscopeApp.localeNotifier.removeListener(_onLocaleChanged);
+    super.dispose();
+  }
+
+  void _onLocaleChanged() {
+    if (mounted) {
+      _loadZodiacData(forceRefresh: false);
+    }
   }
 
   Future<void> _loadZodiacData({bool forceRefresh = false}) async {
@@ -72,9 +85,9 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
 
   List<ZodiacSign> get _filteredSigns {
     if (_zodiacData == null) return [];
-    if (_selectedElement == 'Все') return _zodiacData!.signs;
+    if (_selectedElementCategory == 'all') return _zodiacData!.signs;
     return _zodiacData!.signs
-        .where((s) => s.element.toLowerCase() == _selectedElement.toLowerCase())
+        .where((s) => s.elementCategory == _selectedElementCategory)
         .toList();
   }
 
@@ -88,9 +101,11 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Гороскоп по знакам'),
+        title: Text(l10n.zodiacScreenTitle),
         actions: [
           IconButton(
             icon: _isLoading
@@ -100,28 +115,28 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2, color: CosmicTheme.goldAccent),
                   )
                 : const Icon(Icons.refresh_rounded, color: CosmicTheme.cyanAccent),
-            tooltip: 'Обновить прогноз знаков',
+            tooltip: l10n.refreshTooltip,
             onPressed: () => _loadZodiacData(forceRefresh: true),
           ),
         ],
       ),
       body: CosmicBackground(
-        child: _buildBody(),
+        child: _buildBody(l10n),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations l10n) {
     if (_isLoading && _zodiacData == null) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: CosmicTheme.goldAccent),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(color: CosmicTheme.goldAccent),
+            const SizedBox(height: 16),
             Text(
-              'Загрузка гороскопа по 12 знакам...',
-              style: TextStyle(color: CosmicTheme.goldSoft),
+              l10n.loading,
+              style: const TextStyle(color: CosmicTheme.goldSoft),
             ),
           ],
         ),
@@ -145,7 +160,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => _loadZodiacData(forceRefresh: true),
-                child: const Text('Повторить'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -164,7 +179,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         children: [
           // Фильтры по стихиям (Ряд 1: кнопка "Все знаки", Ряд 2: 4 стихии)
-          _buildElementFilterChips(),
+          _buildElementFilterChips(l10n),
           const SizedBox(height: 12),
 
           // Ряд 3: Селектор всех 12 знаков в 2 ряда по 6 кнопок (аналогично главной странице)
@@ -179,7 +194,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
             child: Text(
-              'Все знаки зодиака (${_filteredSigns.length})',
+              '${l10n.zodiacAllSigns} (${_filteredSigns.length})',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -194,8 +209,8 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     );
   }
 
-  Widget _buildElementFilterChips() {
-    final isAllSelected = _selectedElement == 'Все';
+  Widget _buildElementFilterChips(AppLocalizations l10n) {
+    final isAllSelected = _selectedElementCategory == 'all';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -205,7 +220,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
           GestureDetector(
             onTap: () {
               setState(() {
-                _selectedElement = 'Все';
+                _selectedElementCategory = 'all';
               });
             },
             child: Container(
@@ -242,7 +257,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    'Все 12 знаков зодиака',
+                    l10n.zodiacAllSigns,
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -259,13 +274,13 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
           // 2. 4 кнопки стихий в одну строку на всю ширину экрана
           Row(
             children: [
-              _buildElementButton('Огонь', const Color(0xFFE76F51), Icons.local_fire_department_rounded),
+              _buildElementButton('fire', l10n.elementFire, const Color(0xFFE76F51), Icons.local_fire_department_rounded),
               const SizedBox(width: 6),
-              _buildElementButton('Земля', const Color(0xFF2A9D8F), Icons.eco_rounded),
+              _buildElementButton('earth', l10n.elementEarth, const Color(0xFF2A9D8F), Icons.eco_rounded),
               const SizedBox(width: 6),
-              _buildElementButton('Воздух', const Color(0xFFE9C46A), Icons.air_rounded),
+              _buildElementButton('air', l10n.elementAir, const Color(0xFFE9C46A), Icons.air_rounded),
               const SizedBox(width: 6),
-              _buildElementButton('Вода', const Color(0xFF457B9D), Icons.water_drop_rounded),
+              _buildElementButton('water', l10n.elementWater, const Color(0xFF457B9D), Icons.water_drop_rounded),
             ],
           ),
         ],
@@ -273,14 +288,14 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     );
   }
 
-  Widget _buildElementButton(String name, Color color, IconData icon) {
-    final isSelected = _selectedElement == name;
+  Widget _buildElementButton(String category, String name, Color color, IconData icon) {
+    final isSelected = _selectedElementCategory == category;
 
     return Expanded(
       child: GestureDetector(
         onTap: () {
           setState(() {
-            _selectedElement = name;
+            _selectedElementCategory = category;
           });
         },
         child: Container(
@@ -360,8 +375,8 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     return Row(
       children: signs.map((sign) {
         final isSelected = sign.id == _activeSignId;
-        final matchesElement = _selectedElement == 'Все' ||
-            sign.element.toLowerCase() == _selectedElement.toLowerCase();
+        final matchesElement = _selectedElementCategory == 'all' ||
+            sign.elementCategory == _selectedElementCategory;
 
         return Expanded(
           child: Padding(
@@ -428,6 +443,8 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
   }
 
   Widget _buildActiveHeroCard(ZodiacSign sign) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(22),
@@ -444,21 +461,21 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
         border: Border.all(color: sign.elementColor.withOpacity(0.4), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: sign.elementColor.withOpacity(0.2),
+            color: sign.elementColor.withOpacity(0.12),
             blurRadius: 24,
-            offset: const Offset(0, 6),
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Шапка карточки (Символ + Имя + Стихия + Даты)
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 58,
-                height: 58,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: sign.elementColor.withOpacity(0.15),
                   shape: BoxShape.circle,
@@ -530,9 +547,9 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              _buildBadge(Icons.track_changes_rounded, 'Фокус: ${sign.focus}', CosmicTheme.goldAccent),
-              _buildBadge(Icons.bolt_rounded, 'Энергия: ${sign.energy}', const Color(0xFF2EC4B6)),
-              _buildBadge(Icons.access_time_rounded, 'Часы: ${sign.luckyHours}', CosmicTheme.cyanAccent),
+              _buildBadge(Icons.track_changes_rounded, sign.focus, CosmicTheme.goldAccent),
+              _buildBadge(Icons.bolt_rounded, '${l10n.energyLabel}: ${sign.energy}', const Color(0xFF2EC4B6)),
+              _buildBadge(Icons.access_time_rounded, '${l10n.luckyHoursLabel}: ${sign.luckyHours}', CosmicTheme.cyanAccent),
             ],
           ),
           const SizedBox(height: 18),

@@ -555,12 +555,21 @@ def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city:
         return None
 
 
-def build_horoscope_prompt(user_profile: dict, target_date: str = None) -> str:
+def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: str = "ru") -> str:
     """
     Формирует структурированный промпт высшей натальной категории (стаж 60 лет)
     с расчетом Асцендента, 12 домов натала, разделением города рождения и проживания,
     учетом пола пользователя, фокуса внимания и точных временных интервалов.
+    Поддерживает мультиязычность (ru, en, es, de, fr).
     """
+    lang_directives = {
+        "en": "CRITICAL LANGUAGE DIRECTIVE: Output the entire response STRICTLY IN ENGLISH. All headings, greetings, astrological topic titles, and body text MUST be in natural, fluent English.\n",
+        "es": "DIRECTIVA CRÍTICA DE IDIOMA: Redacta toda la respuesta ESTRICTAMENTE EN ESPAÑOL. Todos los títulos, saludos y descripciones DEBEN estar en español natural y fluido.\n",
+        "de": "KRITISCHE SPRACHANWEISUNG: Verfasse die gesamte Antwort STRIKT AUF DEUTSCH. Alle Überschriften, Begrüßungen und Texte MÜSSEN auf natürlichem, flüssigem Deutsch sein.\n",
+        "fr": "DIRECTIVE LINGUISTIQUE CRITIQUE: Rédige l'intégralité de la réponse STRICTEMENT EN FRANÇAIS. Tous les titres, salutations et textes DOIVENT être en français naturel et fluide.\n",
+    }
+    lang_prefix = lang_directives.get(lang, "")
+
     name = user_profile.get("name", "").strip() or "Уважаемый читатель"
     birth_date = user_profile.get("birth_date", "").strip()
     birth_time = user_profile.get("birth_time", "").strip()
@@ -637,7 +646,7 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None) -> str:
             "Тип прогноза: Точный классический астрологический прогноз дня по реальным астрономическим транзитам.\n"
         )
 
-    prompt = f"""Ты — выдающийся профессиональный астролог высшей категории с 60-летним стажем.
+    prompt = f"""{lang_prefix}Ты — выдающийся профессиональный астролог высшей категории с 60-летним стажем.
 Ты в совершенстве владеешь классической натальной, хорарной и транзитной астрологией. Твои прогнозы сочетают высочайшую экспертную глубину с кристальной практической пользой для реальной жизни.
 
 АСТРОНОМИЧЕСКИЙ ПАСПОРТ ДНЯ НА {target_date}:
@@ -689,7 +698,7 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None) -> str:
     return prompt
 
 
-def generate_horoscope_text(api_key: str, user_profile: dict) -> str:
+def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru") -> str:
     """
     Генерирует текст гороскопа с автопоиском моделей и автопереключением (Fallback).
     Делает до 2 попыток на каждую модель при временных сбоях.
@@ -697,7 +706,7 @@ def generate_horoscope_text(api_key: str, user_profile: dict) -> str:
     """
     models = discover_models(api_key)
     target_date = datetime.now().strftime("%d.%m.%Y")
-    prompt = build_horoscope_prompt(user_profile, target_date)
+    prompt = build_horoscope_prompt(user_profile, target_date, lang=lang)
 
     headers = {
         "x-goog-api-key": api_key,
@@ -942,12 +951,21 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
     return default_prompt
 
 
-def build_zodiac_prompt(target_date: str = None) -> str:
+def build_zodiac_prompt(target_date: str = None, lang: str = "ru") -> str:
     """
     Формирует структурированный промпт для генерации психологического гороскопа по 12 знакам зодиака
     с утренней образной шапкой, навигационной лентой, формулой «Инсайт + СОВЕТ ДНЯ ☝️»
     и финальной мудрой притчей, строго умещающегося в ОДНО сообщение Telegram (3200–3700 симв.).
+    Поддерживает мультиязычность (ru, en, es, de, fr).
     """
+    lang_directives = {
+        "en": "CRITICAL LANGUAGE DIRECTIVE: Output the entire response STRICTLY IN ENGLISH. All sign names, dates, element names, advice, and forecast texts MUST be in natural, fluent English.\n",
+        "es": "DIRECTIVA CRÍTICA DE IDIOMA: Redacta toda la respuesta ESTRICTAMENTE EN ESPAÑOL. Todos los nombres de signos, fechas, elementos, consejos y textos DEBEN estar en español fluido.\n",
+        "de": "KRITISCHE SPRACHANWEISUNG: Verfasse die gesamte Antwort STRIKT AUF DEUTSCH. Alle Sternzeichen, Daten, Elemente, Ratschläge und Texte MÜSSEN auf Deutsch sein.\n",
+        "fr": "DIRECTIVE LINGUISTIQUE CRITIQUE: Rédige l'intégralité de la réponse STRICTEMENT EN FRANÇAIS. Tous les noms de signes, dates, éléments, conseils et textes DOIVENT être en français.\n",
+    }
+    lang_prefix = lang_directives.get(lang, "")
+
     if not target_date:
         target_date = datetime.now().strftime("%d.%m.%Y")
     
@@ -965,7 +983,7 @@ def build_zodiac_prompt(target_date: str = None) -> str:
     except Exception:
         pass
 
-    return f"""Ты — Магистр классической и психологической астрологии высшей категории.
+    return f"""{lang_prefix}Ты — Магистр классической и психологической астрологии высшей категории.
 Твоя задача — составить вдохновляющий, живой и практически полезный гороскоп на {target_date} ({astro['weekday']}) ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА.
 
 АСТРОНОМИЧЕСКИЙ ФОН ДНЯ:
@@ -1020,15 +1038,16 @@ REQUIRED_ZODIAC_SIGNS = [
 ]
 
 
-def generate_zodiac_horoscope_text(api_key: str, target_date: str = None) -> str:
+def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: str = "ru") -> str:
     """
     Генерирует гороскоп по 12 знакам зодиака через Google Gemini API с автопоиском и отказоустойчивостью.
     Гарантирует генерацию ВСЕХ 12 знаков без обрыва по лимиту токенов (MAX_TOKENS).
+    Поддерживает мультиязычность (ru, en, es, de, fr).
     """
     if not target_date:
         target_date = datetime.now().strftime("%d.%m.%Y")
 
-    prompt = build_zodiac_prompt(target_date)
+    prompt = build_zodiac_prompt(target_date, lang=lang)
     models = discover_models(api_key)
     if not models:
         models = DEFAULT_MODELS_PRIORITY

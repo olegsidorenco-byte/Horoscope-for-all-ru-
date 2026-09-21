@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'ui/theme/cosmic_theme.dart';
-import 'ui/screens/main_nav_screen.dart';
+import 'l10n/app_localizations.dart';
+import 'services/storage_service.dart';
 import 'services/notification_service.dart';
 import 'services/background_sync_service.dart';
+import 'ui/theme/cosmic_theme.dart';
+import 'ui/screens/main_nav_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +20,12 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
+
+  // Загружаем сохраненный язык интерфейса
+  try {
+    final langCode = await StorageService.getLanguageCode();
+    CosmicHoroscopeApp.localeNotifier.value = Locale(langCode);
+  } catch (_) {}
 
   // Инициализация сервиса утренних напоминаний, бейджей и разрешений Android 13/14+
   try {
@@ -33,24 +41,31 @@ void main() async {
 }
 
 class CosmicHoroscopeApp extends StatelessWidget {
+  static final ValueNotifier<Locale> localeNotifier =
+      ValueNotifier<Locale>(const Locale('ru'));
+
   const CosmicHoroscopeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Астро Гороскоп',
-      debugShowCheckedModeBanner: false,
-      theme: CosmicTheme.darkTheme,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('ru', 'RU'),
-      ],
-      locale: const Locale('ru', 'RU'),
-      home: const MainNavScreen(),
+    return ValueListenableBuilder<Locale>(
+      valueListenable: localeNotifier,
+      builder: (context, currentLocale, _) {
+        return MaterialApp(
+          title: 'Астро Гороскоп',
+          debugShowCheckedModeBanner: false,
+          theme: CosmicTheme.darkTheme,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: currentLocale,
+          home: const MainNavScreen(),
+        );
+      },
     );
   }
 }

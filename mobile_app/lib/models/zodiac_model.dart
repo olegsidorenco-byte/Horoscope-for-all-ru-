@@ -25,15 +25,24 @@ class ZodiacSign {
     required this.forecast,
   });
 
+  String get elementCategory {
+    final e = element.toLowerCase().trim();
+    if (e == 'огонь' || e == 'fire' || e == 'fuego' || e == 'feuer' || e == 'feu') return 'fire';
+    if (e == 'земля' || e == 'earth' || e == 'tierra' || e == 'erde' || e == 'terre') return 'earth';
+    if (e == 'воздух' || e == 'air' || e == 'aire' || e == 'luft') return 'air';
+    if (e == 'вода' || e == 'water' || e == 'agua' || e == 'wasser' || e == 'eau') return 'water';
+    return 'other';
+  }
+
   Color get elementColor {
-    switch (element.toLowerCase()) {
-      case 'огонь':
+    switch (elementCategory) {
+      case 'fire':
         return const Color(0xFFE76F51);
-      case 'земля':
+      case 'earth':
         return const Color(0xFF2A9D8F);
-      case 'воздух':
+      case 'air':
         return const Color(0xFFE9C46A);
-      case 'вода':
+      case 'water':
         return const Color(0xFF457B9D);
       default:
         return const Color(0xFFD4AF37);
@@ -41,14 +50,14 @@ class ZodiacSign {
   }
 
   IconData get elementIcon {
-    switch (element.toLowerCase()) {
-      case 'огонь':
+    switch (elementCategory) {
+      case 'fire':
         return Icons.local_fire_department_rounded;
-      case 'земля':
+      case 'earth':
         return Icons.eco_rounded;
-      case 'воздух':
+      case 'air':
         return Icons.air_rounded;
-      case 'вода':
+      case 'water':
         return Icons.water_drop_rounded;
       default:
         return Icons.stars_rounded;
