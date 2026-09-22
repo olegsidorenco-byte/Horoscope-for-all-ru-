@@ -31,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? _errorMessage;
   bool _isNewForecast = false;
   UserProfile _userProfile = UserProfile.defaultProfile();
+  final ScrollController _scrollController = ScrollController();
 
   final List<Map<String, String>> _zodiacQuickList = const [
     {'id': 'aries', 'name': 'Овен', 'symbol': '♈'},
@@ -52,6 +53,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     CosmicHoroscopeApp.localeNotifier.addListener(_onLocaleChanged);
+    _scrollController.addListener(_onScroll);
     _fetchLatestHoroscope();
   }
 
@@ -59,7 +61,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     CosmicHoroscopeApp.localeNotifier.removeListener(_onLocaleChanged);
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_isNewForecast) return;
+    if (_scrollController.hasClients) {
+      final position = _scrollController.position;
+      // Автоматически отмечаем как прочитанное при полной прокрутке до конца всего текста
+      if (position.maxScrollExtent > 0 &&
+          position.pixels >= (position.maxScrollExtent - 40)) {
+        _markAsRead();
+      }
+    }
   }
 
   void _onLocaleChanged() {
@@ -128,14 +144,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _markAsRead() async {
+    if (!_isNewForecast) return;
     if (_horoscope != null && _horoscope!.date.isNotEmpty) {
-      await StorageService.setLastReadDate(_horoscope!.date);
-      await NotificationService.cancelAll();
       if (mounted) {
         setState(() {
           _isNewForecast = false;
         });
       }
+      await StorageService.setLastReadDate(_horoscope!.date);
+      await NotificationService.cancelAll();
+      await NotificationService.clearBadge();
       widget.onReadStateChanged?.call();
     }
   }
@@ -290,6 +308,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       backgroundColor: CosmicTheme.backgroundCard,
       onRefresh: () => _fetchLatestHoroscope(forceRefresh: true),
       child: ListView(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
         children: [
           // Всплывающий баннер о новом прогнозе
@@ -325,9 +344,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'НЕПРОЧИТАННЫЙ ГОРОСКОП',
-                          style: TextStyle(
+                        Text(
+                          l10n.unreadForecast,
+                          style: const TextStyle(
                             color: Colors.white70,
                             fontWeight: FontWeight.w900,
                             fontSize: 10,
@@ -336,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Свежий прогноз на ${_horoscope!.date} опубликован!',
+                          l10n.newForecastPublished(_horoscope!.date),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -350,9 +369,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ElevatedButton.icon(
                     onPressed: _markAsRead,
                     icon: const Icon(Icons.done_all_rounded, size: 14, color: Colors.black),
-                    label: const Text(
-                      'Прочитано',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
+                    label: Text(
+                      l10n.markAsRead,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

@@ -78,6 +78,36 @@ class AppLocalizations {
 
   String get newBadge => 'NEW';
 
+  String get markAsRead {
+    switch (langCode) {
+      case 'en': return 'Read';
+      case 'es': return 'Leído';
+      case 'de': return 'Gelesen';
+      case 'fr': return 'Lu';
+      default: return 'Прочитано';
+    }
+  }
+
+  String get unreadForecast {
+    switch (langCode) {
+      case 'en': return 'UNREAD FORECAST';
+      case 'es': return 'HORÓSCOPO NO LEÍDO';
+      case 'de': return 'UNGELESENES HOROSKOP';
+      case 'fr': return 'HOROSCOPE NON LU';
+      default: return 'НЕПРОЧИТАННЫЙ ГОРОСКОП';
+    }
+  }
+
+  String newForecastPublished(String date) {
+    switch (langCode) {
+      case 'en': return 'Fresh forecast for $date is published!';
+      case 'es': return '¡El pronóstico para el $date está disponible!';
+      case 'de': return 'Frisches Horoskop für den $date ist veröffentlicht!';
+      case 'fr': return 'Nouvel horoscope pour le $date publié !';
+      default: return 'Свежий прогноз на $date опубликован!';
+    }
+  }
+
   String get loading {
     switch (langCode) {
       case 'en': return 'Loading forecast...';
