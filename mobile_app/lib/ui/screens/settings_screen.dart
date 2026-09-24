@@ -241,7 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 20),
 
               // Блок фоновой службы («Висеть в фоне»)
-              _buildBackgroundServiceSection(),
+              // _buildBackgroundServiceSection(), // Устаревшая функция фонового мониторинга
               const SizedBox(height: 20),
 
               // Блок утренних уведомлений
