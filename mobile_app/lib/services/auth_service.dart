@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_profile.dart';
 import 'storage_service.dart';
 
@@ -94,60 +96,55 @@ class AuthService {
       throw Exception('Пожалуйста, введите ваше имя');
     }
 
-    final accounts = await _getAllAccounts();
-
-    // Проверка уникальности контакта: запрет дубликатов
-    final contactExists = accounts.any((acc) {
-      final accEmail = normalizeContact(acc['email'] ?? '');
-      final accPhone = normalizeContact(acc['phone'] ?? '');
-      return accEmail == normContact || accPhone == normContact;
-    });
-
-    if (contactExists) {
-      throw Exception('Аккаунт с контактом "$normContact" уже зарегистрирован! Пожалуйста, выполните вход.');
-    }
-
     final isMail = isEmail(normContact);
-    final userId = 'usr_${DateTime.now().millisecondsSinceEpoch}';
-    final pwdHash = hashPassword(password);
+    // Для Firebase Auth мы требуем email. Если ввели телефон, делаем фиктивный email для совместимости,
+    // либо можно использовать FirebaseAuth.instance.verifyPhoneNumber, но это сложнее.
+    // Пока что конвертируем телефон в почту:
+    final authEmail = isMail ? normContact : '$normContact@phone.cosmic-horoscope.app';
 
-    final newProfile = UserProfile(
-      id: userId,
-      name: name.trim(),
-      email: isMail ? normContact : '',
-      phone: !isMail ? normContact : '',
-      authType: isMail ? 'email' : 'phone',
-      telegramUsername: telegramUsername?.trim() ?? '',
-      passwordHash: pwdHash,
-      birthDate: birthDate ?? DateTime(2000, 1, 1),
-      birthTime: birthTime ?? '12:00',
-      isTimeExact: isTimeExact ?? false,
-      birthPlace: birthPlace ?? '',
-      currentCity: currentCity ?? '',
-      gender: gender ?? 'female',
-      updatedAt: DateTime.now(),
-    );
+    try {
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: authEmail,
+        password: password,
+      );
 
-    // Добавляем в реестр аккаунтов
-    final accountEntry = {
-      'id': userId,
-      'email': newProfile.email,
-      'phone': newProfile.phone,
-      'name': newProfile.name,
-      'authType': newProfile.authType,
-      'passwordHash': pwdHash,
-      'telegramUsername': newProfile.telegramUsername,
-      'profile': newProfile.toJson(),
-    };
-    accounts.add(accountEntry);
-    await _saveAllAccounts(accounts);
+      final user = userCredential.user;
+      if (user == null) throw Exception("Не удалось создать пользователя в Firebase");
 
-    // Активируем сессию
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCurrentSessionUserId, userId);
-    await StorageService.saveProfile(newProfile);
+      final newProfile = UserProfile(
+        id: user.uid,
+        name: name.trim(),
+        email: isMail ? normContact : '',
+        phone: !isMail ? normContact : '',
+        authType: isMail ? 'email' : 'phone',
+        telegramUsername: telegramUsername?.trim() ?? '',
+        passwordHash: '', // Больше не храним хеши
+        birthDate: birthDate ?? DateTime(2000, 1, 1),
+        birthTime: birthTime ?? '12:00',
+        isTimeExact: isTimeExact ?? false,
+        birthPlace: birthPlace ?? '',
+        currentCity: currentCity ?? '',
+        gender: gender ?? 'female',
+        updatedAt: DateTime.now(),
+      );
 
-    return newProfile;
+      // Сохраняем в Firestore
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set(newProfile.toJson());
+
+      // Активируем локальную сессию для оффлайна
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyCurrentSessionUserId, user.uid);
+      await StorageService.saveProfile(newProfile);
+
+      return newProfile;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        throw Exception('Слишком слабый пароль.');
+      } else if (e.code == 'email-already-in-use') {
+        throw Exception('Аккаунт с таким контактом уже существует.');
+      }
+      throw Exception(e.message ?? 'Ошибка регистрации');
+    }
   }
 
   /// Вход в существующий аккаунт по почте или телефону и паролю
@@ -163,36 +160,44 @@ class AuthService {
       throw Exception('Введите пароль');
     }
 
-    final accounts = await _getAllAccounts();
-    final pwdHash = hashPassword(password);
+    final isMail = isEmail(normContact);
+    final authEmail = isMail ? normContact : '$normContact@phone.cosmic-horoscope.app';
 
-    // Поиск аккаунта по нормализованному контакту
-    final acc = accounts.firstWhere(
-      (a) {
-        final accEmail = normalizeContact(a['email'] ?? '');
-        final accPhone = normalizeContact(a['phone'] ?? '');
-        return accEmail == normContact || accPhone == normContact;
-      },
-      orElse: () => {},
-    );
+    try {
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: authEmail,
+        password: password,
+      );
 
-    if (acc.isEmpty) {
-      throw Exception('Аккаунт с контактом "$normContact" не найден. Проверьте данные или зарегистрируйтесь.');
+      final user = userCredential.user;
+      if (user == null) throw Exception("Не удалось войти");
+
+      // Пытаемся загрузить профиль из Firestore
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      UserProfile profile;
+      if (doc.exists && doc.data() != null) {
+        profile = UserProfile.fromJson(doc.data()!);
+      } else {
+        // Если профиля в базе почему-то нет (например удален вручную)
+        profile = UserProfile(
+          id: user.uid,
+          name: "Пользователь",
+          birthDate: DateTime(2000, 1, 1),
+        );
+      }
+
+      // Устанавливаем текущую локальную сессию
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyCurrentSessionUserId, user.uid);
+      await StorageService.saveProfile(profile);
+
+      return profile;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
+        throw Exception('Неверный логин или пароль.');
+      }
+      throw Exception(e.message ?? 'Ошибка авторизации');
     }
-
-    if (acc['passwordHash'] != pwdHash) {
-      throw Exception('Неверный пароль. Пожалуйста, попробуйте снова.');
-    }
-
-    final profileData = Map<String, dynamic>.from(acc['profile'] ?? {});
-    final profile = UserProfile.fromJson(profileData);
-
-    // Устанавливаем текущую сессию
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCurrentSessionUserId, profile.id);
-    await StorageService.saveProfile(profile);
-
-    return profile;
   }
 
   /// Быстрая авторизация через Telegram
