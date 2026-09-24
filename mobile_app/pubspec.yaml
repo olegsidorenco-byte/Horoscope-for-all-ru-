@@ -39,3 +39,5 @@ flutter:
     - assets/icon/app_icon.png
     - assets/data/
     - assets/data/archive/
+
+# Trigger rebuild for version 1.0.26
