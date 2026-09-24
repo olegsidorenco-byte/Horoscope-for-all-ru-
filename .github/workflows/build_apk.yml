@@ -69,6 +69,23 @@ jobs:
           # Копируем постоянный цифровой сертификат подписи
           mkdir -p android/app
           cp keystore/release.keystore android/app/release.keystore
+          
+          # Настройка Firebase: Копируем google-services.json и внедряем плагины в Gradle
+          if [ -f android_custom/google-services.json ]; then
+            cp android_custom/google-services.json android/app/
+            
+            # Добавляем classpath в android/build.gradle
+            if [ -f android/build.gradle ]; then
+              sed -i '/dependencies {/a \        classpath "com.google.gms:google-services:4.3.15"' android/build.gradle
+            fi
+            
+            # Добавляем apply plugin в android/app/build.gradle
+            if [ -f android/app/build.gradle ]; then
+              echo "apply plugin: 'com.google.gms.google-services'" >> android/app/build.gradle
+              # Поднимаем minSdkVersion до 23, так как Firebase это часто требует
+              sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
+            fi
+          fi
 
           # Настройка постоянной цифровой подписи (Release Keystore) для бесшовных обновлений APK
           if [ -f android/app/build.gradle.kts ]; then

@@ -8,8 +8,20 @@ import 'services/background_sync_service.dart';
 import 'ui/theme/cosmic_theme.dart';
 import 'ui/screens/main_nav_screen.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Инициализация Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print("Firebase init error: $e");
+  }
   
   // Устанавливаем стиль системного статус-бара
   SystemChrome.setSystemUIOverlayStyle(

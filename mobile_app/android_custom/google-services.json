@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "688107707932",
+    "project_id": "cosmic-horoscope-ru",
+    "storage_bucket": "cosmic-horoscope-ru.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688107707932:android:f1853cf1647e05eb4f89d9",
+        "android_client_info": {
+          "package_name": "com.cosmic.cosmic_horoscope"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "688107707932-p0v1sa25msj04b8jpfsjpjl26vb6694k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxn71r2dlRaMJnn5vtiHhVVCD7hbE_oUs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "688107707932-p0v1sa25msj04b8jpfsjpjl26vb6694k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
