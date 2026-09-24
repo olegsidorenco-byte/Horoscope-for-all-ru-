@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/horoscope_model.dart';
 import '../models/zodiac_model.dart';
 import 'storage_service.dart';
@@ -15,6 +16,46 @@ class HoroscopeSyncService {
     String? langCode,
   }) async {
     final lang = langCode ?? await StorageService.getLanguageCode();
+    
+    // Пытаемся получить персональный гороскоп, если пользователь авторизован в Firebase
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        final token = await user.getIdToken();
+        if (token != null) {
+          final url = Uri.parse('https://cosmic-horoscope-api-688107707932.europe-west1.run.app/horoscope/personal');
+          final response = await http.post(
+            url,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({'lang': lang}),
+          ).timeout(const Duration(seconds: 10));
+
+          if (response.statusCode == 200) {
+            final data = jsonDecode(utf8.decode(response.bodyBytes));
+            
+            // Формируем модель HoroscopeDay на лету (пока API возвращает только один текст)
+            final parsedHoroscope = HoroscopeDay(
+              date: data['date'] ?? DateTime.now().toString(),
+              general: data['horoscope'] ?? '',
+              love: '',
+              career: '',
+              health: '',
+              signs: {},
+            );
+            
+            return parsedHoroscope;
+          }
+        }
+      } catch (e) {
+        print("Ошибка получения персонального прогноза: $e");
+        // Фолбэк на общий гороскоп, если сервер недоступен
+      }
+    }
+
+    // --- ФОЛБЭК ДЛЯ ГОСТЕЙ ИЛИ ПРИ СБОЕ API ---
     final fileName = (lang == 'ru') ? 'latest_horoscope.json' : 'latest_horoscope_$lang.json';
     final assetPath = (lang == 'ru') ? 'assets/data/latest_horoscope.json' : 'assets/data/latest_horoscope_$lang.json';
 
