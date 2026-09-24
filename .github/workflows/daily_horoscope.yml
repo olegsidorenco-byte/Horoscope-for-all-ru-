@@ -1,9 +1,9 @@
 name: Daily Horoscope Bot
 
 on:
-# schedule:
-  #   # Запуск отключен в пользу локального надежного запуска с ноутбука в 06:30
-  #   - cron: '40 2 * * *'
+  schedule:
+    # Запуск бота каждый день в 01:00 по расписанию
+    - cron: '0 1 * * *'
   workflow_dispatch: # Ручной резервный запуск через интерфейс GitHub
 
 permissions:
