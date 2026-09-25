@@ -39,11 +39,16 @@ class HoroscopeSyncService {
             // Формируем модель HoroscopeDay на лету (пока API возвращает только один текст)
             final parsedHoroscope = HoroscopeDay(
               date: data['date'] ?? DateTime.now().toString(),
-              general: data['horoscope'] ?? '',
-              love: '',
-              career: '',
-              health: '',
-              signs: {},
+              greeting: "Ваш персональный астрологический прогноз",
+              topics: [
+                HoroscopeTopic(
+                  title: "Транзиты на сегодня",
+                  content: data['horoscope'] ?? '',
+                  icon: "🪐",
+                )
+              ],
+              rawText: data['horoscope'] ?? '',
+              updatedAt: DateTime.now().toIso8601String(),
             );
             
             return parsedHoroscope;
