@@ -183,6 +183,9 @@ class AuthService {
           id: user.uid,
           name: "Пользователь",
           birthDate: DateTime(2000, 1, 1),
+          birthTime: "12:00",
+          birthPlace: "",
+          currentCity: "",
         );
       }
 
