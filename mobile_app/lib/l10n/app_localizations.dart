@@ -10,26 +10,26 @@ class AppLocalizations {
 
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
-        AppLocalizations(const Locale('ru'));
+        AppLocalizations(const Locale('en'));
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
 
   static const List<Locale> supportedLocales = [
-    Locale('ru'),
     Locale('en'),
-    Locale('es'),
     Locale('de'),
+    Locale('es'),
     Locale('fr'),
+    Locale('ru'),
   ];
 
   static const List<Map<String, String>> supportedLanguages = [
-    {'code': 'ru', 'name': 'Русский', 'nativeName': 'Русский', 'flag': '🇷🇺'},
+    {'code': 'de', 'name': 'German', 'nativeName': 'Deutsch', 'flag': '🇩🇪'},
     {'code': 'en', 'name': 'English', 'nativeName': 'English', 'flag': '🇬🇧'},
     {'code': 'es', 'name': 'Spanish', 'nativeName': 'Español', 'flag': '🇪🇸'},
-    {'code': 'de', 'name': 'German', 'nativeName': 'Deutsch', 'flag': '🇩🇪'},
     {'code': 'fr', 'name': 'French', 'nativeName': 'Français', 'flag': '🇫🇷'},
+    {'code': 'ru', 'name': 'Русский', 'nativeName': 'Русский', 'flag': '🇷🇺'},
   ];
 
   String get langCode => locale.languageCode;

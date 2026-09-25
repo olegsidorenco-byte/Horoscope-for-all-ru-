@@ -54,7 +54,7 @@ void main() async {
 
 class CosmicHoroscopeApp extends StatelessWidget {
   static final ValueNotifier<Locale> localeNotifier =
-      ValueNotifier<Locale>(const Locale('ru'));
+      ValueNotifier<Locale>(const Locale('en'));
 
   const CosmicHoroscopeApp({super.key});
 

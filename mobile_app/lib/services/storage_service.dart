@@ -19,7 +19,7 @@ class StorageService {
   // Выбранный язык приложения (ru, en, es, de, fr)
   static Future<String> getLanguageCode() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyLanguage) ?? 'ru';
+    return prefs.getString(_keyLanguage) ?? 'en';
   }
 
   static Future<void> setLanguageCode(String langCode) async {

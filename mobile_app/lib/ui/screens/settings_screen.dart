@@ -27,7 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _notifHour = 6;
   int _notifMinute = 45;
   UserProfile _profile = UserProfile.defaultProfile();
-  String _currentLanguageCode = 'ru';
+  String _currentLanguageCode = 'en';
 
   @override
   void initState() {
