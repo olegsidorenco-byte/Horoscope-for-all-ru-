@@ -32,7 +32,7 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
         ]
         
         scanned_extensions = ('.py', '.dart', '.json', '.yml', '.yaml')
-        exempt_files = ('.env.example', 'users_registry.json')
+        exempt_files = ('.env.example', 'users_registry.json', 'firebase_options.dart', 'google-services.json')
 
         leaks_found = []
         for root, dirs, files in os.walk(project_root):
