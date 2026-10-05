@@ -1,0 +1,151 @@
+{
+  "date": "05.10.2026",
+  "raw_text": "Good morning, dear souls! Wrap yourself in the cozy warmth of a fresh autumn brew, let a gentle smile light up your face, and step into this day with absolute trust in the universe. ☕️🍂✨\n\n☀️🌿 <b>Гороскоп на 5 октября (Понедельник)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Овен. 5 октября.</b>\n✨ The sensitive Cancer Moon invites you to soften your fiery armor today. Focus on securing your inner fortress and nurturing your closest family bonds.\n<b>СОВЕТ ДНЯ ☝️</b> Spend the evening at home with your loved ones.\n\n<b>♉️ Телец. 5 октября.</b>\n✨ Warm conversations and heartfelt connections will bring you immense joy. It is a wonderful day to resolve old misunderstandings through gentle, honest dialogue.\n<b>СОВЕТ ДНЯ ☝️</b> Call an old friend to share a warm chat.\n\n<b>♊️ Близнецы. 5 октября.</b>\n✨ Financial intuition is exceptionally high today, guiding you toward cozy comfort. Focus on practical matters but do not hesitate to treat your soul.\n<b>СОВЕТ ДНЯ ☝️</b> Review your budget and buy something cozy for home.\n\n<b>♋️ Рак. 5 октября.</b>\n✨ With the Moon in your sign, your emotional magnetism is truly unmatched today. Trust your deep gut feelings and let your inner light guide others.\n<b>СОВЕТ ДНЯ ☝️</b> Put your own emotional needs first today.\n\n<b>♌️ Лев. 5 октября.</b>\n✨ This Monday calls for a peaceful pause and deep spiritual restoration. Retreat from the noisy world to recharge your magnificent, creative solar batteries.\n<b>СОВЕТ ДНЯ ☝️</b> Meditate or listen to quiet music before sleep.\n\n<b>♍️ Дева. 5 октября.</b>\n✨ Friendly support and warm group dynamics will inspire your logical mind today. Sharing your heartfelt dreams with trusted allies brings them closer to reality.\n<b>СОВЕТ ДНЯ ☝️</b> Accept help from friends with an open heart.\n\n<b>♎️ Весы. 5 октября.</b>\n✨ Your professional path shines brightly when you infuse duty with genuine empathy. Trust your intuition to solve complex career tasks with absolute grace.\n<b>СОВЕТ ДНЯ ☝️</b> Use diplomacy instead of pressure to achieve goals.\n\n<b>♏️ Скорпион. 5 октября.</b>\n✨ Philosophical insights and spiritual growth await you beyond your comfort zone. Open your heart to inspiring knowledge that expands your inner horizons.\n<b>СОВЕТ ДНЯ ☝️</b> Read an inspiring book to feed your soul.\n\n<b>♐️ Стрелец. 5 октября.</b>\n✨ Deep emotional transformations help you release old, stagnant psychological baggage today. Trust the natural cycle of endings to welcome beautiful new beginnings.\n<b>СОВЕТ ДНЯ ☝️</b> Let go of past regrets with gratitude.\n\n<b>♑️ Козерог. 5 октября.</b>\n✨ Harmony in partnerships is your main source of strength and inspiration today. Listen to your partner's heart rather than focusing only on dry logic.\n<b>СОВЕТ ДНЯ ☝️</b> Show your vulnerable side to someone you trust.\n\n<b>♒️ Водолей. 5 октября.</b>\n✨ Daily routines become a source of comfort when approached with mindful love. Take gentle care of your physical body and organize your workspace.\n<b>СОВЕТ ДНЯ ☝️</b> Drink clean water and take a relaxing walk.\n\n<b>♓️ Рыбы. 5 октября.</b>\n✨ Pure creative inspiration and romantic vibes fill your sensitive soul today. Express your deepest feelings through art, play, or heartwarming laughter.\n<b>СОВЕТ ДНЯ ☝️</b> Allow yourself to create without judging the result.\n\n✨✨✨ <i>Like a deep river flowing quietly to the ocean, true strength lies not in fighting the current, but in trusting the gentle flow of life that always carries us home.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Овен",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Огонь",
+      "color": "0xFFE63946",
+      "focus": "Совет: Spend the evening at home with your loved ones.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ The sensitive Cancer Moon invites you to soften your fiery armor today. Focus on securing your inner fortress and nurturing your closest family bonds.\n\nСОВЕТ ДНЯ ☝️ Spend the evening at home with your loved ones."
+    },
+    {
+      "id": "taurus",
+      "name": "Телец",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Земля",
+      "color": "0xFF2A9D8F",
+      "focus": "Совет: Call an old friend to share a warm chat.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Warm conversations and heartfelt connections will bring you immense joy. It is a wonderful day to resolve old misunderstandings through gentle, honest dialogue.\n\nСОВЕТ ДНЯ ☝️ Call an old friend to share a warm chat."
+    },
+    {
+      "id": "gemini",
+      "name": "Близнецы",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Воздух",
+      "color": "0xFFE9C46A",
+      "focus": "Совет: Review your budget and buy something cozy for home.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Financial intuition is exceptionally high today, guiding you toward cozy comfort. Focus on practical matters but do not hesitate to treat your soul.\n\nСОВЕТ ДНЯ ☝️ Review your budget and buy something cozy for home."
+    },
+    {
+      "id": "cancer",
+      "name": "Рак",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Вода",
+      "color": "0xFF457B9D",
+      "focus": "Совет: Put your own emotional needs first today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ With the Moon in your sign, your emotional magnetism is truly unmatched today. Trust your deep gut feelings and let your inner light guide others.\n\nСОВЕТ ДНЯ ☝️ Put your own emotional needs first today."
+    },
+    {
+      "id": "leo",
+      "name": "Лев",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Огонь",
+      "color": "0xFFF4A261",
+      "focus": "Совет: Meditate or listen to quiet music before sleep.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ This Monday calls for a peaceful pause and deep spiritual restoration. Retreat from the noisy world to recharge your magnificent, creative solar batteries.\n\nСОВЕТ ДНЯ ☝️ Meditate or listen to quiet music before sleep."
+    },
+    {
+      "id": "virgo",
+      "name": "Дева",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Земля",
+      "color": "0xFF588157",
+      "focus": "Совет: Accept help from friends with an open heart.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Friendly support and warm group dynamics will inspire your logical mind today. Sharing your heartfelt dreams with trusted allies brings them closer to reality.\n\nСОВЕТ ДНЯ ☝️ Accept help from friends with an open heart."
+    },
+    {
+      "id": "libra",
+      "name": "Весы",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Воздух",
+      "color": "0xFFA8DADC",
+      "focus": "Совет: Use diplomacy instead of pressure to achieve goals.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your professional path shines brightly when you infuse duty with genuine empathy. Trust your intuition to solve complex career tasks with absolute grace.\n\nСОВЕТ ДНЯ ☝️ Use diplomacy instead of pressure to achieve goals."
+    },
+    {
+      "id": "scorpio",
+      "name": "Скорпион",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Вода",
+      "color": "0xFF9D0208",
+      "focus": "Совет: Read an inspiring book to feed your soul.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Philosophical insights and spiritual growth await you beyond your comfort zone. Open your heart to inspiring knowledge that expands your inner horizons.\n\nСОВЕТ ДНЯ ☝️ Read an inspiring book to feed your soul."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Стрелец",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Огонь",
+      "color": "0xFFE76F51",
+      "focus": "Совет: Let go of past regrets with gratitude.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Deep emotional transformations help you release old, stagnant psychological baggage today. Trust the natural cycle of endings to welcome beautiful new beginnings.\n\nСОВЕТ ДНЯ ☝️ Let go of past regrets with gratitude."
+    },
+    {
+      "id": "capricorn",
+      "name": "Козерог",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Земля",
+      "color": "0xFF3A5A40",
+      "focus": "Совет: Show your vulnerable side to someone you trust.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Harmony in partnerships is your main source of strength and inspiration today. Listen to your partner's heart rather than focusing only on dry logic.\n\nСОВЕТ ДНЯ ☝️ Show your vulnerable side to someone you trust."
+    },
+    {
+      "id": "aquarius",
+      "name": "Водолей",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Воздух",
+      "color": "0xFF00B4D8",
+      "focus": "Совет: Drink clean water and take a relaxing walk.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Daily routines become a source of comfort when approached with mindful love. Take gentle care of your physical body and organize your workspace.\n\nСОВЕТ ДНЯ ☝️ Drink clean water and take a relaxing walk."
+    },
+    {
+      "id": "pisces",
+      "name": "Рыбы",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Вода",
+      "color": "0xFF7209B7",
+      "focus": "Совет: Allow yourself to create without judging the result.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Pure creative inspiration and romantic vibes fill your sensitive soul today. Express your deepest feelings through art, play, or heartwarming laughter.\n\nСОВЕТ ДНЯ ☝️ Allow yourself to create without judging the result.\n\n✨✨✨ Like a deep river flowing quietly to the ocean, true strength lies not in fighting the current, but in trusting the gentle flow of life that always carries us home. ✨✨✨"
+    }
+  ],
+  "updated_at": "2026-10-05T03:31:31.752212Z"
+}
