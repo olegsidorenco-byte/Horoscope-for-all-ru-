@@ -1037,6 +1037,16 @@ REQUIRED_ZODIAC_SIGNS = [
     "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы"
 ]
 
+REQUIRED_ZODIAC_SIGNS_BY_LANG = {
+    "ru": REQUIRED_ZODIAC_SIGNS,
+    "en": ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"],
+    "es": ["Aries", "Tauro", "Géminis", "Cáncer", "Leo", "Virgo", "Libra", "Escorpio", "Sagitario", "Capricornio", "Acuario", "Piscis"],
+    "de": ["Widder", "Stier", "Zwillinge", "Krebs", "Löwe", "Jungfrau", "Waage", "Skorpion", "Schütze", "Steinbock", "Wassermann", "Fische"],
+    "fr": ["Bélier", "Taureau", "Gémeaux", "Cancer", "Lion", "Vierge", "Balance", "Scorpion", "Sagittaire", "Capricorne", "Verseau", "Poissons"],
+}
+
+ZODIAC_SYMBOLS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"]
+
 
 def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: str = "ru") -> str:
     """
@@ -1098,8 +1108,14 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: 
                             last_error = f"Превышен лимит токенов (MAX_TOKENS) на модели {model_name}"
                             continue
 
-                        # Проверяем наличие всех 12 знаков
-                        missing_signs = [s for s in REQUIRED_ZODIAC_SIGNS if s not in text]
+                        # Проверяем наличие всех 12 знаков (с учетом языка и астрологических символов)
+                        target_signs = REQUIRED_ZODIAC_SIGNS_BY_LANG.get(lang, REQUIRED_ZODIAC_SIGNS)
+                        missing_signs = []
+                        for sym, ru_name, t_name in zip(ZODIAC_SYMBOLS, REQUIRED_ZODIAC_SIGNS, target_signs):
+                            if sym in text or ru_name in text or t_name.lower() in text.lower():
+                                continue
+                            missing_signs.append(t_name if lang != "ru" else ru_name)
+
                         if missing_signs:
                             print(f"⚠️ [Зодиак] Модель {model_name} вернула неполный гороскоп (нет знаков: {missing_signs}).")
                             last_error = f"Неполный гороскоп: отсутствуют знаки {missing_signs}"

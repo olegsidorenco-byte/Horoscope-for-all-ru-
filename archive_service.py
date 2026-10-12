@@ -90,7 +90,8 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         sign_name = meta["name"]
         symbol = meta["symbol"]
         
-        pattern = re.compile(rf"(?:<b>)?\s*{symbol}[^<]*\s*{sign_name}[^<]*</b>(.*?)(?=(?:<b>)?\s*[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
+        # Ищем блок знака по символу в заголовке <b>...</b> или имени
+        pattern = re.compile(rf"(?:<b>)?\s*{symbol}[^<]*</b>(.*?)(?=(?:<b>)?\s*[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
         match = pattern.search(clean_text)
         
         block_text = ""
@@ -102,10 +103,15 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
         if match:
             block_text = match.group(1).strip()
         else:
-            simple_pattern = re.compile(rf"{sign_name}.*?\n(.*?)(?=\n[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
-            simple_match = simple_pattern.search(clean_text)
-            if simple_match:
-                block_text = simple_match.group(1).strip()
+            sym_pattern = re.compile(rf"{symbol}.*?\n(.*?)(?=\n[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
+            sym_match = sym_pattern.search(clean_text)
+            if sym_match:
+                block_text = sym_match.group(1).strip()
+            else:
+                simple_pattern = re.compile(rf"{sign_name}.*?\n(.*?)(?=\n[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
+                simple_match = simple_pattern.search(clean_text)
+                if simple_match:
+                    block_text = simple_match.group(1).strip()
 
         if block_text:
             lines = [l.strip() for l in block_text.split("\n") if l.strip()]
@@ -113,8 +119,11 @@ def parse_zodiac_structure(raw_text: str, target_date: str) -> dict:
             for line in lines:
                 if "Фокус:" in line:
                     focus = line.replace("•", "").replace("Фокус:", "").strip()
-                elif "СОВЕТ ДНЯ" in line or "СОВЕТ ДНЯ ☝️" in line or "СОВЕТ ДНЯ☝️" in line:
-                    clean_adv = re.sub(r'<[^>]*>', '', line).replace("СОВЕТ ДНЯ ☝️", "").replace("СОВЕТ ДНЯ☝️", "").replace("СОВЕТ ДНЯ", "").strip()
+                elif any(kw in line for kw in ["СОВЕТ ДНЯ", "TIP OF THE DAY", "CONSEJO DEL DÍA", "TIPP DES TAGES", "CONSEIL DU JOUR"]):
+                    clean_adv = re.sub(r'<[^>]*>', '', line)
+                    for kw in ["СОВЕТ ДНЯ ☝️", "СОВЕТ ДНЯ☝️", "СОВЕТ ДНЯ", "TIP OF THE DAY ☝️", "TIP OF THE DAY", "CONSEJO DEL DÍA ☝️", "CONSEJO DEL DÍA", "TIPP DES TAGES ☝️", "TIPP DES TAGES", "CONSEIL DU JOUR ☝️", "CONSEIL DU JOUR"]:
+                        clean_adv = clean_adv.replace(kw, "")
+                    clean_adv = clean_adv.strip()
                     focus = f"Совет: {clean_adv[:60]}" if clean_adv else "Практический совет дня"
                     forecast_lines.append(line)
                 elif "Энергия:" in line or "Часы удачи:" in line:
