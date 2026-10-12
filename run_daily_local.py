@@ -76,11 +76,18 @@ def run_cmd(cmd_list: list, cwd: Path = BASE_DIR) -> subprocess.CompletedProcess
 def sync_git_pull():
     """Синхронизирует репозиторий с удаленным origin/main перед генерацией."""
     log("🔄 Синхронизация с удаленным репозиторием (git pull --rebase)...")
+    has_changes = bool(run_cmd(["git", "status", "--porcelain"]).stdout.strip())
+    if has_changes:
+        run_cmd(["git", "stash", "push", "-u", "-m", "auto-stash-before-pull"])
+
     res = run_cmd(["git", "pull", "--rebase", "origin", "main"])
     if res.returncode == 0:
         log("✅ Репозиторий успешно обновлен.")
     else:
         log(f"⚠️ Предупреждение при git pull: {res.stderr.strip() or res.stdout.strip()}")
+
+    if has_changes:
+        run_cmd(["git", "stash", "pop"])
 
 
 def is_already_generated_today() -> bool:
@@ -107,13 +114,13 @@ def is_already_generated_today() -> bool:
 def sync_git_push(target_date: str):
     """Фиксирует изменения в папке data/ и отправляет их в GitHub."""
     log("📤 Проверка изменений архива для публикации на GitHub...")
-    status_res = run_cmd(["git", "status", "--porcelain", "data/"])
+    status_res = run_cmd(["git", "status", "--porcelain", "data/", "mobile_app/assets/data/"])
     if not status_res.stdout.strip():
         log("ℹ️ В папке data/ нет новых изменений для отправки.")
         return
 
     log("📦 Добавление изменений папки data/ в индекс Git...")
-    run_cmd(["git", "add", "data/"])
+    run_cmd(["git", "add", "data/", "mobile_app/assets/data/"])
     
     commit_msg = f"🗄️ Ежедневный гороскоп на {target_date} [skip ci]"
     commit_res = run_cmd(["git", "commit", "-m", commit_msg])
