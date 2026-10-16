@@ -1,0 +1,151 @@
+{
+  "date": "16.10.2026",
+  "raw_text": "Good morning, beautiful souls! May your Friday be filled with the warmth of a fresh cup of coffee, the gentle light of the rising sun, and a heart ready to embrace the magic of new beginnings. Let the optimism of the day carry you toward your dreams with grace and steady confidence. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope for October 16 (Friday)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. October 16.</b>\nYour natural fire meets the expansive energy of the Moon today, fueling your ambition to conquer new heights. Focus on bold initiatives and clear, assertive communication.\n<b>СОВЕТ ДНЯ ☝️</b> Take a decisive step toward your long-term goal.\n\n<b>♉️ Taurus. October 16.</b>\nVenusian influence brings a soothing touch to your professional life, helping you find beauty in routine tasks. Stay grounded while allowing yourself to dream a little bigger.\n<b>СОВЕТ ДНЯ ☝️</b> Invest time in organizing your workspace for harmony.\n\n<b>♊️ Gemini. October 16.</b>\nYour social batteries are recharging, making today perfect for networking and sharing bright ideas. Intellectual stimulation will bring you the joy you truly crave now.\n<b>СОВЕТ ДНЯ ☝️</b> Reach out to a friend for a conversation.\n\n<b>♋️ Cancer. October 16.</b>\nThe Moon encourages you to nurture your inner world and create a sanctuary of peace at home. Emotional clarity helps you resolve a lingering personal dilemma today.\n<b>СОВЕТ ДНЯ ☝️</b> Focus on self-care and quiet moments of reflection.\n\n<b>♌️ Leo. October 16.</b>\nYour charisma is magnetic, drawing positive opportunities toward your creative projects. Speak your truth with confidence, as others are ready to listen to your vision.\n<b>СОВЕТ ДНЯ ☝️</b> Share your ideas openly with your trusted team.\n\n<b>♍️ Virgo. October 16.</b>\nPracticality is your superpower today as you streamline your financial habits and daily schedule. Trust your analytical mind to solve a complex puzzle with ease.\n<b>СОВЕТ ДНЯ ☝️</b> Review your budget to ensure future financial stability.\n\n<b>♎️ Libra. October 16.</b>\nWith the Sun lighting up your sign, you feel balanced and ready to harmonize your relationships. Embrace your diplomatic nature to bridge gaps between colleagues.\n<b>СОВЕТ ДНЯ ☝️</b> Practice active listening in all your important interactions.\n\n<b>♏️ Scorpio. October 16.</b>\nIntuition is high, allowing you to sense hidden truths and potential paths for growth. A moment of solitude will provide the insight you need for success.\n<b>СОВЕТ ДНЯ ☝️</b> Trust your gut feelings regarding a new venture.\n\n<b>♐️ Sagittarius. October 16.</b>\nThe Moon in your sign expands your horizons, filling your day with adventurous energy and optimism. Seek out experiences that challenge your current perspective today.\n<b>СОВЕТ ДНЯ ☝️</b> Plan a mini-adventure to refresh your tired spirit.\n\n<b>♑️ Capricorn. October 16.</b>\nSteady progress is your theme today, as your dedication begins to yield tangible results. Stay focused on your long-term vision despite any minor morning distractions.\n<b>СОВЕТ ДНЯ ☝️</b> Stick to your plan to achieve maximum results.\n\n<b>♒️ Aquarius. October 16.</b>\nFresh ideas are flowing, urging you to break free from tradition and embrace innovation. Your unique approach to problem-solving will earn you great respect today.\n<b>СОВЕТ ДНЯ ☝️</b> Propose a bold, unconventional idea to your peers.\n\n<b>♓️ Pisces. October 16.</b>\nYour empathetic nature creates deep connections with those around you, fostering a sense of unity. Let your intuition guide your decisions in matters of the heart.\n<b>СОВЕТ ДНЯ ☝️</b> Offer your support to someone truly in need.\n\n✨✨✨ <i>True wisdom lies in knowing that even the longest journey begins with a single step taken in trust, and the greatest strength is found in a heart that remains soft and open to the world.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Овен",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Огонь",
+      "color": "0xFFE63946",
+      "focus": "Совет: Take a decisive step toward your long-term goal.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your natural fire meets the expansive energy of the Moon today, fueling your ambition to conquer new heights. Focus on bold initiatives and clear, assertive communication.\n\nСОВЕТ ДНЯ ☝️ Take a decisive step toward your long-term goal."
+    },
+    {
+      "id": "taurus",
+      "name": "Телец",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Земля",
+      "color": "0xFF2A9D8F",
+      "focus": "Совет: Invest time in organizing your workspace for harmony.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Venusian influence brings a soothing touch to your professional life, helping you find beauty in routine tasks. Stay grounded while allowing yourself to dream a little bigger.\n\nСОВЕТ ДНЯ ☝️ Invest time in organizing your workspace for harmony."
+    },
+    {
+      "id": "gemini",
+      "name": "Близнецы",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Воздух",
+      "color": "0xFFE9C46A",
+      "focus": "Совет: Reach out to a friend for a conversation.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your social batteries are recharging, making today perfect for networking and sharing bright ideas. Intellectual stimulation will bring you the joy you truly crave now.\n\nСОВЕТ ДНЯ ☝️ Reach out to a friend for a conversation."
+    },
+    {
+      "id": "cancer",
+      "name": "Рак",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Вода",
+      "color": "0xFF457B9D",
+      "focus": "Совет: Focus on self-care and quiet moments of reflection.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Moon encourages you to nurture your inner world and create a sanctuary of peace at home. Emotional clarity helps you resolve a lingering personal dilemma today.\n\nСОВЕТ ДНЯ ☝️ Focus on self-care and quiet moments of reflection."
+    },
+    {
+      "id": "leo",
+      "name": "Лев",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Огонь",
+      "color": "0xFFF4A261",
+      "focus": "Совет: Share your ideas openly with your trusted team.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your charisma is magnetic, drawing positive opportunities toward your creative projects. Speak your truth with confidence, as others are ready to listen to your vision.\n\nСОВЕТ ДНЯ ☝️ Share your ideas openly with your trusted team."
+    },
+    {
+      "id": "virgo",
+      "name": "Дева",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Земля",
+      "color": "0xFF588157",
+      "focus": "Совет: Review your budget to ensure future financial stability.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Practicality is your superpower today as you streamline your financial habits and daily schedule. Trust your analytical mind to solve a complex puzzle with ease.\n\nСОВЕТ ДНЯ ☝️ Review your budget to ensure future financial stability."
+    },
+    {
+      "id": "libra",
+      "name": "Весы",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Воздух",
+      "color": "0xFFA8DADC",
+      "focus": "Совет: Practice active listening in all your important interactions",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "With the Sun lighting up your sign, you feel balanced and ready to harmonize your relationships. Embrace your diplomatic nature to bridge gaps between colleagues.\n\nСОВЕТ ДНЯ ☝️ Practice active listening in all your important interactions."
+    },
+    {
+      "id": "scorpio",
+      "name": "Скорпион",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Вода",
+      "color": "0xFF9D0208",
+      "focus": "Совет: Trust your gut feelings regarding a new venture.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Intuition is high, allowing you to sense hidden truths and potential paths for growth. A moment of solitude will provide the insight you need for success.\n\nСОВЕТ ДНЯ ☝️ Trust your gut feelings regarding a new venture."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Стрелец",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Огонь",
+      "color": "0xFFE76F51",
+      "focus": "Совет: Plan a mini-adventure to refresh your tired spirit.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Moon in your sign expands your horizons, filling your day with adventurous energy and optimism. Seek out experiences that challenge your current perspective today.\n\nСОВЕТ ДНЯ ☝️ Plan a mini-adventure to refresh your tired spirit."
+    },
+    {
+      "id": "capricorn",
+      "name": "Козерог",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Земля",
+      "color": "0xFF3A5A40",
+      "focus": "Совет: Stick to your plan to achieve maximum results.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Steady progress is your theme today, as your dedication begins to yield tangible results. Stay focused on your long-term vision despite any minor morning distractions.\n\nСОВЕТ ДНЯ ☝️ Stick to your plan to achieve maximum results."
+    },
+    {
+      "id": "aquarius",
+      "name": "Водолей",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Воздух",
+      "color": "0xFF00B4D8",
+      "focus": "Совет: Propose a bold, unconventional idea to your peers.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Fresh ideas are flowing, urging you to break free from tradition and embrace innovation. Your unique approach to problem-solving will earn you great respect today.\n\nСОВЕТ ДНЯ ☝️ Propose a bold, unconventional idea to your peers."
+    },
+    {
+      "id": "pisces",
+      "name": "Рыбы",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Вода",
+      "color": "0xFF7209B7",
+      "focus": "Совет: Offer your support to someone truly in need.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your empathetic nature creates deep connections with those around you, fostering a sense of unity. Let your intuition guide your decisions in matters of the heart.\n\nСОВЕТ ДНЯ ☝️ Offer your support to someone truly in need.\n\n✨✨✨ True wisdom lies in knowing that even the longest journey begins with a single step taken in trust, and the greatest strength is found in a heart that remains soft and open to the world. ✨✨✨"
+    }
+  ],
+  "updated_at": "2026-10-16T03:30:50.268063Z"
+}
