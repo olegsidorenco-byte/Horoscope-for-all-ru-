@@ -1,0 +1,151 @@
+{
+  "date": "25.10.2026",
+  "raw_text": "Bonjour à tous ! Que ce doux dimanche commence par la chaleur d'une tasse de thé fumante et un sourire radieux tourné vers l'horizon. Respirez profondément, laissez la sérénité infuser votre esprit et accueillez cette journée avec une confiance absolue en la vie. ☀️☕️🌿\n\n☀️🌿 <b>Гороскоп на 25 октября (Воскресенье)</b> 🌿☀️\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Овен. 25 октября.</b>\n✨ Votre énergie déborde sous l'influence de la Lune. C'est le moment idéal pour initier un projet audacieux qui vous tient à cœur.\n<b>СОВЕТ ДНЯ ☝️</b> Soyez audacieux et foncez vers vos objectifs personnels.\n\n<b>♉️ Телец. 25 октября.</b>\n✨ La stabilité émotionnelle est à portée de main. Profitez du calme ambiant pour harmoniser vos relations proches et apaiser les tensions.\n<b>СОВЕТ ДНЯ ☝️</b> Privilégiez le confort et le repos en famille.\n\n<b>♊️ Близнецы. 25 октября.</b>\n✨ Votre curiosité intellectuelle est stimulée. Échangez des idées inspirantes avec votre entourage pour nourrir votre créativité débordante et dynamique.\n<b>СОВЕТ ДНЯ ☝️</b> Partagez vos pensées avec bienveillance et ouverture.\n\n<b>♋️ Рак. 25 октября.</b>\n✨ L'introspection vous guide vers une meilleure compréhension de vos besoins intérieurs. Écoutez votre intuition, elle est votre boussole aujourd'hui.\n<b>СОВЕТ ДНЯ ☝️</b> Accordez-vous un moment de solitude ressourçante.\n\n<b>♌️ Лев. 25 октября.</b>\n✨ Votre aura rayonne et attire naturellement la sympathie. Utilisez cette influence positive pour fédérer vos amis autour d'un projet commun.\n<b>СОВЕТ ДНЯ ☝️</b> Exprimez votre créativité avec passion et générosité.\n\n<b>♍️ Дева. 25 октября.</b>\n✨ Le Soleil dans votre signe renforce votre lucidité. C'est l'instant parfait pour organiser vos priorités et clarifier vos intentions futures.\n<b>СОВЕТ ДНЯ ☝️</b> Soyez méthodique et précis dans vos décisions.\n\n<b>♎️ Весы. 25 октября.</b>\n✨ L'équilibre relationnel est votre priorité. Cherchez le compromis dans les échanges et favorisez la douceur pour maintenir une paix durable.\n<b>СОВЕТ ДНЯ ☝️</b> Cultivez la diplomatie dans toutes vos interactions.\n\n<b>♏️ Скорпион. 25 октября.</b>\n✨ Une intuition puissante vous révèle des vérités cachées. Utilisez cette force pour transformer une situation complexe en opportunité de croissance.\n<b>СОВЕТ ДНЯ ☝️</b> Faites confiance à votre instinct profond aujourd'hui.\n\n<b>♐️ Стрелец. 25 октября.</b>\n✨ Un vent de liberté souffle sur vos aspirations. Explorez de nouveaux horizons mentaux pour élargir votre vision du monde actuel.\n<b>СОВЕТ ДНЯ ☝️</b> Osez sortir de votre zone de confort.\n\n<b>♑️ Козерог. 25 октября.</b>\n✨ Votre persévérance porte enfin ses fruits. Prenez le temps de savourer vos accomplissements récents avec fierté et sérénité intérieure.\n<b>СОВЕТ ДНЯ ☝️</b> Fixez des objectifs ambitieux mais réalisables.\n\n<b>♒️ Водолей. 25 октября.</b>\n✨ Votre esprit visionnaire anticipe les changements à venir. Connectez-vous avec des personnes partageant vos idéaux pour créer demain.\n<b>СОВЕТ ДНЯ ☝️</b> Innovez et proposez des solutions originales.\n\n<b>♓️ Рыбы. 25 октября.</b>\n✨ Votre sensibilité artistique est en pleine éclosion. Laissez votre imagination s'exprimer pleinement pour apaiser votre âme et inspirer autrui.\n<b>СОВЕТ ДНЯ ☝️</b> Pratiquez une activité créative pour vous évader.\n\n✨✨✨ <i>La paix intérieure est le jardin secret où chaque intention fleurit pour transformer le monde en un lieu plus lumineux.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Овен",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Огонь",
+      "color": "0xFFE63946",
+      "focus": "Совет: Soyez audacieux et foncez vers vos objectifs personnels.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre énergie déborde sous l'influence de la Lune. C'est le moment idéal pour initier un projet audacieux qui vous tient à cœur.\n\nСОВЕТ ДНЯ ☝️ Soyez audacieux et foncez vers vos objectifs personnels."
+    },
+    {
+      "id": "taurus",
+      "name": "Телец",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Земля",
+      "color": "0xFF2A9D8F",
+      "focus": "Совет: Privilégiez le confort et le repos en famille.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La stabilité émotionnelle est à portée de main. Profitez du calme ambiant pour harmoniser vos relations proches et apaiser les tensions.\n\nСОВЕТ ДНЯ ☝️ Privilégiez le confort et le repos en famille."
+    },
+    {
+      "id": "gemini",
+      "name": "Близнецы",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Воздух",
+      "color": "0xFFE9C46A",
+      "focus": "Совет: Partagez vos pensées avec bienveillance et ouverture.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre curiosité intellectuelle est stimulée. Échangez des idées inspirantes avec votre entourage pour nourrir votre créativité débordante et dynamique.\n\nСОВЕТ ДНЯ ☝️ Partagez vos pensées avec bienveillance et ouverture."
+    },
+    {
+      "id": "cancer",
+      "name": "Рак",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Вода",
+      "color": "0xFF457B9D",
+      "focus": "Совет: Accordez-vous un moment de solitude ressourçante.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ L'introspection vous guide vers une meilleure compréhension de vos besoins intérieurs. Écoutez votre intuition, elle est votre boussole aujourd'hui.\n\nСОВЕТ ДНЯ ☝️ Accordez-vous un moment de solitude ressourçante."
+    },
+    {
+      "id": "leo",
+      "name": "Лев",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Огонь",
+      "color": "0xFFF4A261",
+      "focus": "Совет: Exprimez votre créativité avec passion et générosité.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre aura rayonne et attire naturellement la sympathie. Utilisez cette influence positive pour fédérer vos amis autour d'un projet commun.\n\nСОВЕТ ДНЯ ☝️ Exprimez votre créativité avec passion et générosité."
+    },
+    {
+      "id": "virgo",
+      "name": "Дева",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Земля",
+      "color": "0xFF588157",
+      "focus": "Совет: Soyez méthodique et précis dans vos décisions.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le Soleil dans votre signe renforce votre lucidité. C'est l'instant parfait pour organiser vos priorités et clarifier vos intentions futures.\n\nСОВЕТ ДНЯ ☝️ Soyez méthodique et précis dans vos décisions."
+    },
+    {
+      "id": "libra",
+      "name": "Весы",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Воздух",
+      "color": "0xFFA8DADC",
+      "focus": "Совет: Cultivez la diplomatie dans toutes vos interactions.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ L'équilibre relationnel est votre priorité. Cherchez le compromis dans les échanges et favorisez la douceur pour maintenir une paix durable.\n\nСОВЕТ ДНЯ ☝️ Cultivez la diplomatie dans toutes vos interactions."
+    },
+    {
+      "id": "scorpio",
+      "name": "Скорпион",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Вода",
+      "color": "0xFF9D0208",
+      "focus": "Совет: Faites confiance à votre instinct profond aujourd'hui.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Une intuition puissante vous révèle des vérités cachées. Utilisez cette force pour transformer une situation complexe en opportunité de croissance.\n\nСОВЕТ ДНЯ ☝️ Faites confiance à votre instinct profond aujourd'hui."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Стрелец",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Огонь",
+      "color": "0xFFE76F51",
+      "focus": "Совет: Osez sortir de votre zone de confort.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Un vent de liberté souffle sur vos aspirations. Explorez de nouveaux horizons mentaux pour élargir votre vision du monde actuel.\n\nСОВЕТ ДНЯ ☝️ Osez sortir de votre zone de confort."
+    },
+    {
+      "id": "capricorn",
+      "name": "Козерог",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Земля",
+      "color": "0xFF3A5A40",
+      "focus": "Совет: Fixez des objectifs ambitieux mais réalisables.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre persévérance porte enfin ses fruits. Prenez le temps de savourer vos accomplissements récents avec fierté et sérénité intérieure.\n\nСОВЕТ ДНЯ ☝️ Fixez des objectifs ambitieux mais réalisables."
+    },
+    {
+      "id": "aquarius",
+      "name": "Водолей",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Воздух",
+      "color": "0xFF00B4D8",
+      "focus": "Совет: Innovez et proposez des solutions originales.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre esprit visionnaire anticipe les changements à venir. Connectez-vous avec des personnes partageant vos idéaux pour créer demain.\n\nСОВЕТ ДНЯ ☝️ Innovez et proposez des solutions originales."
+    },
+    {
+      "id": "pisces",
+      "name": "Рыбы",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Вода",
+      "color": "0xFF7209B7",
+      "focus": "Совет: Pratiquez une activité créative pour vous évader.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre sensibilité artistique est en pleine éclosion. Laissez votre imagination s'exprimer pleinement pour apaiser votre âme et inspirer autrui.\n\nСОВЕТ ДНЯ ☝️ Pratiquez une activité créative pour vous évader.\n\n✨✨✨ La paix intérieure est le jardin secret où chaque intention fleurit pour transformer le monde en un lieu plus lumineux. ✨✨✨"
+    }
+  ],
+  "updated_at": "2026-10-25T03:31:10.581711Z"
+}
