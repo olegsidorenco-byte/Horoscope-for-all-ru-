@@ -1,0 +1,151 @@
+{
+  "date": "28.10.2026",
+  "raw_text": "Bonjour, chers amis ! Que cette matinée vous apporte la clarté d'un café fumant et la douceur d'un rayon de soleil automnal. Respirez profondément, souriez à l'inconnu, et laissez la confiance en l'univers guider chacun de vos pas aujourd'hui. ☀️☕️🌿\n\n☀️🌿 <b>Гороскоп на 28 октября (Среда)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Bélier. 28 octobre.</b>\nVotre énergie déborde, mais la Lune en Gémeaux demande de la nuance dans vos paroles. Canalisez votre fougue vers des projets créatifs concrets.\n<b>СОВЕТ ДНЯ ☝️</b> Écoutez davantage vos interlocuteurs avant de prendre parole.\n\n<b>♉️ Taureau. 28 octobre.</b>\nLa stabilité est votre alliée, même si le rythme rapide de cette journée vous déstabilise. Restez ancré dans vos valeurs fondamentales.\n<b>СОВЕТ ДНЯ ☝️</b> Privilégiez la qualité sur la quantité dans vos tâches.\n\n<b>♊️ Gémeaux. 28 octobre.</b>\nSous l'influence de votre signe, votre esprit est en ébullition. C'est le moment idéal pour initier des échanges intellectuels stimulants.\n<b>СОВЕТ ДНЯ ☝️</b> Notez vos idées brillantes pour ne pas les oublier.\n\n<b>♋️ Cancer. 28 octobre.</b>\nUne sensibilité accrue vous permet de percevoir les besoins cachés de vos proches. Offrez votre soutien avec une bienveillance sincère.\n<b>СОВЕТ ДНЯ ☝️</b> Créez un cocon de paix chez vous ce soir.\n\n<b>♌️ Lion. 28 octobre.</b>\nVotre charisme attire les regards, mais restez humble face aux défis collectifs. L'élégance réside souvent dans la retenue bien placée.\n<b>СОВЕТ ДНЯ ☝️</b> Partagez la lumière avec ceux qui vous entourent.\n\n<b>♍️ Vierge. 28 octobre.</b>\nLe Soleil dans votre signe affine votre sens du détail. Utilisez cette précision pour résoudre un problème complexe en suspens.\n<b>СОВЕТ ДНЯ ☝️</b> Organisez votre espace de travail pour clarifier l'esprit.\n\n<b>♎️ Balance. 28 octobre.</b>\nLa diplomatie est votre arme secrète pour apaiser les tensions ambiantes. Cherchez l'équilibre parfait dans vos relations les plus proches.\n<b>СОВЕТ ДНЯ ☝️</b> Faites un compromis gracieux pour restaurer l'harmonie totale.\n\n<b>♏️ Scorpion. 28 octobre.</b>\nUne intuition profonde vous guide vers des vérités cachées. Ne craignez pas d'explorer les zones d'ombre pour mieux évoluer.\n<b>СОВЕТ ДНЯ ☝️</b> Faites confiance à votre instinct lors d'une décision.\n\n<b>♐️ Sagittaire. 28 octobre.</b>\nVotre soif d'aventure se heurte aux obligations. Trouvez un juste milieu en planifiant un projet inspirant pour votre futur proche.\n<b>СОВЕТ ДНЯ ☝️</b> Apprenez quelque chose de nouveau durant votre pause.\n\n<b>♑️ Capricorne. 28 octobre.</b>\nLa persévérance est la clé de votre succès actuel. Ne vous laissez pas distraire par le bruit extérieur et restez focalisé.\n<b>СОВЕТ ДНЯ ☝️</b> Fixez-vous un objectif réaliste et atteignez-le aujourd'hui.\n\n<b>♒️ Verseau. 28 octobre.</b>\nVotre esprit visionnaire apporte une perspective unique aux défis. Osez proposer vos idées originales, même si elles semblent audacieuses.\n<b>СОВЕТ ДНЯ ☝️</b> Connectez-vous avec des personnes partageant vos grandes idées.\n\n<b>♓️ Poissons. 28 octobre.</b>\nLaissez votre empathie naturelle guider vos interactions sociales aujourd'hui. Votre douceur sera un baume apaisant pour les cœurs agités.\n<b>СОВЕТ ДНЯ ☝️</b> Pratiquez la méditation pour calmer votre esprit créatif.\n\n✨✨✨ <i>La vie ne consiste pas à attendre que l'orage passe, mais à apprendre à danser sous la pluie avec confiance et sérénité.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Овен",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Огонь",
+      "color": "0xFFE63946",
+      "focus": "Совет: Écoutez davantage vos interlocuteurs avant de prendre parole",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Votre énergie déborde, mais la Lune en Gémeaux demande de la nuance dans vos paroles. Canalisez votre fougue vers des projets créatifs concrets.\n\nСОВЕТ ДНЯ ☝️ Écoutez davantage vos interlocuteurs avant de prendre parole."
+    },
+    {
+      "id": "taurus",
+      "name": "Телец",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Земля",
+      "color": "0xFF2A9D8F",
+      "focus": "Совет: Privilégiez la qualité sur la quantité dans vos tâches.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La stabilité est votre alliée, même si le rythme rapide de cette journée vous déstabilise. Restez ancré dans vos valeurs fondamentales.\n\nСОВЕТ ДНЯ ☝️ Privilégiez la qualité sur la quantité dans vos tâches."
+    },
+    {
+      "id": "gemini",
+      "name": "Близнецы",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Воздух",
+      "color": "0xFFE9C46A",
+      "focus": "Совет: Notez vos idées brillantes pour ne pas les oublier.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Sous l'influence de votre signe, votre esprit est en ébullition. C'est le moment idéal pour initier des échanges intellectuels stimulants.\n\nСОВЕТ ДНЯ ☝️ Notez vos idées brillantes pour ne pas les oublier."
+    },
+    {
+      "id": "cancer",
+      "name": "Рак",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Вода",
+      "color": "0xFF457B9D",
+      "focus": "Совет: Créez un cocon de paix chez vous ce soir.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Une sensibilité accrue vous permet de percevoir les besoins cachés de vos proches. Offrez votre soutien avec une bienveillance sincère.\n\nСОВЕТ ДНЯ ☝️ Créez un cocon de paix chez vous ce soir."
+    },
+    {
+      "id": "leo",
+      "name": "Лев",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Огонь",
+      "color": "0xFFF4A261",
+      "focus": "Совет: Partagez la lumière avec ceux qui vous entourent.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Votre charisme attire les regards, mais restez humble face aux défis collectifs. L'élégance réside souvent dans la retenue bien placée.\n\nСОВЕТ ДНЯ ☝️ Partagez la lumière avec ceux qui vous entourent."
+    },
+    {
+      "id": "virgo",
+      "name": "Дева",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Земля",
+      "color": "0xFF588157",
+      "focus": "Совет: Organisez votre espace de travail pour clarifier l'esprit.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Le Soleil dans votre signe affine votre sens du détail. Utilisez cette précision pour résoudre un problème complexe en suspens.\n\nСОВЕТ ДНЯ ☝️ Organisez votre espace de travail pour clarifier l'esprit."
+    },
+    {
+      "id": "libra",
+      "name": "Весы",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Воздух",
+      "color": "0xFFA8DADC",
+      "focus": "Совет: Faites un compromis gracieux pour restaurer l'harmonie total",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La diplomatie est votre arme secrète pour apaiser les tensions ambiantes. Cherchez l'équilibre parfait dans vos relations les plus proches.\n\nСОВЕТ ДНЯ ☝️ Faites un compromis gracieux pour restaurer l'harmonie totale."
+    },
+    {
+      "id": "scorpio",
+      "name": "Скорпион",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Вода",
+      "color": "0xFF9D0208",
+      "focus": "Совет: Faites confiance à votre instinct lors d'une décision.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Une intuition profonde vous guide vers des vérités cachées. Ne craignez pas d'explorer les zones d'ombre pour mieux évoluer.\n\nСОВЕТ ДНЯ ☝️ Faites confiance à votre instinct lors d'une décision."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Стрелец",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Огонь",
+      "color": "0xFFE76F51",
+      "focus": "Совет: Apprenez quelque chose de nouveau durant votre pause.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Votre soif d'aventure se heurte aux obligations. Trouvez un juste milieu en planifiant un projet inspirant pour votre futur proche.\n\nСОВЕТ ДНЯ ☝️ Apprenez quelque chose de nouveau durant votre pause."
+    },
+    {
+      "id": "capricorn",
+      "name": "Козерог",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Земля",
+      "color": "0xFF3A5A40",
+      "focus": "Совет: Fixez-vous un objectif réaliste et atteignez-le aujourd'hui.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La persévérance est la clé de votre succès actuel. Ne vous laissez pas distraire par le bruit extérieur et restez focalisé.\n\nСОВЕТ ДНЯ ☝️ Fixez-vous un objectif réaliste et atteignez-le aujourd'hui."
+    },
+    {
+      "id": "aquarius",
+      "name": "Водолей",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Воздух",
+      "color": "0xFF00B4D8",
+      "focus": "Совет: Connectez-vous avec des personnes partageant vos grandes idé",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Votre esprit visionnaire apporte une perspective unique aux défis. Osez proposer vos idées originales, même si elles semblent audacieuses.\n\nСОВЕТ ДНЯ ☝️ Connectez-vous avec des personnes partageant vos grandes idées."
+    },
+    {
+      "id": "pisces",
+      "name": "Рыбы",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Вода",
+      "color": "0xFF7209B7",
+      "focus": "Совет: Pratiquez la méditation pour calmer votre esprit créatif.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Laissez votre empathie naturelle guider vos interactions sociales aujourd'hui. Votre douceur sera un baume apaisant pour les cœurs agités.\n\nСОВЕТ ДНЯ ☝️ Pratiquez la méditation pour calmer votre esprit créatif.\n\n✨✨✨ La vie ne consiste pas à attendre que l'orage passe, mais à apprendre à danser sous la pluie avec confiance et sérénité. ✨✨✨"
+    }
+  ],
+  "updated_at": "2026-10-28T04:31:14.447682Z"
+}
