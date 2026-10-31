@@ -1,0 +1,151 @@
+{
+  "date": "31.10.2026",
+  "raw_text": "¡Muy buenos días, alma brillante! Despierta con la suavidad de un rayo de sol que se cuela por tu ventana, mientras el aroma de un café recién hecho te invita a confiar en el flujo natural de la vida. Que hoy la calma de la Luna en Cáncer te brinde el refugio emocional que necesitas para florecer con serenidad. ☀️☕️🍂\n\n☀️🌿 <b>Horóscopo para el 31 de octubre (Sábado)</b> 🌿☀️\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. 31 de octubre.</b>\n✨ Tu energía se enfoca en el hogar y la calma interior. Es un gran momento para sanar vínculos familiares antiguos con paciencia.\nCONSEJO DEL DÍA ☝️ Dedica tiempo a organizar tu espacio personal hoy mismo.\n\n<b>♉️ Tauro. 31 de octubre.</b>\n✨ La comunicación fluye con una profundidad inusual. Expresa tus sentimientos más íntimos con total honestidad y sin miedo al juicio.\nCONSEJO DEL DÍA ☝️ Escribe tus pensamientos en un diario para ganar claridad.\n\n<b>♊️ Géminis. 31 de octubre.</b>\n✨ La estabilidad financiera requiere tu atención hoy. Evalúa tus recursos con prudencia y evita gastos impulsivos buscando la seguridad material.\nCONSEJO DEL DÍA ☝️ Revisa tus cuentas y planifica tus ahorros a futuro.\n\n<b>♋️ Cáncer. 31 de octubre.</b>\n✨ La Luna en tu signo potencia tu intuición al máximo nivel. Confía en tus corazonadas, pues hoy son tu guía más certera.\nCONSEJO DEL DÍA ☝️ Escucha tu voz interior antes de tomar decisiones importantes.\n\n<b>♌️ Leo. 31 de octubre.</b>\n✨ Es tiempo de introspección y descanso reparador. Necesitas soltar cargas del pasado para recuperar tu brillo natural y tu vitalidad.\nCONSEJO DEL DÍA ☝️ Practica una meditación breve para liberar tensiones acumuladas ahora.\n\n<b>♍️ Virgo. 31 de octubre.</b>\n✨ Los amigos juegan un papel clave en tu bienestar actual. Busca apoyo en tu círculo cercano para renovar tus metas personales.\nCONSEJO DEL DÍA ☝️ Llama a un amigo querido y comparte tus planes.\n\n<b>♎️ Libra. ♎️ 31 de octubre.</b>\n✨ Tu carrera profesional demanda un enfoque equilibrado y paciente. Mantén la calma ante los retos y tu éxito estará garantizado hoy.\nCONSEJO DEL DÍA ☝️ Enfócate en una sola tarea importante con total atención.\n\n<b>♏️ Escorpio. 31 de octubre.</b>\n✨ Tu mente busca horizontes nuevos y aprendizajes profundos. Es un día perfecto para planear un viaje o explorar una nueva filosofía.\nCONSEJO DEL DÍA ☝️ Lee un libro que desafíe tus creencias actuales hoy.\n\n<b>♐️ Sagitario. 31 de octubre.</b>\n✨ La transformación personal es el tema central de tu jornada. Deja ir viejos miedos y permítete renacer con una fuerza renovada.\nCONSEJO DEL DÍA ☝️ Suelta aquello que ya no aporta valor a tu vida.\n\n<b>♑️ Capricornio. 31 de octubre.</b>\n✨ Las relaciones de pareja requieren de empatía y escucha activa. Un gesto de ternura fortalecerá profundamente tu conexión con el otro.\nCONSEJO DEL DÍA ☝️ Muestra tu afecto con un pequeño detalle muy sincero.\n\n<b>♒️ Acuario. 31 de octubre.</b>\n✨ Tu salud y bienestar requieren una rutina más consciente. Organiza tus hábitos diarios para mejorar tu energía y tu ánimo vital.\nCONSEJO DEL DÍA ☝️ Camina al aire libre para despejar tu mente hoy.\n\n<b>♓️ Piscis. 31 de octubre.</b>\n✨ La creatividad es tu mayor aliada para expresar tu esencia. Deja que tu imaginación vuele libre y disfruta del placer artístico.\nCONSEJO DEL DÍA ☝️ Dedica una hora a una actividad artística que ames.\n\n✨✨✨ <i>La paz interior no es la ausencia de problemas, sino la capacidad de mantener el corazón sereno mientras la vida sigue su curso natural.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fuego",
+      "color": "0xFFE63946",
+      "focus": "Consejo: Dedica tiempo a organizar tu espacio personal hoy mismo.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu energía se enfoca en el hogar y la calma interior. Es un gran momento para sanar vínculos familiares antiguos con paciencia.\n\nCONSEJO DEL DÍA ☝️ Dedica tiempo a organizar tu espacio personal hoy mismo."
+    },
+    {
+      "id": "taurus",
+      "name": "Tauro",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Escribe tus pensamientos en un diario para ganar claridad.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La comunicación fluye con una profundidad inusual. Expresa tus sentimientos más íntimos con total honestidad y sin miedo al juicio.\n\nCONSEJO DEL DÍA ☝️ Escribe tus pensamientos en un diario para ganar claridad."
+    },
+    {
+      "id": "gemini",
+      "name": "Géminis",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Revisa tus cuentas y planifica tus ahorros a futuro.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La estabilidad financiera requiere tu atención hoy. Evalúa tus recursos con prudencia y evita gastos impulsivos buscando la seguridad material.\n\nCONSEJO DEL DÍA ☝️ Revisa tus cuentas y planifica tus ahorros a futuro."
+    },
+    {
+      "id": "cancer",
+      "name": "Cáncer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Escucha tu voz interior antes de tomar decisiones importante",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La Luna en tu signo potencia tu intuición al máximo nivel. Confía en tus corazonadas, pues hoy son tu guía más certera.\n\nCONSEJO DEL DÍA ☝️ Escucha tu voz interior antes de tomar decisiones importantes."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fuego",
+      "color": "0xFFF4A261",
+      "focus": "Consejo: Practica una meditación breve para liberar tensiones acumula",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Es tiempo de introspección y descanso reparador. Necesitas soltar cargas del pasado para recuperar tu brillo natural y tu vitalidad.\n\nCONSEJO DEL DÍA ☝️ Practica una meditación breve para liberar tensiones acumuladas ahora."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Tierra",
+      "color": "0xFF588157",
+      "focus": "Consejo: Llama a un amigo querido y comparte tus planes.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Los amigos juegan un papel clave en tu bienestar actual. Busca apoyo en tu círculo cercano para renovar tus metas personales.\n\nCONSEJO DEL DÍA ☝️ Llama a un amigo querido y comparte tus planes."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Aire",
+      "color": "0xFFA8DADC",
+      "focus": "Consejo: Enfócate en una sola tarea importante con total atención.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu carrera profesional demanda un enfoque equilibrado y paciente. Mantén la calma ante los retos y tu éxito estará garantizado hoy.\n\nCONSEJO DEL DÍA ☝️ Enfócate en una sola tarea importante con total atención."
+    },
+    {
+      "id": "scorpio",
+      "name": "Escorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Agua",
+      "color": "0xFF9D0208",
+      "focus": "Consejo: Lee un libro que desafíe tus creencias actuales hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu mente busca horizontes nuevos y aprendizajes profundos. Es un día perfecto para planear un viaje o explorar una nueva filosofía.\n\nCONSEJO DEL DÍA ☝️ Lee un libro que desafíe tus creencias actuales hoy."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagitario",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fuego",
+      "color": "0xFFE76F51",
+      "focus": "Consejo: Suelta aquello que ya no aporta valor a tu vida.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La transformación personal es el tema central de tu jornada. Deja ir viejos miedos y permítete renacer con una fuerza renovada.\n\nCONSEJO DEL DÍA ☝️ Suelta aquello que ya no aporta valor a tu vida."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricornio",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Tierra",
+      "color": "0xFF3A5A40",
+      "focus": "Consejo: Muestra tu afecto con un pequeño detalle muy sincero.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Las relaciones de pareja requieren de empatía y escucha activa. Un gesto de ternura fortalecerá profundamente tu conexión con el otro.\n\nCONSEJO DEL DÍA ☝️ Muestra tu afecto con un pequeño detalle muy sincero."
+    },
+    {
+      "id": "aquarius",
+      "name": "Acuario",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Aire",
+      "color": "0xFF00B4D8",
+      "focus": "Consejo: Camina al aire libre para despejar tu mente hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu salud y bienestar requieren una rutina más consciente. Organiza tus hábitos diarios para mejorar tu energía y tu ánimo vital.\n\nCONSEJO DEL DÍA ☝️ Camina al aire libre para despejar tu mente hoy."
+    },
+    {
+      "id": "pisces",
+      "name": "Piscis",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Agua",
+      "color": "0xFF7209B7",
+      "focus": "Consejo: Dedica una hora a una actividad artística que ames.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La creatividad es tu mayor aliada para expresar tu esencia. Deja que tu imaginación vuele libre y disfruta del placer artístico.\n\nCONSEJO DEL DÍA ☝️ Dedica una hora a una actividad artística que ames."
+    }
+  ],
+  "updated_at": "2026-10-31T04:31:38.960708Z"
+}

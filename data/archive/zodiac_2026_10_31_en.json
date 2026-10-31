@@ -1,0 +1,151 @@
+{
+  "date": "31.10.2026",
+  "raw_text": "Good morning, dear friends! May your Saturday be filled with the gentle warmth of a freshly brewed cup of tea and the golden light of autumn. Embrace this day with a calm heart and a smile, trusting that the universe is cradling your journey toward peace and inner clarity. ☀️☕️🍂✨\n\n☀️🌿 <b>Horoscope for October 31 (Saturday)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. October 31.</b>\n✨ Your energy is high, but the Moon in Cancer asks you to slow down and value emotional connections. Focus on home comfort.\nTIP OF THE DAY ☝️ Spend time with family in a cozy atmosphere.\n\n<b>♉️ Taurus. October 31.</b>\n✨ Conversations today will be particularly fruitful if you lead with empathy. Trust your intuition when making small financial choices.\nTIP OF THE DAY ☝️ Listen more than you speak during important discussions.\n\n<b>♊️ Gemini. October 31.</b>\n✨ You might feel a need to organize your thoughts and surroundings. Stability is your best friend during this lunar phase.\nTIP OF THE DAY ☝️ Declutter your workspace to clear your mental space.\n\n<b>♋️ Cancer. October 31.</b>\n✨ With the Moon in your sign, your sensitivity is a superpower today. Embrace your emotions as sources of deep wisdom.\nTIP OF THE DAY ☝️ Practice self-care and gentle reflection this evening.\n\n<b>♌️ Leo. October 31.</b>\n✨ It is a perfect day to retreat from the spotlight and recharge. Reflect on your goals from a place of quiet.\nTIP OF THE DAY ☝️ Enjoy a peaceful walk in nature alone today.\n\n<b>♍️ Virgo. October 31.</b>\n✨ Social connections bring unexpected joy and fresh perspectives. Be open to advice from those who truly care for you.\nTIP OF THE DAY ☝️ Reach out to an old friend for coffee.\n\n<b>♎️ Libra. October 31.</b>\n✨ Professional matters require a steady, patient hand today. Your natural diplomacy will help you navigate any minor workplace tensions.\nTIP OF THE DAY ☝️ Focus on completing one major task before relaxing.\n\n<b>♏️ Scorpio. October 31.</b>\n✨ Your ruling Sun brings intensity, while the Moon encourages a broader perspective. Seek beauty in new knowledge and learning.\nTIP OF THE DAY ☝️ Read a book that expands your current worldview.\n\n<b>♐️ Sagittarius. October 31.</b>\n✨ Transformation is in the air, urging you to release old burdens. Trust the process as you move toward new beginnings.\nTIP OF THE DAY ☝️ Let go of a grudge to feel lighter.\n\n<b>♑️ Capricorn. October 31.</b>\n✨ Partnerships take center stage today as Saturn guides your focus. Be patient with others to foster long-term harmony now.\nTIP OF THE DAY ☝️ Practice active listening with your closest partner.\n\n<b>♒️ Aquarius. October 31.</b>\n✨ Small adjustments to your daily routine can significantly boost your well-being. Focus on grounding yourself through mindful physical activity.\nTIP OF THE DAY ☝️ Try a short morning yoga or stretching session.\n\n<b>♓️ Pisces. October 31.</b>\n✨ Your creative spirit is blooming under the current lunar influence. Express your inner world through art or gentle conversation.\nTIP OF THE DAY ☝️ Dedicate time to your favorite creative hobby today.\n\n✨✨✨ <i>True peace is not the absence of trouble, but the presence of trust that you can navigate any tide with grace and an open, steady heart.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Tip: Spend time with family in a cozy atmosphere.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your energy is high, but the Moon in Cancer asks you to slow down and value emotional connections. Focus on home comfort.\n\nTIP OF THE DAY ☝️ Spend time with family in a cozy atmosphere."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Tip: Listen more than you speak during important discussions.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Conversations today will be particularly fruitful if you lead with empathy. Trust your intuition when making small financial choices.\n\nTIP OF THE DAY ☝️ Listen more than you speak during important discussions."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Tip: Declutter your workspace to clear your mental space.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ You might feel a need to organize your thoughts and surroundings. Stability is your best friend during this lunar phase.\n\nTIP OF THE DAY ☝️ Declutter your workspace to clear your mental space."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Tip: Practice self-care and gentle reflection this evening.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ With the Moon in your sign, your sensitivity is a superpower today. Embrace your emotions as sources of deep wisdom.\n\nTIP OF THE DAY ☝️ Practice self-care and gentle reflection this evening."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Tip: Enjoy a peaceful walk in nature alone today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ It is a perfect day to retreat from the spotlight and recharge. Reflect on your goals from a place of quiet.\n\nTIP OF THE DAY ☝️ Enjoy a peaceful walk in nature alone today."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Earth",
+      "color": "0xFF588157",
+      "focus": "Tip: Reach out to an old friend for coffee.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Social connections bring unexpected joy and fresh perspectives. Be open to advice from those who truly care for you.\n\nTIP OF THE DAY ☝️ Reach out to an old friend for coffee."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Tip: Focus on completing one major task before relaxing.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Professional matters require a steady, patient hand today. Your natural diplomacy will help you navigate any minor workplace tensions.\n\nTIP OF THE DAY ☝️ Focus on completing one major task before relaxing."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Water",
+      "color": "0xFF9D0208",
+      "focus": "Tip: Read a book that expands your current worldview.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your ruling Sun brings intensity, while the Moon encourages a broader perspective. Seek beauty in new knowledge and learning.\n\nTIP OF THE DAY ☝️ Read a book that expands your current worldview."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Tip: Let go of a grudge to feel lighter.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Transformation is in the air, urging you to release old burdens. Trust the process as you move toward new beginnings.\n\nTIP OF THE DAY ☝️ Let go of a grudge to feel lighter."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Earth",
+      "color": "0xFF3A5A40",
+      "focus": "Tip: Practice active listening with your closest partner.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Partnerships take center stage today as Saturn guides your focus. Be patient with others to foster long-term harmony now.\n\nTIP OF THE DAY ☝️ Practice active listening with your closest partner."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Tip: Try a short morning yoga or stretching session.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Small adjustments to your daily routine can significantly boost your well-being. Focus on grounding yourself through mindful physical activity.\n\nTIP OF THE DAY ☝️ Try a short morning yoga or stretching session."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Water",
+      "color": "0xFF7209B7",
+      "focus": "Tip: Dedicate time to your favorite creative hobby today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your creative spirit is blooming under the current lunar influence. Express your inner world through art or gentle conversation.\n\nTIP OF THE DAY ☝️ Dedicate time to your favorite creative hobby today."
+    }
+  ],
+  "updated_at": "2026-10-31T04:31:34.865218Z"
+}

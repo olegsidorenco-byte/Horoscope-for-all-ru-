@@ -1,0 +1,151 @@
+{
+  "date": "31.10.2026",
+  "raw_text": "Que cette matinée vous accueille avec la douceur d'une tasse de thé fumante et la promesse d'une sérénité retrouvée. Prenez un instant pour respirer, souriez à la lumière qui filtre par la fenêtre et laissez votre cœur s'ouvrir à la bienveillance de cet univers qui vous accompagne. ☕️🍂✨\n\n☀️🌿 <b>Horoscope du 31 octobre (Samedi)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Bélier. 31 octobre.</b>\n✨ Votre énergie combative se tempère sous l'influence du Cancer, vous invitant à privilégier vos émotions. C'est le moment idéal pour cultiver la patience et la douceur intérieure.\n<b>CONSEIL DU JOUR ☝️</b> Accordez-vous un moment de silence absolu ce matin.\n\n<b>♉️ Taureau. 31 octobre.</b>\n✨ La stabilité est votre alliée aujourd'hui. Profitez de ce samedi pour renforcer vos liens familiaux et savourer les petits plaisirs simples de votre foyer chaleureux.\n<b>CONSEIL DU JOUR ☝️</b> Préparez un repas réconfortant pour vos proches chéris.\n\n<b>♊️ Gémeaux. 31 octobre.</b>\n✨ Votre esprit est en effervescence, mais la Lune vous pousse vers une introspection nécessaire. Canalisez votre curiosité vers des projets qui nourrissent votre âme profonde.\n<b>CONSEIL DU JOUR ☝️</b> Notez vos rêves dans un journal intime personnel.\n\n<b>♋️ Cancer. 31 octobre.</b>\n✨ Avec la Lune dans votre signe, votre intuition est à son apogée. Faites confiance à vos ressentis pour naviguer dans vos relations avec une grande lucidité.\n<b>CONSEIL DU JOUR ☝️</b> Écoutez votre instinct avant de prendre toute décision.\n\n<b>♌️ Lion. 31 octobre.</b>\n✨ Sous l'influence du Scorpion, vous explorez des territoires émotionnels cachés. Apprivoisez votre vulnérabilité, car elle est la véritable source de votre puissance rayonnante.\n<b>CONSEIL DU JOUR ☝️</b> Exprimez votre gratitude envers une personne très chère.\n\n<b>♍️ Vierge. 31 octobre.</b>\n✨ L'organisation cède la place à la connexion humaine. Votre sens du détail sera mis au service de la compréhension et du soutien envers vos amis.\n<b>CONSEIL DU JOUR ☝️</b> Soyez indulgent envers vos propres erreurs de parcours.\n\n<b>♎️ Balance. 31 octobre.</b>\n✨ L'équilibre entre vie privée et ambitions sociales est au cœur de votre journée. Cherchez l'harmonie plutôt que la perfection dans tous vos échanges actuels.\n<b>CONSEIL DU JOUR ☝️</b> Offrez-vous une promenade apaisante dans un parc calme.\n\n<b>♏️ Scorpion. 31 octobre.</b>\n✨ Le Soleil dans votre signe intensifie votre magnétisme naturel. Utilisez cette force pour transformer vos doutes en certitudes et avancer vers vos objectifs personnels.\n<b>CONSEIL DU JOUR ☝️</b> Libérez-vous d'une charge émotionnelle devenue trop lourde.\n\n<b>♐️ Sagittaire. 31 octobre.</b>\n✨ Une envie d'évasion intérieure vous anime. Explorez de nouvelles perspectives philosophiques tout en restant ancré dans la réalité bienveillante de votre entourage proche.\n<b>CONSEIL DU JOUR ☝️</b> Lisez un livre qui inspire votre esprit libre.\n\n<b>♑️ Capricorne. 31 octobre.</b>\n✨ Le maître du jour, Saturne, vous invite à structurer vos émotions avec sagesse. Ne craignez pas de montrer votre sensibilité, c'est votre plus grande force.\n<b>CONSEIL DU JOUR ☝️</b> Planifiez une activité créative pour votre détente totale.\n\n<b>♒️ Verseau. 31 octobre.</b>\n✨ Votre vision originale du monde trouve un écho dans votre vie familiale. Partagez vos idées novatrices avec douceur pour renforcer vos liens de confiance.\n<b>CONSEIL DU JOUR ☝️</b> Pratiquez la respiration consciente durant dix minutes entières.\n\n<b>♓️ Poissons. 31 octobre.</b>\n✨ La Lune en Cancer amplifie votre empathie naturelle. Laissez votre compassion guider vos actions et soyez un phare de lumière pour ceux qui doutent.\n<b>CONSEIL DU JOUR ☝️</b> Apportez votre aide désintéressée à un proche fatigué.\n\n✨✨✨ <i>La véritable sagesse consiste à accepter que le calme après la tempête n'est pas une fin, mais le terreau fertile où germent nos plus beaux projets.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Bélier",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Feu",
+      "color": "0xFFE63946",
+      "focus": "Conseil: Accordez-vous un moment de silence absolu ce matin.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre énergie combative se tempère sous l'influence du Cancer, vous invitant à privilégier vos émotions. C'est le moment idéal pour cultiver la patience et la douceur intérieure.\n\nCONSEIL DU JOUR ☝️ Accordez-vous un moment de silence absolu ce matin."
+    },
+    {
+      "id": "taurus",
+      "name": "Taureau",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Terre",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Préparez un repas réconfortant pour vos proches chéris.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La stabilité est votre alliée aujourd'hui. Profitez de ce samedi pour renforcer vos liens familiaux et savourer les petits plaisirs simples de votre foyer chaleureux.\n\nCONSEIL DU JOUR ☝️ Préparez un repas réconfortant pour vos proches chéris."
+    },
+    {
+      "id": "gemini",
+      "name": "Gémeaux",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Notez vos rêves dans un journal intime personnel.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre esprit est en effervescence, mais la Lune vous pousse vers une introspection nécessaire. Canalisez votre curiosité vers des projets qui nourrissent votre âme profonde.\n\nCONSEIL DU JOUR ☝️ Notez vos rêves dans un journal intime personnel."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Écoutez votre instinct avant de prendre toute décision.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Avec la Lune dans votre signe, votre intuition est à son apogée. Faites confiance à vos ressentis pour naviguer dans vos relations avec une grande lucidité.\n\nCONSEIL DU JOUR ☝️ Écoutez votre instinct avant de prendre toute décision."
+    },
+    {
+      "id": "leo",
+      "name": "Lion",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Feu",
+      "color": "0xFFF4A261",
+      "focus": "Conseil: Exprimez votre gratitude envers une personne très chère.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Sous l'influence du Scorpion, vous explorez des territoires émotionnels cachés. Apprivoisez votre vulnérabilité, car elle est la véritable source de votre puissance rayonnante.\n\nCONSEIL DU JOUR ☝️ Exprimez votre gratitude envers une personne très chère."
+    },
+    {
+      "id": "virgo",
+      "name": "Vierge",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Terre",
+      "color": "0xFF588157",
+      "focus": "Conseil: Soyez indulgent envers vos propres erreurs de parcours.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ L'organisation cède la place à la connexion humaine. Votre sens du détail sera mis au service de la compréhension et du soutien envers vos amis.\n\nCONSEIL DU JOUR ☝️ Soyez indulgent envers vos propres erreurs de parcours."
+    },
+    {
+      "id": "libra",
+      "name": "Balance",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Conseil: Offrez-vous une promenade apaisante dans un parc calme.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ L'équilibre entre vie privée et ambitions sociales est au cœur de votre journée. Cherchez l'harmonie plutôt que la perfection dans tous vos échanges actuels.\n\nCONSEIL DU JOUR ☝️ Offrez-vous une promenade apaisante dans un parc calme."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpion",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Eau",
+      "color": "0xFF9D0208",
+      "focus": "Conseil: Libérez-vous d'une charge émotionnelle devenue trop lourde.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le Soleil dans votre signe intensifie votre magnétisme naturel. Utilisez cette force pour transformer vos doutes en certitudes et avancer vers vos objectifs personnels.\n\nCONSEIL DU JOUR ☝️ Libérez-vous d'une charge émotionnelle devenue trop lourde."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittaire",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Feu",
+      "color": "0xFFE76F51",
+      "focus": "Conseil: Lisez un livre qui inspire votre esprit libre.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Une envie d'évasion intérieure vous anime. Explorez de nouvelles perspectives philosophiques tout en restant ancré dans la réalité bienveillante de votre entourage proche.\n\nCONSEIL DU JOUR ☝️ Lisez un livre qui inspire votre esprit libre."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorne",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Terre",
+      "color": "0xFF3A5A40",
+      "focus": "Conseil: Planifiez une activité créative pour votre détente totale.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le maître du jour, Saturne, vous invite à structurer vos émotions avec sagesse. Ne craignez pas de montrer votre sensibilité, c'est votre plus grande force.\n\nCONSEIL DU JOUR ☝️ Planifiez une activité créative pour votre détente totale."
+    },
+    {
+      "id": "aquarius",
+      "name": "Verseau",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Conseil: Pratiquez la respiration consciente durant dix minutes entiè",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre vision originale du monde trouve un écho dans votre vie familiale. Partagez vos idées novatrices avec douceur pour renforcer vos liens de confiance.\n\nCONSEIL DU JOUR ☝️ Pratiquez la respiration consciente durant dix minutes entières."
+    },
+    {
+      "id": "pisces",
+      "name": "Poissons",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Eau",
+      "color": "0xFF7209B7",
+      "focus": "Conseil: Apportez votre aide désintéressée à un proche fatigué.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La Lune en Cancer amplifie votre empathie naturelle. Laissez votre compassion guider vos actions et soyez un phare de lumière pour ceux qui doutent.\n\nCONSEIL DU JOUR ☝️ Apportez votre aide désintéressée à un proche fatigué."
+    }
+  ],
+  "updated_at": "2026-10-31T04:31:47.823075Z"
+}
