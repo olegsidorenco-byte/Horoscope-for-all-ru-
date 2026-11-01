@@ -1,0 +1,151 @@
+{
+  "date": "01.11.2026",
+  "raw_text": "Bonjour à toutes et à tous ! Que ce dimanche soit pour vous une douce parenthèse, une invitation à savourer la chaleur d'un café fumant et la sérénité d'un esprit apaisé. Laissez la lumière du soleil illuminer vos intentions et accueillez cette journée avec confiance et une profonde bienveillance envers vous-mêmes. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope du 1 novembre (Dimanche)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Bélier. 1 novembre.</b>\n✨ Votre énergie est tournée vers l'introspection. Canalisez votre fougue naturelle pour clarifier vos objectifs personnels et renforcer votre paix intérieure.\n<b>CONSEIL DU JOUR ☝️</b> Prenez le temps de méditer au calme ce matin.\n\n<b>♉️ Taureau. 1 novembre.</b>\n✨ La Lune en Cancer favorise vos échanges affectifs. C'est le moment idéal pour cultiver la tendresse et consolider vos liens les plus précieux.\n<b>CONSEIL DU JOUR ☝️</b> Partagez un repas convivial avec vos proches aujourd'hui.\n\n<b>♊️ Gémeaux. 1 novembre.</b>\n✨ Votre esprit est vif, mais le besoin de repos se fait sentir. Priorisez la qualité de vos échanges plutôt que la quantité.\n<b>CONSEIL DU JOUR ☝️</b> Éteignez vos écrans pour mieux vous ressourcer pleinement.\n\n<b>♋️ Cancer. 1 novembre.</b>\n✨ Avec la Lune dans votre signe, vos émotions sont décuplées et intuitives. Faites confiance à votre ressenti pour guider vos choix actuels.\n<b>CONSEIL DU JOUR ☝️</b> Accordez-vous un moment de soin personnel bien mérité.\n\n<b>♌️ Lion. 1 novembre.</b>\n✨ Une journée propice au bilan discret loin des projecteurs. Votre charisme brille de l'intérieur, nourri par une sagesse que vous redécouvrez enfin.\n<b>CONSEIL DU JOUR ☝️</b> Pratiquez la gratitude pour les petites victoires quotidiennes.\n\n<b>♍️ Vierge. 1 novembre.</b>\n✨ Vos relations sociales sont favorisées par votre sens aigu de l'écoute. Apportez votre soutien, tout en préservant votre propre équilibre énergétique vital.\n<b>CONSEIL DU JOUR ☝️</b> Offrez une oreille attentive à un ami sincère.\n\n<b>♎️ Balance. 1 novembre.</b>\n✨ Le climat astral vous invite à harmoniser vos ambitions professionnelles et votre vie privée. L'équilibre est à portée de main aujourd'hui.\n<b>CONSEIL DU JOUR ☝️</b> Organisez votre espace de vie pour plus d'harmonie.\n\n<b>♏️ Scorpion. 1 novembre.</b>\n✨ Le Soleil dans votre signe décuple votre détermination. Utilisez cette force pour transformer vos projets en réalités concrètes et durables maintenant.\n<b>CONSEIL DU JOUR ☝️</b> Notez vos idées inspirantes dans un carnet dédié.\n\n<b>♐️ Sagittaire. 1 novembre.</b>\n✨ Une envie d'évasion spirituelle vous habite. Explorez de nouvelles perspectives intellectuelles pour nourrir votre soif insatiable de connaissance et vérité.\n<b>CONSEIL DU JOUR ☝️</b> Lisez un livre qui nourrit votre esprit curieux.\n\n<b>♑️ Capricorne. 1 novembre.</b>\n✨ La patience est votre meilleure alliée face aux imprévus. Restez ancré dans vos valeurs et tout se mettra en place naturellement.\n<b>CONSEIL DU JOUR ☝️</b> Soyez indulgent avec vous-même face aux petits retards.\n\n<b>♒️ Verseau. 1 novembre.</b>\n✨ Votre créativité est stimulée par le calme dominical. Laissez libre cours à vos idées novatrices sans craindre le jugement des autres.\n<b>CONSEIL DU JOUR ☝️</b> Exprimez votre originalité à travers une activité artistique.\n\n<b>♓️ Poissons. 1 novembre.</b>\n✨ Votre sensibilité est un atout majeur pour comprendre les non-dits. Utilisez cette empathie pour apaiser les tensions autour de vous sereinement.\n<b>CONSEIL DU JOUR ☝️</b> Pratiquez une activité relaxante au bord de l'eau.\n\n✨✨✨ <i>La paix intérieure est un jardin secret que l'on cultive chaque jour par de petites attentions envers soi et envers les autres.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Bélier",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Feu",
+      "color": "0xFFE63946",
+      "focus": "Conseil: Prenez le temps de méditer au calme ce matin.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre énergie est tournée vers l'introspection. Canalisez votre fougue naturelle pour clarifier vos objectifs personnels et renforcer votre paix intérieure.\n\nCONSEIL DU JOUR ☝️ Prenez le temps de méditer au calme ce matin."
+    },
+    {
+      "id": "taurus",
+      "name": "Taureau",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Terre",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Partagez un repas convivial avec vos proches aujourd'hui.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La Lune en Cancer favorise vos échanges affectifs. C'est le moment idéal pour cultiver la tendresse et consolider vos liens les plus précieux.\n\nCONSEIL DU JOUR ☝️ Partagez un repas convivial avec vos proches aujourd'hui."
+    },
+    {
+      "id": "gemini",
+      "name": "Gémeaux",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Éteignez vos écrans pour mieux vous ressourcer pleinement.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre esprit est vif, mais le besoin de repos se fait sentir. Priorisez la qualité de vos échanges plutôt que la quantité.\n\nCONSEIL DU JOUR ☝️ Éteignez vos écrans pour mieux vous ressourcer pleinement."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Accordez-vous un moment de soin personnel bien mérité.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Avec la Lune dans votre signe, vos émotions sont décuplées et intuitives. Faites confiance à votre ressenti pour guider vos choix actuels.\n\nCONSEIL DU JOUR ☝️ Accordez-vous un moment de soin personnel bien mérité."
+    },
+    {
+      "id": "leo",
+      "name": "Lion",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Feu",
+      "color": "0xFFF4A261",
+      "focus": "Conseil: Pratiquez la gratitude pour les petites victoires quotidienn",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Une journée propice au bilan discret loin des projecteurs. Votre charisme brille de l'intérieur, nourri par une sagesse que vous redécouvrez enfin.\n\nCONSEIL DU JOUR ☝️ Pratiquez la gratitude pour les petites victoires quotidiennes."
+    },
+    {
+      "id": "virgo",
+      "name": "Vierge",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Terre",
+      "color": "0xFF588157",
+      "focus": "Conseil: Offrez une oreille attentive à un ami sincère.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Vos relations sociales sont favorisées par votre sens aigu de l'écoute. Apportez votre soutien, tout en préservant votre propre équilibre énergétique vital.\n\nCONSEIL DU JOUR ☝️ Offrez une oreille attentive à un ami sincère."
+    },
+    {
+      "id": "libra",
+      "name": "Balance",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Conseil: Organisez votre espace de vie pour plus d'harmonie.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le climat astral vous invite à harmoniser vos ambitions professionnelles et votre vie privée. L'équilibre est à portée de main aujourd'hui.\n\nCONSEIL DU JOUR ☝️ Organisez votre espace de vie pour plus d'harmonie."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpion",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Eau",
+      "color": "0xFF9D0208",
+      "focus": "Conseil: Notez vos idées inspirantes dans un carnet dédié.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le Soleil dans votre signe décuple votre détermination. Utilisez cette force pour transformer vos projets en réalités concrètes et durables maintenant.\n\nCONSEIL DU JOUR ☝️ Notez vos idées inspirantes dans un carnet dédié."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittaire",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Feu",
+      "color": "0xFFE76F51",
+      "focus": "Conseil: Lisez un livre qui nourrit votre esprit curieux.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Une envie d'évasion spirituelle vous habite. Explorez de nouvelles perspectives intellectuelles pour nourrir votre soif insatiable de connaissance et vérité.\n\nCONSEIL DU JOUR ☝️ Lisez un livre qui nourrit votre esprit curieux."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorne",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Terre",
+      "color": "0xFF3A5A40",
+      "focus": "Conseil: Soyez indulgent avec vous-même face aux petits retards.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La patience est votre meilleure alliée face aux imprévus. Restez ancré dans vos valeurs et tout se mettra en place naturellement.\n\nCONSEIL DU JOUR ☝️ Soyez indulgent avec vous-même face aux petits retards."
+    },
+    {
+      "id": "aquarius",
+      "name": "Verseau",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Conseil: Exprimez votre originalité à travers une activité artistique",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre créativité est stimulée par le calme dominical. Laissez libre cours à vos idées novatrices sans craindre le jugement des autres.\n\nCONSEIL DU JOUR ☝️ Exprimez votre originalité à travers une activité artistique."
+    },
+    {
+      "id": "pisces",
+      "name": "Poissons",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Eau",
+      "color": "0xFF7209B7",
+      "focus": "Conseil: Pratiquez une activité relaxante au bord de l'eau.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre sensibilité est un atout majeur pour comprendre les non-dits. Utilisez cette empathie pour apaiser les tensions autour de vous sereinement.\n\nCONSEIL DU JOUR ☝️ Pratiquez une activité relaxante au bord de l'eau."
+    }
+  ],
+  "updated_at": "2026-11-01T04:31:47.032224Z"
+}
