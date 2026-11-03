@@ -1,0 +1,151 @@
+{
+  "date": "03.11.2026",
+  "raw_text": "¡Buenos días! Que la calidez de tu café o té favorito te llene hoy de energía renovada y optimismo. Confía en el flujo de la vida y permite que la luz de este martes ilumine tus decisiones con serenidad y alegría. ☀️☕️🌿\n\n☀️🌿 <b>Horóscopo para el 3 de noviembre (Martes)</b> 🌿☀️\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. 3 de noviembre.</b>\nLa energía de Marte te impulsa a conquistar nuevos retos personales. Aprovecha este impulso para liderar proyectos que requieren valentía y una visión clara.\nCONSEJO DEL DÍA ☝️ Enfócate hoy en una sola prioridad importante.\n\n<b>♉️ Tauro. 3 de noviembre.</b>\nEs un momento ideal para consolidar tus finanzas y buscar estabilidad emocional. Tu paciencia será la clave para resolver cualquier tensión en el hogar.\nCONSEJO DEL DÍA ☝️ Dedica tiempo a organizar tus recursos materiales hoy.\n\n<b>♊️ Géminis. 3 de noviembre.</b>\nTu capacidad comunicativa brilla hoy con fuerza, facilitando acuerdos importantes. Aprovecha esta claridad mental para expresar tus ideas más innovadoras con total confianza.\nCONSEJO DEL DÍA ☝️ Escucha activamente antes de dar tu opinión.\n\n<b>♋️ Cáncer. 3 de noviembre.</b>\nLa Luna en Leo te invita a cuidar tu bienestar emocional y buscar momentos de alegría. Confía en tu intuición para tomar decisiones afectivas acertadas.\nCONSEJO DEL DÍA ☝️ Regálate un momento de paz y autocuidado.\n\n<b>♌️ Leo. 3 de noviembre.</b>\nTu magnetismo personal está en su punto máximo, atrayendo oportunidades muy valiosas. Es el instante perfecto para mostrar tu creatividad al mundo entero.\nCONSEJO DEL DÍA ☝️ Confía plenamente en tu talento y brillantez.\n\n<b>♍️ Virgo. 3 de noviembre.</b>\nLa precisión en tus tareas te llevará a resultados excelentes hoy. Mantén el orden en tu entorno para despejar tu mente de preocupaciones innecesarias.\nCONSEJO DEL DÍA ☝️ Simplifica tus tareas diarias con gran eficacia.\n\n<b>♎️ Libra. 3 de noviembre.</b>\nBusca el equilibrio en tus relaciones personales mediante la diplomacia. Tu encanto natural será el puente para resolver cualquier malentendido reciente con éxito.\nCONSEJO DEL DÍA ☝️ Busca la armonía en todas tus conversaciones.\n\n<b>♏️ Escorpio. 3 de noviembre.</b>\nEl Sol en tu signo potencia tu fuerza interior y determinación. Es hora de dejar atrás lo que ya no sirve y renacer.\nCONSEJO DEL DÍA ☝️ Canaliza tu energía hacia un proyecto personal.\n\n<b>♐️ Sagitario. 3 de noviembre.</b>\nTu espíritu aventurero te abre puertas hacia nuevos horizontes intelectuales. Mantén la mente abierta a las enseñanzas que el día tiene para ofrecer.\nCONSEJO DEL DÍA ☝️ Aprende algo nuevo que te inspire hoy.\n\n<b>♑️ Capricornio. 3 de noviembre.</b>\nLa disciplina te permitirá avanzar con paso firme hacia tus metas. Confía en el proceso y no temas delegar responsabilidades si es necesario.\nCONSEJO DEL DÍA ☝️ Mantén la constancia en tus objetivos profesionales.\n\n<b>♒️ Acuario. 3 de noviembre.</b>\nTu visión vanguardista será valorada por quienes te rodean hoy. No temas ser auténtico y defender tus ideas más originales y visionarias.\nCONSEJO DEL DÍA ☝️ Comparte tus ideas innovadoras con entusiasmo.\n\n<b>♓️ Piscis. 3 de noviembre.</b>\nLa sensibilidad es tu mayor fortaleza para conectar profundamente con otros. Deja que tu empatía guíe tus acciones hacia la bondad y comprensión.\nCONSEJO DEL DÍA ☝️ Confía en los mensajes de tu intuición.\n\n✨✨✨ <i>La paz interior no es la ausencia de problemas, sino la capacidad de mantener el corazón tranquilo mientras el mundo sigue girando a nuestro alrededor.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fuego",
+      "color": "0xFFE63946",
+      "focus": "Consejo: Enfócate hoy en una sola prioridad importante.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La energía de Marte te impulsa a conquistar nuevos retos personales. Aprovecha este impulso para liderar proyectos que requieren valentía y una visión clara.\n\nCONSEJO DEL DÍA ☝️ Enfócate hoy en una sola prioridad importante."
+    },
+    {
+      "id": "taurus",
+      "name": "Tauro",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Dedica tiempo a organizar tus recursos materiales hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Es un momento ideal para consolidar tus finanzas y buscar estabilidad emocional. Tu paciencia será la clave para resolver cualquier tensión en el hogar.\n\nCONSEJO DEL DÍA ☝️ Dedica tiempo a organizar tus recursos materiales hoy."
+    },
+    {
+      "id": "gemini",
+      "name": "Géminis",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Escucha activamente antes de dar tu opinión.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Tu capacidad comunicativa brilla hoy con fuerza, facilitando acuerdos importantes. Aprovecha esta claridad mental para expresar tus ideas más innovadoras con total confianza.\n\nCONSEJO DEL DÍA ☝️ Escucha activamente antes de dar tu opinión."
+    },
+    {
+      "id": "cancer",
+      "name": "Cáncer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Regálate un momento de paz y autocuidado.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La Luna en Leo te invita a cuidar tu bienestar emocional y buscar momentos de alegría. Confía en tu intuición para tomar decisiones afectivas acertadas.\n\nCONSEJO DEL DÍA ☝️ Regálate un momento de paz y autocuidado."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fuego",
+      "color": "0xFFF4A261",
+      "focus": "Consejo: Confía plenamente en tu talento y brillantez.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Tu magnetismo personal está en su punto máximo, atrayendo oportunidades muy valiosas. Es el instante perfecto para mostrar tu creatividad al mundo entero.\n\nCONSEJO DEL DÍA ☝️ Confía plenamente en tu talento y brillantez."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Tierra",
+      "color": "0xFF588157",
+      "focus": "Consejo: Simplifica tus tareas diarias con gran eficacia.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La precisión en tus tareas te llevará a resultados excelentes hoy. Mantén el orden en tu entorno para despejar tu mente de preocupaciones innecesarias.\n\nCONSEJO DEL DÍA ☝️ Simplifica tus tareas diarias con gran eficacia."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Aire",
+      "color": "0xFFA8DADC",
+      "focus": "Consejo: Busca la armonía en todas tus conversaciones.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Busca el equilibrio en tus relaciones personales mediante la diplomacia. Tu encanto natural será el puente para resolver cualquier malentendido reciente con éxito.\n\nCONSEJO DEL DÍA ☝️ Busca la armonía en todas tus conversaciones."
+    },
+    {
+      "id": "scorpio",
+      "name": "Escorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Agua",
+      "color": "0xFF9D0208",
+      "focus": "Consejo: Canaliza tu energía hacia un proyecto personal.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "El Sol en tu signo potencia tu fuerza interior y determinación. Es hora de dejar atrás lo que ya no sirve y renacer.\n\nCONSEJO DEL DÍA ☝️ Canaliza tu energía hacia un proyecto personal."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagitario",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fuego",
+      "color": "0xFFE76F51",
+      "focus": "Consejo: Aprende algo nuevo que te inspire hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Tu espíritu aventurero te abre puertas hacia nuevos horizontes intelectuales. Mantén la mente abierta a las enseñanzas que el día tiene para ofrecer.\n\nCONSEJO DEL DÍA ☝️ Aprende algo nuevo que te inspire hoy."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricornio",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Tierra",
+      "color": "0xFF3A5A40",
+      "focus": "Consejo: Mantén la constancia en tus objetivos profesionales.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La disciplina te permitirá avanzar con paso firme hacia tus metas. Confía en el proceso y no temas delegar responsabilidades si es necesario.\n\nCONSEJO DEL DÍA ☝️ Mantén la constancia en tus objetivos profesionales."
+    },
+    {
+      "id": "aquarius",
+      "name": "Acuario",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Aire",
+      "color": "0xFF00B4D8",
+      "focus": "Consejo: Comparte tus ideas innovadoras con entusiasmo.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Tu visión vanguardista será valorada por quienes te rodean hoy. No temas ser auténtico y defender tus ideas más originales y visionarias.\n\nCONSEJO DEL DÍA ☝️ Comparte tus ideas innovadoras con entusiasmo."
+    },
+    {
+      "id": "pisces",
+      "name": "Piscis",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Agua",
+      "color": "0xFF7209B7",
+      "focus": "Consejo: Confía en los mensajes de tu intuición.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "La sensibilidad es tu mayor fortaleza para conectar profundamente con otros. Deja que tu empatía guíe tus acciones hacia la bondad y comprensión.\n\nCONSEJO DEL DÍA ☝️ Confía en los mensajes de tu intuición."
+    }
+  ],
+  "updated_at": "2026-11-03T04:31:41.494138Z"
+}
