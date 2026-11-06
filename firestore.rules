@@ -1,0 +1,21 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Пользователи могут читать и записывать только свои собственные данные натального профиля
+    // и кэшированные/предгенерированные персональные прогнозы в подколлекции horoscopes
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /horoscopes/{horoscopeId} {
+        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        allow write: if false;
+      }
+    }
+
+    // Все остальные коллекции закрыты по умолчанию
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -152,8 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         });
       }
       await StorageService.setLastReadDate(_horoscope!.date);
-      await NotificationService.cancelAll();
-      await NotificationService.clearBadge();
+      await NotificationService.dismissActiveAlerts();
       widget.onReadStateChanged?.call();
     }
   }
@@ -233,11 +232,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             icon: const Icon(Icons.settings_outlined, color: CosmicTheme.cyanAccent),
             tooltip: l10n.settingsTitle,
             onPressed: () async {
+              final prevSig = _userProfile.natalConfigSignature;
+              final prevId = _userProfile.id;
               await Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
-              await _reloadProfile();
+              final updated = await StorageService.loadProfile();
+              if (updated.id != prevId || updated.natalConfigSignature != prevSig) {
+                await _fetchLatestHoroscope(forceRefresh: true);
+              } else {
+                await _reloadProfile();
+              }
             },
           ),
         ],
@@ -408,7 +414,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             final topic = entry.value;
             final personalizedTopic = HoroscopeTopic(
               title: topic.title,
-              content: _userProfile.formatTopicContent(topic.content),
+              content: _horoscope!.isPersonal
+                  ? topic.content
+                  : _userProfile.formatTopicContent(topic.content),
               icon: topic.icon,
             );
             return TopicCard(
@@ -423,6 +431,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   String _getPersonalizedGreeting(String rawGreeting) {
+    if (_horoscope != null && _horoscope!.isPersonal && rawGreeting.trim().isNotEmpty) {
+      return rawGreeting;
+    }
     return _userProfile.formatGreeting(rawGreeting);
   }
 
@@ -558,8 +569,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   MaterialPageRoute(builder: (context) => ProfileScreen(initialProfile: _userProfile)),
                 );
                 if (res == true) {
-                  final p = await StorageService.loadProfile();
-                  if (mounted) setState(() => _userProfile = p);
+                  await _fetchLatestHoroscope(forceRefresh: true);
                 }
               },
               child: const Text(
@@ -612,7 +622,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_userProfile.zodiacSign} • ${_userProfile.formattedBirthDate} (${_userProfile.birthTime}) • ${_userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity}',
+                  '${_userProfile.zodiacSign} • ${_userProfile.formattedBirthDate} (${_userProfile.isTimeExact ? _userProfile.birthTime : "космограмма"}) • ${_userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
@@ -647,8 +657,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 MaterialPageRoute(builder: (context) => ProfileScreen(initialProfile: _userProfile)),
               );
               if (res == true) {
-                final p = await StorageService.loadProfile();
-                if (mounted) setState(() => _userProfile = p);
+                await _fetchLatestHoroscope(forceRefresh: true);
               }
             },
           ),
@@ -693,7 +702,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             const SizedBox(height: 10),
             const Text(
-              'Наш официальный Telegram-бот доставляет утренний персональный прогноз точно в 06:30 со звуком, не завися от спящего режима смартфона.',
+              'Наш официальный Telegram-бот доставляет персональный прогноз строго в выбранное вами время по вашему часовому поясу (при раннем времени или смещении суток прогноз рассчитывается заранее под вашу дату).',
               style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 14),
@@ -705,7 +714,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 border: Border.all(color: Colors.white10),
               ),
               child: const Text(
-                '1. Скопируйте имя бота: @Horoscope_SiDoReCo_bot\n2. Откройте Telegram и нажмите «Запустить» (/start)\n3. Укажите логин Telegram в анкете профиля',
+                '1. Скопируйте имя бота: @Horoscope_SiDoReCo_bot\n2. Откройте Telegram и нажмите «Запустить» (/start)\n3. Укажите время и часовой пояс командой /delivery ЧЧ:ММ Город',
                 style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
               ),
             ),

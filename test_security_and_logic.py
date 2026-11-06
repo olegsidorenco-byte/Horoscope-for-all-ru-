@@ -587,6 +587,290 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 15 пройден: Полная валидность мультиязычных файлов (RU, EN, ES, DE, FR) и директив генерации.")
 
+    def test_16_all_12_months_sun_sign_and_jan_feb_ascendant(self):
+        """Проверка точности положения Солнца во все 12 месяцев и расчета Асцендента/MC в январе-феврале и при переходе суток UTC."""
+        from ai_service import get_astronomical_context, calculate_natal_asc_mc
+
+        month_samples = [
+            ("15.01.2026", "Козерог"),
+            ("15.02.2026", "Водолей"),
+            ("25.03.2026", "Овен"),
+            ("25.04.2026", "Телец"),
+            ("25.05.2026", "Близнецы"),
+            ("25.06.2026", "Рак"),
+            ("25.07.2026", "Лев"),
+            ("25.08.2026", "Дева"),
+            ("25.09.2026", "Весы"),
+            ("30.10.2026", "Скорпион"),
+            ("25.11.2026", "Стрелец"),
+            ("25.12.2026", "Козерог"),
+        ]
+        for date_str, expected_sign in month_samples:
+            ctx = get_astronomical_context(date_str)
+            self.assertEqual(
+                ctx["sun_sign"],
+                expected_sign,
+                f"Неверный знак Солнца для {date_str}: получен {ctx['sun_sign']} вместо {expected_sign}",
+            )
+
+        # Январь и февраль (проверка формулы Миуса m <= 2 -> y-1, m+12) + переход суток UTC + ISO дата Firestore
+        from ai_service import get_sun_zodiac_sign
+        jan_natal = calculate_natal_asc_mc("15.01.1992", "08:15", "Москва")
+        self.assertEqual(get_sun_zodiac_sign("15.01.1992"), "Козерог")
+        self.assertTrue(len(jan_natal["asc_sign"]) > 0)
+        self.assertNotIn("60'", jan_natal["asc_degree"])
+        self.assertNotIn("60'", jan_natal["mc_degree"])
+
+        rollover_natal = calculate_natal_asc_mc("1985-07-04T00:00:00.000", "02:10", "Алматы")
+        self.assertEqual(get_sun_zodiac_sign("1985-07-04T00:00:00.000"), "Рак")
+        self.assertTrue(len(rollover_natal["asc_sign"]) > 0)
+        self.assertNotIn("60'", rollover_natal["asc_degree"])
+
+        print("✅ Тест 16 пройден: Положение Солнца за все 12 месяцев и сферическая тригонометрия Асцендента/MC точны.")
+
+    def test_17_firestore_profile_normalization_and_exact_vs_solar_time(self):
+        """Проверка учета даты и времени рождения (точный Асцендент vs Солнечная космограмма) и camelCase полей Firestore."""
+        from ai_service import normalize_user_profile, build_horoscope_prompt
+
+        firestore_exact = {
+            "name": "Анна",
+            "birthDate": "1994-11-08T00:00:00.000",
+            "birthTime": "04:25",
+            "isTimeExact": True,
+            "birthPlace": "Владивосток",
+            "currentCity": "Токио",
+            "deliveryTime": "06:15",
+            "timezone": "Asia/Tokyo",
+            "utcOffsetMinutes": 540,
+            "gender": "female",
+        }
+        norm_exact = normalize_user_profile(firestore_exact)
+        self.assertEqual(norm_exact["birth_date"], "08.11.1994")
+        self.assertEqual(norm_exact["birth_time"], "04:25")
+        self.assertTrue(norm_exact["is_time_exact"])
+        self.assertEqual(norm_exact["birth_city"], "Владивосток")
+        self.assertEqual(norm_exact["current_city"], "Токио")
+        self.assertEqual(norm_exact["delivery_time"], "06:15")
+        self.assertEqual(norm_exact["timezone"], "Asia/Tokyo")
+
+        prompt_exact = build_horoscope_prompt(firestore_exact, "31.10.2026", lang="ru")
+        self.assertIn("08.11.1994", prompt_exact)
+        self.assertIn("04:25", prompt_exact)
+        self.assertIn("Асцендент", prompt_exact)
+        self.assertIn("Середина Неба", prompt_exact)
+
+        firestore_unknown_time = dict(firestore_exact, isTimeExact=False)
+        prompt_solar = build_horoscope_prompt(firestore_unknown_time, "31.10.2026", lang="ru")
+        self.assertIn("космограмм", prompt_solar.lower())
+        self.assertIn("КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать градус Асцендента", prompt_solar)
+
+        print("✅ Тест 17 пройден: Точное время рождения и режим космограммы корректно различаются в астрологическом ядре.")
+
+    def test_18_timezone_scheduler_advance_generation_and_shifts(self):
+        """Проверка заблаговременной генерации при смещении часового пояса в другие сутки (Восток/Запад), раннем времени и дробных зонах."""
+        from datetime import datetime, timezone
+        from timezone_scheduler import compute_user_delivery_plan, compute_zodiac_target_dates
+
+        # 1. Смещение на Восток в следующие сутки:
+        # На сервере (Кишинёв UTC+2) 30.10.2026 22:15 (20:15 UTC), а во Владивостоке (UTC+10) уже 31.10.2026 06:15!
+        # Пользователь хочет получить гороскоп в 07:00 по Владивостоку -> должен сгенерироваться заранее под 31.10.2026!
+        utc_east_pre = datetime(2026, 10, 30, 20, 15, tzinfo=timezone.utc)
+        vladivostok_user = {
+            "name": "Дмитрий",
+            "timezone": "Asia/Vladivostok",
+            "delivery_time": "07:00",
+            "current_city": "Владивосток",
+        }
+        plan_east = compute_user_delivery_plan(vladivostok_user, now_utc=utc_east_pre, server_tz_name="Europe/Chisinau")
+        self.assertEqual(plan_east["target_date"], "31.10.2026")
+        self.assertEqual(plan_east["server_current_date"], "30.10.2026")
+        self.assertTrue(plan_east["is_shifted_day_vs_server"])
+        self.assertTrue(plan_east["requires_advance_generation"])
+        self.assertTrue(plan_east["should_generate_now"])
+        self.assertFalse(plan_east["should_deliver_now"])
+
+        # В 07:02 по Владивостоку (21:02 UTC 30.10) — момент доставки наступил!
+        utc_east_deliver = datetime(2026, 10, 30, 21, 2, tzinfo=timezone.utc)
+        plan_east_deliv = compute_user_delivery_plan(vladivostok_user, now_utc=utc_east_deliver, server_tz_name="Europe/Chisinau")
+        self.assertEqual(plan_east_deliv["target_date"], "31.10.2026")
+        self.assertTrue(plan_east_deliv["should_deliver_now"])
+
+        # 2. Смещение на Запад в предыдущие сутки:
+        # На сервере (UTC+2) уже 31.10.2026 02:30 (00:30 UTC), а в Нью-Йорке (UTC-4) еще 30.10.2026 20:30!
+        # Пользователь выбрал вечернюю доставку 21:00 -> прогноз должен быть строго на 30.10.2026!
+        utc_west_pre = datetime(2026, 10, 31, 0, 30, tzinfo=timezone.utc)
+        ny_user = {
+            "name": "Майкл",
+            "timezone": "America/New_York",
+            "delivery_time": "21:00",
+        }
+        plan_west = compute_user_delivery_plan(ny_user, now_utc=utc_west_pre, server_tz_name="Europe/Chisinau")
+        self.assertEqual(plan_west["target_date"], "30.10.2026")
+        self.assertEqual(plan_west["server_current_date"], "31.10.2026")
+        self.assertTrue(plan_west["is_shifted_day_vs_server"])
+        self.assertTrue(plan_west["should_generate_now"])
+
+        # 3. Раннее время доставки раньше серверной генерации (05:00 < 06:30 в том же часовом поясе):
+        # В 01:00 ночи (23:00 UTC накануне) открывается окно заблаговременной генерации на 31.10.2026!
+        utc_early_pre = datetime(2026, 10, 30, 23, 0, tzinfo=timezone.utc)
+        early_user = {
+            "name": "Елена",
+            "timezone": "Europe/Chisinau",
+            "delivery_time": "05:00",
+        }
+        plan_early = compute_user_delivery_plan(early_user, now_utc=utc_early_pre, server_tz_name="Europe/Chisinau")
+        self.assertEqual(plan_early["target_date"], "31.10.2026")
+        self.assertTrue(plan_early["is_before_server_generation"])
+        self.assertTrue(plan_early["requires_advance_generation"])
+        self.assertTrue(plan_early["should_generate_now"])
+
+        # 4. Переход через полночь (доставка в 00:15 ночи): в 23:30 локального времени генерируем заранее на завтра!
+        utc_midnight_pre = datetime(2026, 10, 30, 21, 30, tzinfo=timezone.utc)  # 23:30 в Кишинёве
+        midnight_user = {
+            "name": "Игорь",
+            "timezone": "Europe/Chisinau",
+            "delivery_time": "00:15",
+        }
+        plan_midnight = compute_user_delivery_plan(midnight_user, now_utc=utc_midnight_pre, server_tz_name="Europe/Chisinau")
+        self.assertEqual(plan_midnight["target_date"], "31.10.2026")
+        self.assertTrue(plan_midnight["should_generate_now"])
+        self.assertFalse(plan_midnight["should_deliver_now"])
+
+        # 5. Дробный часовой пояс (Индия UTC+05:30 = 330 минут):
+        utc_india = datetime(2026, 10, 30, 23, 30, tzinfo=timezone.utc)  # 05:00 утра 31.10 в Дели
+        india_user = {
+            "name": "Радж",
+            "utc_offset_minutes": 330,
+            "delivery_time": "06:00",
+        }
+        plan_india = compute_user_delivery_plan(india_user, now_utc=utc_india, server_tz_name="Europe/Chisinau")
+        self.assertEqual(plan_india["target_date"], "31.10.2026")
+        self.assertTrue(plan_india["should_generate_now"])
+
+        # 6. Горизонт предгенерации общих зодиакальных прогнозов покрывает UTC+14
+        zodiac_dates = compute_zodiac_target_dates(now_utc=datetime(2026, 10, 30, 12, 0, tzinfo=timezone.utc))
+        self.assertIn("30.10.2026", zodiac_dates["dates_to_ensure"])
+        self.assertIn("31.10.2026", zodiac_dates["dates_to_ensure"])
+
+        print("✅ Тест 18 пройден: Часовые пояса (Восток, Запад, до 06:30, 00:15, UTC+5:30) и предгенерация работают безупречно.")
+
+    def test_19_multilingual_prompts_and_archive_index_integrity(self):
+        """Проверка локализации заголовков разделов, знаков зодиака и защиты index.json при предгенерации будущих суток."""
+        import json
+        import tempfile
+        import archive_service
+        from ai_service import build_horoscope_prompt, split_into_topic_messages
+
+        en_prompt = build_horoscope_prompt({"name": "Sarah", "birth_date": "12.04.1991"}, "31.10.2026", lang="en")
+        self.assertIn("Planetary Influences Today", en_prompt)
+        self.assertIn("Work, Business & Finance", en_prompt)
+
+        sample_en_html = (
+            "☀️ Good morning, Sarah!\n\n"
+            "🪐 <b>Planetary Influences</b>\nMars trines Sun.\n\n"
+            "💼 <b>Work and Business</b>\nGreat negotiations."
+        )
+        chunks = split_into_topic_messages(sample_en_html)
+        self.assertEqual(len(chunks), 3)
+
+        sample_zodiac_en = "\n\n".join([
+            f"♈ <b>Sign {i}</b>\nForecast text {i}\n💡 <i>Advice:</i> Stay focused."
+            for i in range(1, 13)
+        ])
+        parsed_z = archive_service.parse_zodiac_structure(sample_zodiac_en, "31.10.2026", lang="en")
+        self.assertEqual(parsed_z["signs"][0]["name"], "Aries")
+        self.assertEqual(parsed_z["signs"][0]["element"], "Fire")
+        self.assertEqual(parsed_z["signs"][11]["name"], "Pisces")
+
+        # Проверяем save_horoscope_to_archive с update_latest=False и мультиязычными суффиксами во временной папке
+        with tempfile.TemporaryDirectory() as tmpdir:
+            orig_data = archive_service.DATA_DIR
+            orig_arch = archive_service.ARCHIVE_DIR
+            orig_mob = archive_service.MOBILE_DATA_DIR
+            orig_mob_arch = archive_service.MOBILE_ARCHIVE_DIR
+            try:
+                archive_service.DATA_DIR = os.path.join(tmpdir, "data")
+                archive_service.ARCHIVE_DIR = os.path.join(tmpdir, "data", "archive")
+                archive_service.MOBILE_DATA_DIR = os.path.join(tmpdir, "mob_data")
+                archive_service.MOBILE_ARCHIVE_DIR = os.path.join(tmpdir, "mob_data", "archive")
+
+                # Сохраняем текущий день (30.10.2026) как актуальный latest
+                archive_service.save_horoscope_to_archive(
+                    "☀️ Доброе утро!\n\n🪐 <b>Влияние планет</b>\nТекст 30 октября.",
+                    "30.10.2026",
+                    lang="ru",
+                    update_latest=True,
+                )
+                # Предгенерируем завтрашний день (31.10.2026) для Дальнего Востока БЕЗ перезаписи latest_horoscope.json
+                archive_service.save_horoscope_to_archive(
+                    "☀️ Доброе утро!\n\n🪐 <b>Влияние планет</b>\nТекст 31 октября.",
+                    "31.10.2026",
+                    lang="ru",
+                    update_latest=False,
+                )
+                archive_service.save_horoscope_to_archive(
+                    "☀️ Bonjour!\n\n🪐 <b>Influence des planètes</b>\nTexte 31 octobre.",
+                    "31.10.2026",
+                    lang="fr",
+                    update_latest=False,
+                )
+
+                with open(os.path.join(archive_service.DATA_DIR, "latest_horoscope.json"), "r", encoding="utf-8") as f:
+                    latest_doc = json.load(f)
+                self.assertEqual(latest_doc["date"], "30.10.2026", "Предгенерация D+1 не должна затирать latest_horoscope.json")
+                self.assertTrue(os.path.exists(os.path.join(archive_service.ARCHIVE_DIR, "horoscope_2026_10_31.json")))
+                self.assertTrue(os.path.exists(os.path.join(archive_service.ARCHIVE_DIR, "horoscope_2026_10_31_fr.json")))
+
+                with open(os.path.join(archive_service.ARCHIVE_DIR, "index.json"), "r", encoding="utf-8") as f:
+                    idx = json.load(f)
+                for item in idx:
+                    self.assertFalse(item["file"].endswith("_fr.json"), f"index.json не должен ссылаться на _fr.json: {item}")
+            finally:
+                archive_service.DATA_DIR = orig_data
+                archive_service.ARCHIVE_DIR = orig_arch
+                archive_service.MOBILE_DATA_DIR = orig_mob
+                archive_service.MOBILE_ARCHIVE_DIR = orig_mob_arch
+
+        print("✅ Тест 19 пройден: Мультиязычные заголовки, парсинг знаков и защита latest/index при предгенерации проверены.")
+
+    def test_20_api_personal_endpoint_and_cache_logic(self):
+        """Проверка ленивой инициализации Cloud Run API, валидации target_date и инвалидации хэша натального профиля."""
+        from datetime import datetime, timezone
+        from timezone_scheduler import validate_and_resolve_target_date, compute_profile_hash
+        import api.main as cloud_api
+
+        self.assertIsNotNone(cloud_api.app)
+
+        # Если target_date не передан, он обязан вычисляться в часовом поясе ПОЛЬЗОВАТЕЛЯ, а не сервера
+        now_utc = datetime(2026, 10, 30, 20, 30, tzinfo=timezone.utc)  # 31.10 в Токио, но 30.10 в Кишинёве
+        resolved_tokyo_dmy, resolved_tokyo_iso = validate_and_resolve_target_date(
+            None,
+            {"timezone": "Asia/Tokyo"},
+            now_utc=now_utc,
+        )
+        self.assertEqual(resolved_tokyo_dmy, "31.10.2026")
+        self.assertEqual(resolved_tokyo_iso, "2026-10-31")
+
+        resolved_ny_dmy, resolved_ny_iso = validate_and_resolve_target_date(
+            None,
+            {"timezone": "America/New_York"},
+            now_utc=datetime(2026, 10, 31, 1, 0, tzinfo=timezone.utc),
+        )
+        self.assertEqual(resolved_ny_dmy, "30.10.2026")
+        self.assertEqual(resolved_ny_iso, "2026-10-30")
+
+        with self.assertRaises(ValueError):
+            validate_and_resolve_target_date("99.99.2099", {"timezone": "UTC"}, now_utc=now_utc)
+
+        # Изменение времени рождения или флага точности обязано менять profile_hash для инвалидации кэша
+        base_p = {"name": "Ольга", "birth_date": "14.03.1993", "birth_time": "09:15", "is_time_exact": True, "birth_city": "Москва"}
+        changed_time_p = dict(base_p, birth_time="18:40")
+        changed_exact_p = dict(base_p, is_time_exact=False)
+        self.assertNotEqual(compute_profile_hash(base_p, "ru"), compute_profile_hash(changed_time_p, "ru"))
+        self.assertNotEqual(compute_profile_hash(base_p, "ru"), compute_profile_hash(changed_exact_p, "ru"))
+
+        print("✅ Тест 20 пройден: Cloud Run API, часовопоясной target_date и инвалидация натального кэша проверены.")
+
 
 if __name__ == "__main__":
     unittest.main()

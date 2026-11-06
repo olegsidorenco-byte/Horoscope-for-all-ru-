@@ -15,6 +15,11 @@ class UserProfile {
   final String currentCity;
   final String gender; // "male", "female", "other"
   final String focus; // Приоритетные сферы внимания
+  final String timezone; // IANA часовой пояс пользователя (напр. "Asia/Vladivostok")
+  final int? utcOffsetMinutes; // Смещение пользователя от UTC в минутах
+  final String deliveryTime; // Желаемое локальное время доставки "HH:MM"
+  final bool notificationsEnabled;
+  final String lang; // Язык прогноза ("ru", "en", "es", "de", "fr")
   final DateTime updatedAt;
 
   UserProfile({
@@ -32,6 +37,11 @@ class UserProfile {
     required this.currentCity,
     this.gender = "female",
     this.focus = "бизнес, деловые переговоры, финансы и здоровье",
+    this.timezone = "",
+    this.utcOffsetMinutes,
+    this.deliveryTime = "06:45",
+    this.notificationsEnabled = true,
+    this.lang = "ru",
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
 
@@ -52,6 +62,11 @@ class UserProfile {
       currentCity: "",
       gender: "female",
       focus: "бизнес, деловые переговоры, финансы и здоровье",
+      timezone: "",
+      utcOffsetMinutes: null,
+      deliveryTime: "06:45",
+      notificationsEnabled: true,
+      lang: "ru",
     );
   }
 
@@ -113,6 +128,29 @@ class UserProfile {
       default: return "✨";
     }
   }
+
+  /// Системный идентификатор знака зодиака ('aries'..'pisces')
+  String get zodiacSignId {
+    switch (zodiacSign) {
+      case "Овен": return "aries";
+      case "Телец": return "taurus";
+      case "Близнецы": return "gemini";
+      case "Рак": return "cancer";
+      case "Лев": return "leo";
+      case "Дева": return "virgo";
+      case "Весы": return "libra";
+      case "Скорпион": return "scorpio";
+      case "Стрелец": return "sagittarius";
+      case "Козерог": return "capricorn";
+      case "Водолей": return "aquarius";
+      case "Рыбы": return "pisces";
+      default: return "gemini";
+    }
+  }
+
+  /// Сигнатура натальных параметров для инвалидации кеша при изменении даты/времени/места рождения
+  String get natalConfigSignature =>
+      "${name.trim()}|$formattedBirthDate|${birthTime.trim()}|$isTimeExact|${birthPlace.trim()}|${currentCity.trim()}|$gender|${focus.trim()}";
 
   String get element {
     switch (zodiacSign) {
@@ -290,28 +328,48 @@ class UserProfile {
       "currentCity": currentCity,
       "gender": gender,
       "focus": focus,
+      "timezone": timezone,
+      if (utcOffsetMinutes != null) "utcOffsetMinutes": utcOffsetMinutes,
+      "deliveryTime": deliveryTime,
+      "notificationsEnabled": notificationsEnabled,
+      "lang": lang,
       "updatedAt": updatedAt.toIso8601String(),
     };
   }
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
+    final rawOffset = json["utcOffsetMinutes"] ?? json["utc_offset_minutes"];
+    int? parsedOffset;
+    if (rawOffset is int) {
+      parsedOffset = rawOffset;
+    } else if (rawOffset is num) {
+      parsedOffset = rawOffset.toInt();
+    } else if (rawOffset is String) {
+      parsedOffset = int.tryParse(rawOffset);
+    }
+
     return UserProfile(
       id: json["id"] ?? "user_${DateTime.now().millisecondsSinceEpoch}",
       name: json["name"] ?? "",
       email: json["email"] ?? "",
       phone: json["phone"] ?? "",
-      authType: json["authType"] ?? "guest",
-      telegramUsername: json["telegramUsername"] ?? "",
+      authType: json["authType"] ?? json["auth_type"] ?? "guest",
+      telegramUsername: json["telegramUsername"] ?? json["telegram_username"] ?? "",
       passwordHash: json["passwordHash"] ?? "",
-      birthDate: json["birthDate"] != null
-          ? DateTime.tryParse(json["birthDate"]) ?? DateTime(2000, 1, 1)
+      birthDate: (json["birthDate"] ?? json["birth_date"]) != null
+          ? DateTime.tryParse((json["birthDate"] ?? json["birth_date"]).toString()) ?? DateTime(2000, 1, 1)
           : DateTime(2000, 1, 1),
-      birthTime: json["birthTime"] ?? "12:00",
-      isTimeExact: json["isTimeExact"] ?? true,
-      birthPlace: json["birthPlace"] ?? "",
-      currentCity: json["currentCity"] ?? "",
+      birthTime: json["birthTime"] ?? json["birth_time"] ?? "12:00",
+      isTimeExact: json["isTimeExact"] ?? json["is_time_exact"] ?? true,
+      birthPlace: json["birthPlace"] ?? json["birth_place"] ?? "",
+      currentCity: json["currentCity"] ?? json["current_city"] ?? "",
       gender: json["gender"] ?? "female",
       focus: json["focus"] ?? "бизнес, деловые переговоры, финансы и здоровье",
+      timezone: json["timezone"] ?? "",
+      utcOffsetMinutes: parsedOffset,
+      deliveryTime: json["deliveryTime"] ?? json["delivery_time"] ?? "06:45",
+      notificationsEnabled: json["notificationsEnabled"] ?? json["notifications_enabled"] ?? true,
+      lang: json["lang"] ?? "ru",
       updatedAt: json["updatedAt"] != null
           ? DateTime.tryParse(json["updatedAt"])
           : null,
@@ -333,6 +391,11 @@ class UserProfile {
     String? currentCity,
     String? gender,
     String? focus,
+    String? timezone,
+    int? utcOffsetMinutes,
+    String? deliveryTime,
+    bool? notificationsEnabled,
+    String? lang,
     DateTime? updatedAt,
   }) {
     return UserProfile(
@@ -350,6 +413,11 @@ class UserProfile {
       currentCity: currentCity ?? this.currentCity,
       gender: gender ?? this.gender,
       focus: focus ?? this.focus,
+      timezone: timezone ?? this.timezone,
+      utcOffsetMinutes: utcOffsetMinutes ?? this.utcOffsetMinutes,
+      deliveryTime: deliveryTime ?? this.deliveryTime,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      lang: lang ?? this.lang,
       updatedAt: updatedAt ?? DateTime.now(),
     );
   }

@@ -18,3 +18,8 @@ env/
 
 # IDE и снимки
 .snapshots/
+
+# Приватный локальный кэш персональных прогнозов и статусов доставки
+data/user_forecasts/
+data/users/delivery_state.json
+data/users/telegram_offset.json

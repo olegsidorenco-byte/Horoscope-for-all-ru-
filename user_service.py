@@ -2,7 +2,7 @@
 Модуль учета и управления натальными профилями пользователей.
 Хранит реестр зарегистрированных пользователей в data/users/users_registry.json.
 Используется для генерации персональных ежедневных гороскопов с учетом натальных данных
-(дата рождения, время, место рождения для домов гороскопа и место пребывания для локальных транзитов).
+(дата рождения, время, место рождения для домов гороскопа, место пребывания и часовой пояс для доставки).
 """
 
 import os
@@ -36,17 +36,18 @@ def register_or_update_user(user_data: dict) -> dict:
     """
     Регистрирует нового пользователя или обновляет существующего.
     Строгое правило «Один телефон или почта — один аккаунт»:
-    проверяет уникальность email и phone среди всех зарегистрированных записей.
+    проверяет уникальность email, phone, telegram_username и telegram_chat_id среди всех записей.
     """
     ensure_users_dir()
     users = get_all_users()
 
-    email = user_data.get("email", "").strip().lower()
-    phone = user_data.get("phone", "").strip()
-    telegram_username = user_data.get("telegram_username", "").strip().replace("@", "")
+    email = str(user_data.get("email", "")).strip().lower()
+    phone = str(user_data.get("phone", "")).strip()
+    telegram_username = str(user_data.get("telegram_username", "")).strip().replace("@", "")
+    telegram_chat_id = str(user_data.get("telegram_chat_id", "")).strip()
     user_id = user_data.get("id")
 
-    if not email and not phone and not telegram_username:
+    if not email and not phone and not telegram_username and not telegram_chat_id:
         raise ValueError("Для регистрации пользователя необходим уникальный контакт (Email, Телефон или Telegram)")
 
     now_iso = datetime.now(timezone.utc).isoformat()
@@ -62,10 +63,11 @@ def register_or_update_user(user_data: dict) -> dict:
     # 2. Строгая проверка на конфликт уникальности контактов с ДРУГИМИ пользователями
     for i, u in enumerate(users):
         if existing_index_by_id != -1 and i == existing_index_by_id:
-            continue  # Сам пользователь может сохранять и обновлять свои данные
-        u_email = u.get("email", "").strip().lower()
-        u_phone = u.get("phone", "").strip()
-        u_tg = u.get("telegram_username", "").strip().replace("@", "")
+            continue
+        u_email = str(u.get("email", "")).strip().lower()
+        u_phone = str(u.get("phone", "")).strip()
+        u_tg = str(u.get("telegram_username", "")).strip().replace("@", "")
+        u_tg_id = str(u.get("telegram_chat_id", "")).strip()
 
         if email and u_email == email:
             raise ValueError(f"Пользователь с email '{email}' уже зарегистрирован!")
@@ -73,39 +75,55 @@ def register_or_update_user(user_data: dict) -> dict:
             raise ValueError(f"Пользователь с номером телефона '{phone}' уже зарегистрирован!")
         if telegram_username and u_tg and u_tg.lower() == telegram_username.lower():
             raise ValueError(f"Пользователь с Telegram '@{telegram_username}' уже зарегистрирован!")
+        if telegram_chat_id and u_tg_id and u_tg_id == telegram_chat_id:
+            raise ValueError(f"Пользователь с Telegram ID '{telegram_chat_id}' уже зарегистрирован!")
 
     # 3. Определение индекса для обновления или создания
     match_index = existing_index_by_id
     if match_index == -1:
-        # Если ID не был передан, ищем по контакту
         for i, u in enumerate(users):
-            u_email = u.get("email", "").strip().lower()
-            u_phone = u.get("phone", "").strip()
-            u_tg = u.get("telegram_username", "").strip().replace("@", "")
-            if (email and u_email == email) or (phone and u_phone == phone) or (telegram_username and u_tg and u_tg.lower() == telegram_username.lower()):
+            u_email = str(u.get("email", "")).strip().lower()
+            u_phone = str(u.get("phone", "")).strip()
+            u_tg = str(u.get("telegram_username", "")).strip().replace("@", "")
+            u_tg_id = str(u.get("telegram_chat_id", "")).strip()
+            if (
+                (email and u_email == email)
+                or (phone and u_phone == phone)
+                or (telegram_username and u_tg and u_tg.lower() == telegram_username.lower())
+                or (telegram_chat_id and u_tg_id and u_tg_id == telegram_chat_id)
+            ):
                 match_index = i
                 break
 
+    prev = users[match_index] if match_index != -1 else {}
+
     user_entry = {
-        "id": user_id or (users[match_index].get("id") if match_index != -1 else f"usr_{int(datetime.now(timezone.utc).timestamp() * 1000)}"),
-        "name": user_data.get("name", "").strip(),
-        "email": email,
-        "phone": phone,
-        "auth_type": user_data.get("auth_type", "email" if email else ("phone" if phone else "telegram")),
-        "telegram_username": telegram_username,
-        "birth_date": user_data.get("birth_date", "2000-01-01"),
-        "birth_time": user_data.get("birth_time", "12:00"),
-        "is_time_exact": user_data.get("is_time_exact", False),
-        "birth_place": user_data.get("birth_place", "").strip(),
-        "current_city": user_data.get("current_city", "").strip(),
-        "gender": user_data.get("gender", "female"),
-        "focus": user_data.get("focus", "бизнес, деловые переговоры, финансы и здоровье").strip(),
-        "updated_at": now_iso
+        "id": user_id or prev.get("id") or f"usr_{int(datetime.now(timezone.utc).timestamp() * 1000000)}_{os.urandom(2).hex()}",
+        "name": str(user_data.get("name", prev.get("name", ""))).strip(),
+        "email": email or prev.get("email", ""),
+        "phone": phone or prev.get("phone", ""),
+        "auth_type": user_data.get("auth_type", prev.get("auth_type") or ("email" if email else ("phone" if phone else "telegram"))),
+        "telegram_username": telegram_username or prev.get("telegram_username", ""),
+        "telegram_chat_id": telegram_chat_id or prev.get("telegram_chat_id", ""),
+        "birth_date": user_data.get("birth_date", prev.get("birth_date", "2000-01-01")),
+        "birth_time": user_data.get("birth_time", prev.get("birth_time", "12:00")),
+        "is_time_exact": user_data["is_time_exact"] if "is_time_exact" in user_data else prev.get("is_time_exact", False),
+        "birth_place": str(user_data.get("birth_place", prev.get("birth_place", ""))).strip(),
+        "current_city": str(user_data.get("current_city", prev.get("current_city", ""))).strip(),
+        "gender": user_data.get("gender", prev.get("gender", "female")),
+        "focus": str(user_data.get("focus", prev.get("focus", "бизнес, деловые переговоры, финансы и здоровье"))).strip(),
+        "timezone": str(user_data.get("timezone", prev.get("timezone", ""))).strip(),
+        "utc_offset_minutes": user_data.get("utc_offset_minutes", prev.get("utc_offset_minutes")),
+        "delivery_time": str(user_data.get("delivery_time", prev.get("delivery_time", "07:30"))).strip(),
+        "notifications_enabled": user_data["notifications_enabled"] if "notifications_enabled" in user_data else prev.get("notifications_enabled", True),
+        "lang": str(user_data.get("lang", prev.get("lang", "ru"))).strip() or "ru",
+        "updated_at": now_iso,
     }
+    if prev.get("password_hash") or user_data.get("password_hash"):
+        user_entry["password_hash"] = user_data.get("password_hash") or prev.get("password_hash")
 
     if match_index != -1:
-        # Сохраняем created_at старой записи
-        user_entry["created_at"] = users[match_index].get("created_at", now_iso)
+        user_entry["created_at"] = prev.get("created_at", now_iso)
         users[match_index] = user_entry
         updated = True
     else:
@@ -117,7 +135,7 @@ def register_or_update_user(user_data: dict) -> dict:
         json.dump(users, f, ensure_ascii=False, indent=2)
 
     action_str = "обновлен" if updated else "зарегистрирован"
-    contact_display = email or phone or f"@{telegram_username}"
+    contact_display = email or phone or (f"@{telegram_username}" if telegram_username else f"tg:{telegram_chat_id}")
     print(f"👤 Пользователь {user_entry['name']} ({contact_display}) успешно {action_str} в реестре.")
     return user_entry
 
@@ -150,10 +168,11 @@ def delete_user_by_contact(contact: str) -> bool:
     initial_len = len(users)
     filtered = []
     for u in users:
-        u_email = u.get("email", "").strip().lower()
-        u_phone = u.get("phone", "").strip()
-        u_tg = u.get("telegram_username", "").strip().lower().replace("@", "")
-        if (u_email and u_email == raw) or (u_phone and u_phone == raw) or (norm_tg and u_tg == norm_tg):
+        u_email = str(u.get("email", "")).strip().lower()
+        u_phone = str(u.get("phone", "")).strip()
+        u_tg = str(u.get("telegram_username", "")).strip().lower().replace("@", "")
+        u_tg_id = str(u.get("telegram_chat_id", "")).strip().lower()
+        if (u_email and u_email == raw) or (u_phone and u_phone == raw) or (norm_tg and u_tg == norm_tg) or (raw and u_tg_id == raw):
             continue
         filtered.append(u)
 
@@ -174,7 +193,7 @@ def reset_user_password(email: str, new_password_hash: str) -> bool:
     norm_email = email.strip().lower()
     updated = False
     for u in users:
-        if u.get("email", "").strip().lower() == norm_email:
+        if str(u.get("email", "")).strip().lower() == norm_email:
             u["password_hash"] = new_password_hash
             u["updated_at"] = datetime.now(timezone.utc).isoformat()
             updated = True
@@ -185,4 +204,3 @@ def reset_user_password(email: str, new_password_hash: str) -> bool:
         print(f"🔑 Пароль пользователя '{email}' успешно сброшен.")
         return True
     return False
-

@@ -15,6 +15,7 @@ class StorageService {
   static const String _keyNotifMinute = 'cosmic_notif_minute';
   static const String _keyLanguage = 'cosmic_selected_language';
   static const String _prefixDay = 'cosmic_day_json_';
+  static const String _prefixPersonal = 'cosmic_personal_horoscope_';
 
   // Выбранный язык приложения (ru, en, es, de, fr)
   static Future<String> getLanguageCode() async {
@@ -108,15 +109,67 @@ class StorageService {
     await prefs.setString(_keySelectedSign, signId);
   }
 
-  // Кэширование конкретного дня
-  static Future<void> cacheDayHoroscope(String date, Map<String, dynamic> data) async {
+  // Кэширование персонального натального прогноза API (с привязкой к UID, дате, языку и натальной сигнатуре)
+  static Future<void> cachePersonalHoroscope({
+    required String uid,
+    required String date,
+    required String lang,
+    required String natalSignature,
+    required HoroscopeDay horoscope,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('$_prefixDay$date', jsonEncode(data));
+    final safeDate = date.replaceAll('.', '_');
+    final key = '$_prefixPersonal${uid}_${safeDate}_$lang';
+    final payload = {
+      'natal_signature': natalSignature,
+      'horoscope': horoscope.toJson(),
+    };
+    await prefs.setString(key, jsonEncode(payload));
   }
 
-  static Future<HoroscopeDay?> getCachedDayHoroscope(String date) async {
+  static Future<HoroscopeDay?> getCachedPersonalHoroscope({
+    required String uid,
+    required String date,
+    required String lang,
+    required String natalSignature,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
-    final str = prefs.getString('$_prefixDay$date');
+    final safeDate = date.replaceAll('.', '_');
+    final key = '$_prefixPersonal${uid}_${safeDate}_$lang';
+    final raw = prefs.getString(key);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      if (decoded['natal_signature'] != natalSignature) {
+        return null;
+      }
+      final hJson = Map<String, dynamic>.from(decoded['horoscope'] as Map);
+      hJson['is_personal'] = true;
+      return HoroscopeDay.fromJson(hJson);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<void> clearPersonalHoroscopeCache() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys().where((k) => k.startsWith(_prefixPersonal)).toList();
+    for (final key in keys) {
+      await prefs.remove(key);
+    }
+  }
+
+  // Кэширование конкретного дня
+  static Future<void> cacheDayHoroscope(String date, Map<String, dynamic> data, [String? langCode]) async {
+    final prefs = await SharedPreferences.getInstance();
+    final suffix = (langCode != null && langCode.isNotEmpty && langCode != 'ru') ? '_$langCode' : '';
+    await prefs.setString('$_prefixDay$date$suffix', jsonEncode(data));
+  }
+
+  static Future<HoroscopeDay?> getCachedDayHoroscope(String date, [String? langCode]) async {
+    final prefs = await SharedPreferences.getInstance();
+    final suffix = (langCode != null && langCode.isNotEmpty && langCode != 'ru') ? '_$langCode' : '';
+    final str = prefs.getString('$_prefixDay$date$suffix');
     if (str != null && str.isNotEmpty) {
       try {
         return HoroscopeDay.fromJson(jsonDecode(str));
@@ -195,10 +248,22 @@ class StorageService {
     await prefs.setInt(_keyNotifMinute, minute);
   }
 
+  static Future<String> getFormattedDeliveryTime() async {
+    final h = await getNotificationHour();
+    final m = await getNotificationMinute();
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+  }
+
   // Очистка кэша
   static Future<void> clearAllCache() async {
     final prefs = await SharedPreferences.getInstance();
-    final keys = prefs.getKeys().where((k) => k.startsWith('cosmic_cache_') || k.startsWith('cosmic_day_'));
+    final keys = prefs
+        .getKeys()
+        .where((k) =>
+            k.startsWith('cosmic_cache_') ||
+            k.startsWith('cosmic_day_') ||
+            k.startsWith(_prefixPersonal))
+        .toList();
     for (final key in keys) {
       await prefs.remove(key);
     }

@@ -34,6 +34,11 @@ jobs:
           cache: true
 
       - name: Prepare native Android project, permanent keystore and icons
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           mkdir -p mobile_app/assets/data/archive
           cp -r data/* mobile_app/assets/data/ || true
@@ -53,8 +58,8 @@ jobs:
             sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>\n    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <uses-permission android:name="android.permission.VIBRATE"/>\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>\n    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>\n    <uses-permission android:name="android.permission.WAKE_LOCK"/>\n    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>\n    <uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>\n    <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>\n    <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>\n    <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>\n    <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>\n    <uses-permission android:name="com.sony.home.permission.BROADCAST_BADGE"/>\n    <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>\n    <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>\n    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE"/>\n    <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS"/>\n    <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS"/>\n    <uses-permission android:name="android.permission.READ_APP_BADGE"/>\n    <uses-permission android:name="com.oppo.launcher.permission.READ_SETTINGS"/>\n    <uses-permission android:name="com.oppo.launcher.permission.WRITE_SETTINGS"/>\n    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_READ"/>\n    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_WRITE"/>' android/app/src/main/AndroidManifest.xml
           fi
 
-          # Добавляем ресиверы и службу в AndroidManifest.xml
-          sed -i '/<\/application>/i \        <service android:name="com.cosmic.cosmic_horoscope.HoroscopeBackgroundService" android:enabled="true" android:exported="false" />\n        <receiver android:name="com.cosmic.cosmic_horoscope.HoroscopeAlarmReceiver" android:enabled="true" android:exported="false"/>\n        <receiver android:name="com.cosmic.cosmic_horoscope.BootReceiver" android:enabled="true" android:exported="true">\n            <intent-filter>\n                <action android:name="android.intent.action.BOOT_COMPLETED"/>\n                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>\n                <action android:name="android.intent.action.QUICKBOOT_POWERON" />\n                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />\n            </intent-filter>\n        </receiver>\n        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />\n        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">\n            <intent-filter>\n                <action android:name="android.intent.action.BOOT_COMPLETED"/>\n                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>\n                <action android:name="android.intent.action.QUICKBOOT_POWERON" />\n                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />\n            </intent-filter>\n        </receiver>' android/app/src/main/AndroidManifest.xml
+          # Добавляем ресиверы и службу в AndroidManifest.xml (включая реакцию на смену часового пояса TIMEZONE_CHANGED / TIME_SET)
+          sed -i '/<\/application>/i \        <service android:name="com.cosmic.cosmic_horoscope.HoroscopeBackgroundService" android:enabled="true" android:exported="false" />\n        <receiver android:name="com.cosmic.cosmic_horoscope.HoroscopeAlarmReceiver" android:enabled="true" android:exported="false"/>\n        <receiver android:name="com.cosmic.cosmic_horoscope.BootReceiver" android:enabled="true" android:exported="true">\n            <intent-filter>\n                <action android:name="android.intent.action.BOOT_COMPLETED"/>\n                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>\n                <action android:name="android.intent.action.TIME_SET"/>\n                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>\n                <action android:name="android.intent.action.QUICKBOOT_POWERON" />\n                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />\n            </intent-filter>\n        </receiver>\n        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />\n        <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">\n            <intent-filter>\n                <action android:name="android.intent.action.BOOT_COMPLETED"/>\n                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>\n                <action android:name="android.intent.action.TIME_SET"/>\n                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>\n                <action android:name="android.intent.action.QUICKBOOT_POWERON" />\n                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />\n            </intent-filter>\n        </receiver>' android/app/src/main/AndroidManifest.xml
           
           # Включение coreLibraryDesugaring для поддержки flutter_local_notifications
           if [ -f android/app/build.gradle.kts ]; then
@@ -66,36 +71,51 @@ jobs:
             echo 'dependencies { coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4" }' >> android/app/build.gradle
           fi
 
-          # Копируем постоянный цифровой сертификат подписи
+          # Копируем цифровой сертификат подписи (приоритет GitHub Secrets с безопасным откатом)
           mkdir -p android/app
-          cp keystore/release.keystore android/app/release.keystore
+          if [ -n "${RELEASE_KEYSTORE_BASE64:-}" ]; then
+            echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          else
+            cp keystore/release.keystore android/app/release.keystore
+          fi
+          KS_ALIAS="${KEY_ALIAS:-cosmic_key}"
+          KS_PASS="${KEYSTORE_PASSWORD:-cosmic_pass_2026}"
+          K_PASS="${KEY_PASSWORD:-cosmic_pass_2026}"
           
-          # Настройка Firebase: Копируем google-services.json и внедряем плагины в Gradle
+          # Настройка Firebase: Копируем google-services.json и внедряем плагины в Gradle (.gradle и .kts)
           if [ -f android_custom/google-services.json ]; then
             cp android_custom/google-services.json android/app/
             
-            # Добавляем classpath в android/build.gradle
+            # Groovy DSL
             if [ -f android/build.gradle ]; then
-              sed -i '/dependencies {/a \        classpath "com.google.gms:google-services:4.3.15"' android/build.gradle
+              sed -i '/dependencies {/a \        classpath "com.google.gms:google-services:4.4.2"' android/build.gradle
             fi
-            
-            # Добавляем apply plugin в android/app/build.gradle
             if [ -f android/app/build.gradle ]; then
               echo "apply plugin: 'com.google.gms.google-services'" >> android/app/build.gradle
-              # Поднимаем minSdkVersion до 23, так как Firebase это часто требует
               sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' android/app/build.gradle
+            fi
+
+            # Kotlin DSL (.kts)
+            if [ -f android/settings.gradle.kts ] && ! grep -q "com.google.gms.google-services" android/settings.gradle.kts; then
+              sed -i '/id("com.android.application")/a \    id("com.google.gms.google-services") version "4.4.2" apply false' android/settings.gradle.kts
+            fi
+            if [ -f android/app/build.gradle.kts ]; then
+              if ! grep -q "com.google.gms.google-services" android/app/build.gradle.kts; then
+                sed -i '/id("com.android.application")/a \    id("com.google.gms.google-services")' android/app/build.gradle.kts
+              fi
+              sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 23/g' android/app/build.gradle.kts
             fi
           fi
 
           # Настройка постоянной цифровой подписи (Release Keystore) для бесшовных обновлений APK
           if [ -f android/app/build.gradle.kts ]; then
-            sed -i '/buildTypes {/i \    signingConfigs {\n        create("release") {\n            keyAlias = "cosmic_key"\n            keyPassword = "cosmic_pass_2026"\n            storeFile = file("release.keystore")\n            storePassword = "cosmic_pass_2026"\n        }\n    }' android/app/build.gradle.kts
+            sed -i "/buildTypes {/i \    signingConfigs {\n        create(\"release\") {\n            keyAlias = \"${KS_ALIAS}\"\n            keyPassword = \"${K_PASS}\"\n            storeFile = file(\"release.keystore\")\n            storePassword = \"${KS_PASS}\"\n        }\n    }" android/app/build.gradle.kts
             sed -i 's/signingConfig = signingConfigs.getByName("debug")/signingConfig = signingConfigs.getByName("release")/g' android/app/build.gradle.kts
             sed -i '/getByName("release") {/a \            signingConfig = signingConfigs.getByName("release")' android/app/build.gradle.kts
           fi
 
           if [ -f android/app/build.gradle ]; then
-            sed -i '/buildTypes {/i \    signingConfigs {\n        release {\n            keyAlias "cosmic_key"\n            keyPassword "cosmic_pass_2026"\n            storeFile file("release.keystore")\n            storePassword "cosmic_pass_2026"\n        }\n    }' android/app/build.gradle
+            sed -i "/buildTypes {/i \    signingConfigs {\n        release {\n            keyAlias \"${KS_ALIAS}\"\n            keyPassword \"${K_PASS}\"\n            storeFile file(\"release.keystore\")\n            storePassword \"${KS_PASS}\"\n        }\n    }" android/app/build.gradle
             sed -i 's/signingConfig signingConfigs.debug/signingConfig signingConfigs.release/g' android/app/build.gradle
           fi
 
@@ -133,12 +153,12 @@ jobs:
           body: |
             Готовый установочный файл Horoscope-for-all-ru.apk для Android (версия v${{ steps.app_version.outputs.version }}).
             
-            ✨ Ключевые улучшения в этой версии v${{ steps.app_version.outputs.version }}:
-            • ☁️ Собственный облачный API: приложение теперь связывается с быстрым Python-бэкендом на Google Cloud Run.
-            • 🔐 Аутентификация Firebase: безопасный вход, регистрация и хранение натальных анкет в Cloud Firestore.
-            • 🪐 Истинная персонализация: гороскоп генерируется нейросетью Gemini строго по вашей личной дате, времени и городу рождения, а не по общему шаблону!
-            • 🌐 Мультиязычность: полноценная поддержка (RU, EN, ES, DE, FR) как в интерфейсе, так и в ИИ-прогнозах.
-            • 🧹 Очистка и минимализм: убраны устаревшие настройки, интерфейс стал чище и понятнее.
+            ✨ Ключевые улучшения в версии v${{ steps.app_version.outputs.version }}:
+            • 🌍 Часовой пояс пользователя и предгенерация: время доставки и уведомлений рассчитывается строго по часовому поясу смартфона (включая дробные пояса и перелеты), а при смещении суток или раннем времени до 06:30 прогноз формируется заранее под вашу дату.
+            • 🪐 Высшая натальная точность по дате и времени рождения: точный сферический расчет Асцендента, Середины Неба (MC) и домов при известном времени рождения либо чистая Солнечная космограмма без искажений.
+            • 🗂️ Полная структура персонального прогноза: облачный расчет раскладывается по всем 6 тематическим карточкам дня с умным оффлайн-кэшем и мгновенным пересчетом при обновлении анкеты.
+            • 🔔 Бесшумная предзагрузка за 30 минут до выбранного времени и устранение лишних фоновых срабатываний.
+            • 🔐 Синхронизация анкеты, времени доставки и часового пояса с Firebase / Cloud Run + корректный сброс пароля и удаление аккаунта.
           files: mobile_app/build/app/outputs/flutter-apk/Horoscope-for-all-ru.apk
           draft: false
           prerelease: false

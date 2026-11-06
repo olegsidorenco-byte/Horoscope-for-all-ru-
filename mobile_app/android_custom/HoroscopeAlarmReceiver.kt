@@ -1,36 +1,82 @@
 package com.cosmic.cosmic_horoscope
 
 import android.app.AlarmManager
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Build
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import java.util.concurrent.Executors
 import org.json.JSONObject
 
 /**
- * Бесшумный системный приемник AlarmManager для периодической проверки гороскопа в фоне.
- * Не создает постоянных служб и не выводит постоянных значков в шторку уведомлений.
- * Появляется в шторке ТОЛЬКО при наличии свежего прогноза дня!
+ * Часовопоясной системный планировщик AlarmManager для заблаговременной предзагрузки
+ * и точной доставки гороскопа строго по локальному времени и дате пользователя.
  */
 class HoroscopeAlarmReceiver : BroadcastReceiver() {
 
     companion object {
+        const val ACTION_PREFETCH_HOROSCOPE = "com.cosmic.action.PREFETCH_HOROSCOPE"
         const val ACTION_CHECK_HOROSCOPE = "com.cosmic.action.CHECK_HOROSCOPE"
+        const val EXTRA_TARGET_DATE_DMY = "extra_target_date_dmy"
+        const val EXTRA_TARGET_DATE_ISO = "extra_target_date_iso"
+
         const val ALERTS_CHANNEL_ID = "cosmic_horoscope_daily_v2"
         const val ALERT_NOTIFICATION_ID = 202
         const val LEGACY_SERVICE_NOTIFICATION_ID = 888
+
+        const val ALARM_PREFETCH_REQ_CODE = 908
         const val ALARM_REQUEST_CODE = 909
-        const val INTERVAL_MILLIS = 15 * 60 * 1000L // 15 минут
-        const val GITHUB_JSON_URL = "https://raw.githubusercontent.com/olegsidorenco-byte/Horoscope-for-all-ru-/main/data/latest_horoscope.json"
+        const val PREFETCH_LEAD_MINUTES = 30
+
+        const val REPO_BASE_URL =
+            "https://raw.githubusercontent.com/olegsidorenco-byte/Horoscope-for-all-ru-/main/data"
+
+        const val MODE_PREFETCH = "prefetch"
+        const val MODE_DELIVER = "deliver"
+        const val MODE_BOOT = "boot"
+        const val MODE_MANUAL = "manual"
+
+        private data class UserScheduleConfig(
+            val serviceEnabled: Boolean,
+            val notifEnabled: Boolean,
+            val hour: Int,
+            val minute: Int,
+            val lang: String
+        )
+
+        private fun readUserSchedule(prefs: SharedPreferences): UserScheduleConfig {
+            val serviceEnabled = prefs.getBoolean("flutter.cosmic_foreground_service_enabled", true)
+            val notifEnabled = prefs.getBoolean("flutter.cosmic_notif_enabled", true)
+            val rawAll = prefs.all
+            val hour = (rawAll["flutter.cosmic_notif_hour"] as? Number)?.toInt()?.coerceIn(0, 23) ?: 6
+            val minute = (rawAll["flutter.cosmic_notif_minute"] as? Number)?.toInt()?.coerceIn(0, 59) ?: 45
+            val lang = (prefs.getString("flutter.cosmic_selected_language", "ru") ?: "ru")
+                .trim()
+                .lowercase(Locale.ROOT)
+                .ifEmpty { "ru" }
+            return UserScheduleConfig(serviceEnabled, notifEnabled, hour, minute, lang)
+        }
+
+        private fun formatDates(cal: Calendar): Pair<String, String> {
+            val dmyFmt = SimpleDateFormat("dd.MM.yyyy", Locale.US).apply {
+                timeZone = cal.timeZone
+            }
+            val isoFmt = SimpleDateFormat("yyyy_MM_dd", Locale.US).apply {
+                timeZone = cal.timeZone
+            }
+            return Pair(dmyFmt.format(cal.time), isoFmt.format(cal.time))
+        }
 
         /**
          * Инициализация и создание каналов уведомлений
@@ -39,19 +85,17 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-                // Удаляем старые служебные каналы
                 try {
                     nm.deleteNotificationChannel("cosmic_service_silent_v2")
                     nm.deleteNotificationChannel("cosmic_horoscope_service_v1")
                 } catch (_: Exception) {}
 
-                // Основной пользовательский канал для алертов о новом гороскопе дня
                 val alertChannel = NotificationChannel(
                     ALERTS_CHANNEL_ID,
                     "Ежедневный Астро Гороскоп",
                     NotificationManager.IMPORTANCE_HIGH
                 ).apply {
-                    description = "Утренние оповещения о новом гороскопе дня"
+                    description = "Оповещения о свежем астрологическом прогнозе в выбранное вами время"
                     enableVibration(true)
                     setShowBadge(true)
                 }
@@ -78,75 +122,153 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
             } catch (_: Exception) {}
         }
 
+        private fun setExactCompat(
+            alarmManager: AlarmManager,
+            triggerAtMillis: Long,
+            pendingIntent: PendingIntent
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtMillis,
+                        pendingIntent
+                    )
+                } catch (_: SecurityException) {
+                    alarmManager.setAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        triggerAtMillis,
+                        pendingIntent
+                    )
+                }
+            } else {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+            }
+        }
+
         /**
-         * Планирование следующей фоновой проверки через AlarmManager
+         * Планирование заблаговременной предзагрузки (за 30 минут) и доставки строго
+         * по выбранному пользователем локальному времени и часовому поясу смартфона.
          */
-        fun scheduleAlarm(context: Context, delayMillis: Long = INTERVAL_MILLIS) {
+        fun scheduleAlarm(context: Context, @Suppress("UNUSED_PARAMETER") delayMillis: Long = 0L) {
             try {
                 val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-                val isEnabled = prefs.getBoolean("flutter.cosmic_foreground_service_enabled", true)
-                if (!isEnabled) return
+                val cfg = readUserSchedule(prefs)
+                if (!cfg.serviceEnabled) {
+                    cancelAlarm(context)
+                    return
+                }
 
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val intent = Intent(context, HoroscopeAlarmReceiver::class.java).apply {
-                    action = ACTION_CHECK_HOROSCOPE
+                val nowCal = Calendar.getInstance()
+                val nowMillis = nowCal.timeInMillis
+
+                // Вычисляем ближайший слот доставки строго в локальном часовом поясе пользователя
+                val nextDeliveryCal = (nowCal.clone() as Calendar).apply {
+                    set(Calendar.HOUR_OF_DAY, cfg.hour)
+                    set(Calendar.MINUTE, cfg.minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
                 }
-                val pendingIntent = PendingIntent.getBroadcast(
+                if (nextDeliveryCal.timeInMillis <= nowMillis + 2000L) {
+                    nextDeliveryCal.add(Calendar.DAY_OF_YEAR, 1)
+                }
+
+                val (targetDmy, targetIso) = formatDates(nextDeliveryCal)
+                val immutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PendingIntent.FLAG_IMMUTABLE
+                } else {
+                    0
+                }
+
+                // 1. Заблаговременная бесшумная предзагрузка за 30 минут до времени пользователя
+                // (если пользователь выбрал 00:15, предзагрузка в 23:45 заранее скачает прогноз на завтрашнюю дату!)
+                val prefetchCal = (nextDeliveryCal.clone() as Calendar).apply {
+                    add(Calendar.MINUTE, -PREFETCH_LEAD_MINUTES)
+                }
+                if (prefetchCal.timeInMillis > nowMillis + 5000L) {
+                    val prefetchIntent = Intent(context, HoroscopeAlarmReceiver::class.java).apply {
+                        action = ACTION_PREFETCH_HOROSCOPE
+                        putExtra(EXTRA_TARGET_DATE_DMY, targetDmy)
+                        putExtra(EXTRA_TARGET_DATE_ISO, targetIso)
+                    }
+                    val prefetchPi = PendingIntent.getBroadcast(
+                        context,
+                        ALARM_PREFETCH_REQ_CODE,
+                        prefetchIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or immutableFlag
+                    )
+                    setExactCompat(alarmManager, prefetchCal.timeInMillis, prefetchPi)
+                }
+
+                // 2. Основной будильник доставки точно в выбранное пользователем локальное время
+                val deliverIntent = Intent(context, HoroscopeAlarmReceiver::class.java).apply {
+                    action = ACTION_CHECK_HOROSCOPE
+                    putExtra(EXTRA_TARGET_DATE_DMY, targetDmy)
+                    putExtra(EXTRA_TARGET_DATE_ISO, targetIso)
+                }
+                val deliverPi = PendingIntent.getBroadcast(
                     context,
                     ALARM_REQUEST_CODE,
-                    intent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+                    deliverIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or immutableFlag
                 )
-
-                val triggerAtMillis = System.currentTimeMillis() + delayMillis
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    try {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
-                    } catch (_: SecurityException) {
-                        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
-                    }
-                } else {
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
-                }
+                setExactCompat(alarmManager, nextDeliveryCal.timeInMillis, deliverPi)
             } catch (_: Exception) {}
         }
 
         /**
-         * Отмена фонового планировщика
+         * Отмена фонового планировщика (предзагрузки и доставки)
          */
         fun cancelAlarm(context: Context) {
             try {
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-                val intent = Intent(context, HoroscopeAlarmReceiver::class.java).apply {
-                    action = ACTION_CHECK_HOROSCOPE
+                val immutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PendingIntent.FLAG_IMMUTABLE
+                } else {
+                    0
                 }
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    ALARM_REQUEST_CODE,
-                    intent,
-                    PendingIntent.FLAG_NO_CREATE or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+
+                val actions = listOf(
+                    Pair(ACTION_PREFETCH_HOROSCOPE, ALARM_PREFETCH_REQ_CODE),
+                    Pair(ACTION_CHECK_HOROSCOPE, ALARM_REQUEST_CODE)
                 )
-                if (pendingIntent != null) {
-                    alarmManager.cancel(pendingIntent)
-                    pendingIntent.cancel()
+                for ((act, code) in actions) {
+                    val intent = Intent(context, HoroscopeAlarmReceiver::class.java).apply {
+                        action = act
+                    }
+                    val pi = PendingIntent.getBroadcast(
+                        context,
+                        code,
+                        intent,
+                        PendingIntent.FLAG_NO_CREATE or immutableFlag
+                    )
+                    if (pi != null) {
+                        alarmManager.cancel(pi)
+                        pi.cancel()
+                    }
                 }
             } catch (_: Exception) {}
         }
 
         /**
-         * Проверка, запланирован ли будильник
+         * Проверка, запланирован ли системный будильник доставки
          */
         fun isAlarmScheduled(context: Context): Boolean {
             return try {
                 val intent = Intent(context, HoroscopeAlarmReceiver::class.java).apply {
                     action = ACTION_CHECK_HOROSCOPE
                 }
+                val immutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PendingIntent.FLAG_IMMUTABLE
+                } else {
+                    0
+                }
                 PendingIntent.getBroadcast(
                     context,
                     ALARM_REQUEST_CODE,
                     intent,
-                    PendingIntent.FLAG_NO_CREATE or (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+                    PendingIntent.FLAG_NO_CREATE or immutableFlag
                 ) != null
             } catch (_: Exception) {
                 false
@@ -154,18 +276,62 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Мгновенный запуск фоновой проверки без ожидания таймера
+         * Мгновенный запуск фоновой проверки (по кнопке «Проверить сейчас» или при старте)
          */
-        fun triggerImmediateCheck(context: Context) {
+        fun triggerImmediateCheck(context: Context, silentOnly: Boolean = false) {
             Executors.newSingleThreadExecutor().execute {
-                performBackgroundSync(context)
+                performBackgroundSync(
+                    context,
+                    mode = if (silentOnly) MODE_PREFETCH else MODE_MANUAL
+                )
             }
         }
 
         /**
-         * Выполнение сетевой проверки и показ уведомления при наличии нового прогноза
+         * Проверка после перезагрузки / смены часового пояса:
+         * если выбранное время сегодня уже наступило, но уведомление еще не доставлялось — доставляем.
+         * Если время еще не наступило — только бесшумно предзагружаем кэш.
          */
-        fun performBackgroundSync(context: Context) {
+        fun triggerBootOrTimezoneSync(context: Context) {
+            Executors.newSingleThreadExecutor().execute {
+                performBackgroundSync(context, mode = MODE_BOOT)
+            }
+        }
+
+        private fun fetchJsonText(urlStr: String): String? {
+            var conn: HttpURLConnection? = null
+            return try {
+                val url = URL(urlStr)
+                conn = (url.openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 12000
+                    readTimeout = 12000
+                    requestMethod = "GET"
+                    useCaches = false
+                    setRequestProperty("Cache-Control", "no-cache")
+                }
+                if (conn.responseCode == 200) {
+                    conn.inputStream.bufferedReader().use { it.readText() }
+                } else {
+                    null
+                }
+            } catch (_: Exception) {
+                null
+            } finally {
+                try {
+                    conn?.disconnect()
+                } catch (_: Exception) {}
+            }
+        }
+
+        /**
+         * Загрузка прогноза строго под целевую локальную дату пользователя и показ уведомления только в разрешенный момент
+         */
+        fun performBackgroundSync(
+            context: Context,
+            mode: String = MODE_DELIVER,
+            explicitTargetDmy: String? = null,
+            explicitTargetIso: String? = null
+        ) {
             val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager
             val wakeLock = pm?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "CosmicHoroscope:AlarmSyncLock")
             try {
@@ -174,35 +340,85 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
 
             try {
                 createNotificationChannels(context)
+                val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val cfg = readUserSchedule(flutterPrefs)
 
-                val url = URL(GITHUB_JSON_URL)
-                val conn = url.openConnection() as HttpURLConnection
-                conn.connectTimeout = 12000
-                conn.readTimeout = 12000
-                conn.requestMethod = "GET"
-                conn.useCaches = false
-                conn.setRequestProperty("Cache-Control", "no-cache")
+                val nowCal = Calendar.getInstance()
+                val (todayDmy, todayIso) = formatDates(nowCal)
 
-                if (conn.responseCode == 200) {
-                    val jsonStr = conn.inputStream.bufferedReader().use { it.readText() }
-                    val json = JSONObject(jsonStr)
-                    val horoscopeDate = json.optString("date", "").trim()
+                val targetDmy = explicitTargetDmy?.takeIf { it.isNotEmpty() } ?: todayDmy
+                val targetIso = explicitTargetIso?.takeIf { it.isNotEmpty() } ?: todayIso
 
-                    if (horoscopeDate.isNotEmpty()) {
-                        val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                val langSuffix = if (cfg.lang == "ru") "" else "_${cfg.lang}"
+                val cacheBuster = System.currentTimeMillis()
+
+                // 1. Сначала пробуем точный файл под локальную дату пользователя (поддерживает сдвиг суток на Восток и Запад)
+                val exactArchiveUrl = "$REPO_BASE_URL/archive/horoscope_${targetIso}${langSuffix}.json?t=$cacheBuster"
+                var matchedJsonStr: String? = fetchJsonText(exactArchiveUrl)
+                var resolvedDate = targetDmy
+
+                // 2. Фолбэк на latest_horoscope, если точный архивный файл еще не выложен или дата совпадает
+                if (matchedJsonStr == null) {
+                    val latestUrl = "$REPO_BASE_URL/latest_horoscope${langSuffix}.json?t=$cacheBuster"
+                    val latestStr = fetchJsonText(latestUrl)
+                    if (latestStr != null) {
+                        val obj = JSONObject(latestStr)
+                        val latestDate = obj.optString("date", "").trim()
+                        if (latestDate == targetDmy || mode == MODE_MANUAL) {
+                            matchedJsonStr = latestStr
+                            if (latestDate.isNotEmpty()) {
+                                resolvedDate = latestDate
+                            }
+                        }
+                    }
+                } else {
+                    try {
+                        val obj = JSONObject(matchedJsonStr)
+                        val d = obj.optString("date", "").trim()
+                        if (d.isNotEmpty()) resolvedDate = d
+                    } catch (_: Exception) {}
+                }
+
+                if (matchedJsonStr != null && resolvedDate.isNotEmpty()) {
+                    // Бесшумно обновляем локальный кэш Flutter для мгновенного открытия оффлайн
+                    val editor = flutterPrefs.edit()
+                    editor.putString("flutter.cosmic_cache_latest_json_${cfg.lang}", matchedJsonStr)
+                    if (cfg.lang == "ru") {
+                        editor.putString("flutter.cosmic_cache_latest_json", matchedJsonStr)
+                    }
+                    editor.apply()
+
+                    // Определяем, разрешено ли сейчас показывать звуковое уведомление пользователю
+                    val shouldNotify = when (mode) {
+                        MODE_PREFETCH -> false // Предзагрузка всегда бесшумна!
+                        MODE_DELIVER -> cfg.notifEnabled && resolvedDate == todayDmy
+                        MODE_BOOT -> {
+                            val todaySlotCal = (nowCal.clone() as Calendar).apply {
+                                set(Calendar.HOUR_OF_DAY, cfg.hour)
+                                set(Calendar.MINUTE, cfg.minute)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
+                            }
+                            cfg.notifEnabled &&
+                                resolvedDate == todayDmy &&
+                                nowCal.timeInMillis >= todaySlotCal.timeInMillis
+                        }
+                        MODE_MANUAL -> true
+                        else -> false
+                    }
+
+                    if (shouldNotify) {
                         val lastNotified = flutterPrefs.getString("flutter.cosmic_last_notified_date", "")
                         val lastRead = flutterPrefs.getString("flutter.cosmic_last_read_date", "")
-
-                        // Уведомление показывается ТОЛЬКО если прогноз новый и еще не был показан или прочитан
-                        if (horoscopeDate != lastNotified && horoscopeDate != lastRead) {
-                            showMorningAlert(context, horoscopeDate)
-                            flutterPrefs.edit().putString("flutter.cosmic_last_notified_date", horoscopeDate).apply()
+                        if (resolvedDate != lastNotified && resolvedDate != lastRead) {
+                            showMorningAlert(context, resolvedDate)
+                            flutterPrefs.edit()
+                                .putString("flutter.cosmic_last_notified_date", resolvedDate)
+                                .apply()
                         }
                     }
                 }
-                conn.disconnect()
             } catch (_: Exception) {
-                // Сетевой сбой — повторится при следующем тике
             } finally {
                 try {
                     if (wakeLock?.isHeld == true) {
@@ -225,7 +441,7 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
                 .setContentTitle("✨ Свежий гороскоп на сегодня готов!")
                 .setContentText("Новый астрологический прогноз ($dateStr) уже доступен в приложении ✨")
                 .setStyle(NotificationCompat.BigTextStyle().bigText(
-                    "Опубликован новый подробный астрологический прогноз дня ($dateStr)! Узнайте ключевые часы активности, влияние планет и персональный совет ✨"
+                    "Опубликован подробный астрологический прогноз дня ($dateStr)! Узнайте ключевые часы активности, влияние планет и персональный совет ✨"
                 ))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setAutoCancel(true)
@@ -235,6 +451,10 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
                 .build()
 
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            // Убираем дублирующее уведомление 101 из шторки (не затрагивая будущий AlarmManager 101)
+            try {
+                nm.cancel(101)
+            } catch (_: Exception) {}
             nm.notify(ALERT_NOTIFICATION_ID, alertNotification)
         }
     }
@@ -243,17 +463,27 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
         cleanupLegacyForegroundService(context)
         createNotificationChannels(context)
 
-        // Планируем следующий цикл на 15 минут вперед
-        scheduleAlarm(context, INTERVAL_MILLIS)
-
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
-        val isEnabled = prefs.getBoolean("flutter.cosmic_foreground_service_enabled", true)
-        if (!isEnabled) return
+        val cfg = readUserSchedule(prefs)
+        if (!cfg.serviceEnabled) return
+
+        val action = intent?.action ?: ACTION_CHECK_HOROSCOPE
+        val targetDmy = intent?.getStringExtra(EXTRA_TARGET_DATE_DMY)
+        val targetIso = intent?.getStringExtra(EXTRA_TARGET_DATE_ISO)
+        val syncMode = if (action == ACTION_PREFETCH_HOROSCOPE) MODE_PREFETCH else MODE_DELIVER
+
+        // Перепланируем следующую пару будильников (предзагрузка + доставка) по локальному поясу
+        scheduleAlarm(context)
 
         val pendingResult = goAsync()
         Executors.newSingleThreadExecutor().execute {
             try {
-                performBackgroundSync(context)
+                performBackgroundSync(
+                    context,
+                    mode = syncMode,
+                    explicitTargetDmy = targetDmy,
+                    explicitTargetIso = targetIso
+                )
             } finally {
                 pendingResult.finish()
             }

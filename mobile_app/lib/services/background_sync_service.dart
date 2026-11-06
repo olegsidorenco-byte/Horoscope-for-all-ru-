@@ -72,6 +72,18 @@ class BackgroundSyncService {
     }
   }
 
+  /// Перепланирование системных будильников под новое время и часовой пояс пользователя
+  static Future<bool> rescheduleAlarms() async {
+    try {
+      final enabled = await isServiceEnabled();
+      if (!enabled) return false;
+      final res = await _channel.invokeMethod<bool>('rescheduleAlarms');
+      return res ?? false;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Открытие системных настроек уведомлений
   static Future<bool> openNotificationSettings() async {
     try {

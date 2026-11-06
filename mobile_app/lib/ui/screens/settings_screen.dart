@@ -67,8 +67,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
         SnackBar(
           content: Text(
             value
-                ? '🪐 Фоновый мониторинг включен: проверяет сервер каждые 15 мин и уведомит только о новом гороскопе!'
-                : '⏸ Фоновый мониторинг отключен',
+                ? '🪐 Фоновый планировщик включен: предзагрузка и доставка по вашему часовому поясу!'
+                : '⏸ Фоновый планировщик отключен',
           ),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
@@ -90,6 +90,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
     } else {
       await NotificationService.cancelDailyNotification();
+      await BackgroundSyncService.rescheduleAlarms();
+    }
+
+    final updated = _profile.copyWith(
+      notificationsEnabled: value,
+      timezone: NotificationService.getDetectedTimezoneName(),
+      utcOffsetMinutes: NotificationService.getUtcOffsetMinutes(),
+    );
+    await AuthService.syncCurrentProfile(updated);
+    if (mounted) {
+      setState(() => _profile = updated);
     }
   }
 
@@ -113,6 +124,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (picked != null) {
+      final formattedTime =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+      final tzName = NotificationService.getDetectedTimezoneName();
+      final utcOffsetStr = NotificationService.getFormattedUtcOffset();
+
       setState(() {
         _notifHour = picked.hour;
         _notifMinute = picked.minute;
@@ -124,13 +140,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           hour: picked.hour,
           minute: picked.minute,
         );
+      } else {
+        await BackgroundSyncService.rescheduleAlarms();
+      }
+
+      final updated = _profile.copyWith(
+        deliveryTime: formattedTime,
+        timezone: tzName,
+        utcOffsetMinutes: NotificationService.getUtcOffsetMinutes(),
+      );
+      await AuthService.syncCurrentProfile(updated);
+      if (mounted) {
+        setState(() => _profile = updated);
       }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '⏰ Время утреннего напоминания установлено на ${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}',
+              '⏰ Время доставки установлено на $formattedTime ($tzName, $utcOffsetStr)',
             ),
             backgroundColor: CosmicTheme.backgroundCard,
           ),
@@ -221,7 +249,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Версия 1.0.25 (Release)',
+                            'Версия 1.0.29 (Release)',
                             style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
                           ),
                         ],
@@ -278,8 +306,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Ежедневное напоминание о готовности свежего астрологического прогноза дня в шторку смартфона (по умолчанию в 06:45 сразу после утреннего расчета).',
+                      'Время рассчитывается строго по вашему часовому поясу. Если вы находитесь в других сутках относительно сервера или выбрали раннее время (до 06:30), прогноз формируется заранее специально под вашу дату.',
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: CosmicTheme.backgroundDeep,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: CosmicTheme.cyanAccent.withOpacity(0.25)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.public_rounded, color: CosmicTheme.cyanAccent, size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Часовой пояс: ${NotificationService.getDetectedTimezoneName()} (${NotificationService.getFormattedUtcOffset()})',
+                              style: const TextStyle(
+                                color: CosmicTheme.cyanAccent,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     if (_notificationsEnabled) ...[
                       const SizedBox(height: 16),
@@ -814,9 +867,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Navigator.pop(ctx);
                       await StorageService.setLanguageCode(code);
                       CosmicHoroscopeApp.localeNotifier.value = Locale(code);
-                      setState(() {
-                        _currentLanguageCode = code;
-                      });
+                      final updated = _profile.copyWith(lang: code);
+                      await AuthService.syncCurrentProfile(updated);
+                      await BackgroundSyncService.rescheduleAlarms();
+                      if (mounted) {
+                        setState(() {
+                          _currentLanguageCode = code;
+                          _profile = updated;
+                        });
+                      }
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

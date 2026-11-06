@@ -2,42 +2,100 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:app_badge_plus/app_badge_plus.dart';
+import 'background_sync_service.dart';
 import 'storage_service.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  static bool _tzInitialized = false;
 
   static const String channelId = 'cosmic_horoscope_daily_v2';
   static const String channelName = 'Ежедневный Астро Гороскоп';
   static const String channelDescription =
       'Утренние напоминания о свежем астрологическом прогнозе дня';
 
-  /// Определение правильной временной зоны строго в соответствии со смещением часов смартфона
-  static tz.Location _resolveLocalLocation() {
-    try {
-      final offset = DateTime.now().timeZoneOffset;
-      final offsetHours = offset.inHours;
+  static const List<String> _priorityLocations = [
+    'Europe/Chisinau',
+    'Europe/Moscow',
+    'Europe/Kyiv',
+    'Europe/Minsk',
+    'Europe/Berlin',
+    'Europe/Paris',
+    'Europe/London',
+    'Europe/Lisbon',
+    'UTC',
+    'Asia/Tehran',
+    'Asia/Dubai',
+    'Asia/Tbilisi',
+    'Asia/Yerevan',
+    'Asia/Baku',
+    'Asia/Kabul',
+    'Asia/Tashkent',
+    'Asia/Yekaterinburg',
+    'Asia/Kolkata',
+    'Asia/Kathmandu',
+    'Asia/Almaty',
+    'Asia/Omsk',
+    'Asia/Novosibirsk',
+    'Asia/Bangkok',
+    'Asia/Irkutsk',
+    'Asia/Singapore',
+    'Asia/Tokyo',
+    'Asia/Seoul',
+    'Australia/Adelaide',
+    'Asia/Vladivostok',
+    'Australia/Sydney',
+    'Asia/Magadan',
+    'Asia/Kamchatka',
+    'Pacific/Auckland',
+    'Pacific/Honolulu',
+    'America/Anchorage',
+    'America/Los_Angeles',
+    'America/Denver',
+    'America/Chicago',
+    'America/New_York',
+    'America/Sao_Paulo',
+  ];
 
-      // Прямое сопоставление основных регионов
-      if (offsetHours == 3) {
-        return tz.getLocation('Europe/Moscow');
-      } else if (offsetHours == 2) {
-        return tz.getLocation('Europe/Chisinau');
-      } else if (offsetHours == 4) {
-        return tz.getLocation('Asia/Dubai');
-      } else if (offsetHours == 5) {
-        return tz.getLocation('Asia/Tashkent');
-      } else if (offsetHours == 6) {
-        return tz.getLocation('Asia/Almaty');
-      } else if (offsetHours == 1) {
-        return tz.getLocation('Europe/Berlin');
-      } else if (offsetHours == 0) {
-        return tz.getLocation('UTC');
+  static void _ensureTimeZonesInitialized() {
+    if (!_tzInitialized) {
+      try {
+        tz.initializeTimeZones();
+        _tzInitialized = true;
+      } catch (_) {}
+    }
+  }
+
+  /// Определение правильной временной зоны строго в соответствии с точным смещением (включая дробные зоны +5:30, +3:30, +5:45)
+  static tz.Location _resolveLocalLocation() {
+    _ensureTimeZonesInitialized();
+    try {
+      final now = DateTime.now();
+      final offsetMs = now.timeZoneOffset.inMilliseconds;
+      final tzNameHint = now.timeZoneName.trim();
+
+      // Если ОС вернула прямое IANA-имя в timeZoneName и его смещение совпадает
+      if (tzNameHint.contains('/') && tz.timeZoneDatabase.locations.containsKey(tzNameHint)) {
+        final directLoc = tz.getLocation(tzNameHint);
+        if (directLoc.currentTimeZone.offset == offsetMs) {
+          return directLoc;
+        }
       }
 
-      // Точный поиск среди всех локаций по смещению в миллисекундах
-      final offsetMs = offset.inMilliseconds;
+      // Проверяем приоритетные часовые пояса с точным совпадением смещения в миллисекундах (учитывает летнее/зимнее время)
+      for (final name in _priorityLocations) {
+        try {
+          if (tz.timeZoneDatabase.locations.containsKey(name)) {
+            final loc = tz.getLocation(name);
+            if (loc.currentTimeZone.offset == offsetMs) {
+              return loc;
+            }
+          }
+        } catch (_) {}
+      }
+
+      // Точный поиск среди всех локаций базы данных по смещению в миллисекундах
       for (final loc in tz.timeZoneDatabase.locations.values) {
         try {
           if (loc.currentTimeZone.offset == offsetMs) {
@@ -48,16 +106,40 @@ class NotificationService {
     } catch (_) {}
 
     try {
-      return tz.getLocation('Europe/Moscow');
+      return tz.getLocation('UTC');
     } catch (_) {
       return tz.local;
     }
   }
 
+  /// Возвращает определенное IANA-имя часового пояса устройства (напр. 'Asia/Vladivostok')
+  static String getDetectedTimezoneName() {
+    try {
+      return _resolveLocalLocation().name;
+    } catch (_) {
+      return 'UTC';
+    }
+  }
+
+  /// Возвращает текущее смещение часового пояса пользователя от UTC в минутах
+  static int getUtcOffsetMinutes() {
+    return DateTime.now().timeZoneOffset.inMinutes;
+  }
+
+  /// Человекочитаемая метка смещения от UTC (напр. 'UTC+03:00', 'UTC+05:30', 'UTC-04:00')
+  static String getFormattedUtcOffset() {
+    final totalMinutes = getUtcOffsetMinutes();
+    final sign = totalMinutes >= 0 ? '+' : '-';
+    final absMins = totalMinutes.abs();
+    final h = (absMins ~/ 60).toString().padLeft(2, '0');
+    final m = (absMins % 60).toString().padLeft(2, '0');
+    return 'UTC$sign$h:$m';
+  }
+
   /// Инициализация сервиса уведомлений, каналов и разрешений
   static Future<void> initialize() async {
     try {
-      tz.initializeTimeZones();
+      _ensureTimeZonesInitialized();
       final loc = _resolveLocalLocation();
       tz.setLocalLocation(loc);
     } catch (_) {}
@@ -152,7 +234,16 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Снятие активных уведомлений из шторки и очистка бейджа на иконке
+  /// Снятие только активных всплывающих уведомлений из шторки без отмены ежедневного будильника 101
+  static Future<void> dismissActiveAlerts() async {
+    try {
+      await _notificationsPlugin.cancel(202);
+      await _notificationsPlugin.cancel(999);
+      await clearBadge();
+    } catch (_) {}
+  }
+
+  /// Полная отмена всех уведомлений и будильников
   static Future<void> cancelAll() async {
     try {
       await _notificationsPlugin.cancel(101);
@@ -164,12 +255,15 @@ class NotificationService {
     } catch (_) {}
   }
 
-  /// Запланировать ежедневное утреннее уведомление (по умолчанию 06:45 — сразу после расчета в 06:30)
+  /// Запланировать ежедневное уведомление строго на выбранное пользователем время в его часовом поясе
   static Future<void> scheduleDailyNotification({
     int hour = 6,
     int minute = 45,
   }) async {
     try {
+      _ensureTimeZonesInitialized();
+      tz.setLocalLocation(_resolveLocalLocation());
+
       await _notificationsPlugin.cancel(101);
       await _notificationsPlugin.cancel(102);
       await _notificationsPlugin.cancel(103);
@@ -209,7 +303,7 @@ class NotificationService {
         ),
       );
 
-      // Основной утренний будильник (101)
+      // Ежедневный будильник (101) строго в выбранное пользователем локальное время
       try {
         await _notificationsPlugin.zonedSchedule(
           101,
@@ -236,31 +330,8 @@ class NotificationService {
         );
       }
 
-      // Резервная утренняя точка (102) на 07:30 (если устройство спало или было отключено в 06:45)
-      var backupDate = tz.TZDateTime(
-        tz.local,
-        now.year,
-        now.month,
-        now.day,
-        7,
-        30,
-      );
-      if (backupDate.isBefore(now)) {
-        backupDate = backupDate.add(const Duration(days: 1));
-      }
-      try {
-        await _notificationsPlugin.zonedSchedule(
-          102,
-          '🪐 Астро Гороскоп на сегодня ждет вас!',
-          'Свежий персональный прогноз дня уже доступен в приложении ✨',
-          backupDate,
-          const NotificationDetails(android: androidDetails),
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation:
-              UILocalNotificationDateInterpretation.absoluteTime,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-      } catch (_) {}
+      // Синхронизируем нативный системный AlarmManager (предзагрузка за 30 минут + точная проверка)
+      await BackgroundSyncService.rescheduleAlarms();
     } catch (_) {}
   }
 

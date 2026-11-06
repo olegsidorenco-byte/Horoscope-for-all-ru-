@@ -28,6 +28,7 @@ class HoroscopeDay {
   final List<HoroscopeTopic> topics;
   final String rawText;
   final String updatedAt;
+  final bool isPersonal;
 
   HoroscopeDay({
     required this.date,
@@ -35,6 +36,7 @@ class HoroscopeDay {
     required this.topics,
     required this.rawText,
     this.updatedAt = '',
+    this.isPersonal = false,
   });
 
   factory HoroscopeDay.fromJson(Map<String, dynamic> json) {
@@ -47,8 +49,9 @@ class HoroscopeDay {
       date: json['date'] ?? '',
       greeting: json['greeting'] ?? '',
       topics: parsedTopics,
-      rawText: json['raw_text'] ?? '',
-      updatedAt: json['updated_at'] ?? '',
+      rawText: json['raw_text'] ?? json['horoscope'] ?? '',
+      updatedAt: json['updated_at'] ?? json['generated_at'] ?? '',
+      isPersonal: json['is_personal'] == true,
     );
   }
 
@@ -58,9 +61,52 @@ class HoroscopeDay {
     'topics': topics.map((t) => t.toJson()).toList(),
     'raw_text': rawText,
     'updated_at': updatedAt,
+    'is_personal': isPersonal,
   };
 
-  factory HoroscopeDay.fromRawText(String date, String raw) {
+  static String _stripTrailingSectionIcon(String text, List<String> trailingIconsOut) {
+    final trimmed = text.trimRight();
+    final match = RegExp(r'\s*(🪐|💼|❤️|🌿|💡|✨)\s*$', unicode: true).firstMatch(trimmed);
+    if (match != null) {
+      trailingIconsOut.add(match.group(1)!);
+      return trimmed.substring(0, match.start).trim();
+    }
+    return text.trim();
+  }
+
+  static String _detectTopicIcon(String title, String? precedingIcon) {
+    if (precedingIcon != null && precedingIcon.isNotEmpty) {
+      return precedingIcon;
+    }
+    final t = title.toLowerCase();
+    if (t.contains('влияние планет') || t.contains('planet') || t.contains('influencia')) {
+      return '🪐';
+    } else if (t.contains('работа') || t.contains('бизнес') || t.contains('work') ||
+        t.contains('business') || t.contains('trabajo') || t.contains('arbeit') || t.contains('travail')) {
+      return '💼';
+    } else if (t.contains('личн') || t.contains('отношен') || t.contains('общение') ||
+        t.contains('personal') || t.contains('relationship') || t.contains('relaciones') ||
+        t.contains('beziehung') || t.contains('relations')) {
+      return '❤️';
+    } else if (t.contains('здоров') || t.contains('тонус') || t.contains('health') ||
+        t.contains('salud') || t.contains('gesundheit') || t.contains('sant')) {
+      return '🌿';
+    } else if (t.contains('совет') || t.contains('advice') || t.contains('consejo') ||
+        t.contains('rat') || t.contains('conseil')) {
+      return '💡';
+    } else if (t.contains('пожелан') || t.contains('wish') || t.contains('deseo') ||
+        t.contains('wünsch') || t.contains('vœux')) {
+      return '✨';
+    }
+    return '✨';
+  }
+
+  factory HoroscopeDay.fromRawText(
+    String date,
+    String raw, {
+    bool isPersonal = false,
+    String updatedAt = '',
+  }) {
     String clean = raw
         .replaceAll('&quot;', '"')
         .replaceAll('&amp;', '&')
@@ -72,34 +118,26 @@ class HoroscopeDay {
     List<HoroscopeTopic> topics = [];
 
     final topicBlocks = clean.split('<b>');
+    String? pendingIcon;
     if (topicBlocks.isNotEmpty) {
-      greeting = topicBlocks[0]
-          .replaceAll(RegExp(r'<[^>]*>'), '')
-          .trim();
+      final rawGreeting = topicBlocks[0]
+          .replaceAll(RegExp(r'<[^>]*>'), '');
+      final captured = <String>[];
+      greeting = _stripTrailingSectionIcon(rawGreeting, captured);
+      if (captured.isNotEmpty) {
+        pendingIcon = captured.last;
+      }
     }
 
     for (int i = 1; i < topicBlocks.length; i++) {
       final parts = topicBlocks[i].split('</b>');
       if (parts.length >= 2) {
         String title = parts[0].trim();
-        String content = parts[1]
-            .replaceAll(RegExp(r'<[^>]*>'), '')
-            .trim();
-
-        String icon = '✨';
-        if (title.contains('Влияние планет')) {
-          icon = '🪐';
-        } else if (title.contains('Работа') || title.contains('бизнес')) {
-          icon = '💼';
-        } else if (title.contains('Личные отношения') || title.contains('общение')) {
-          icon = '❤️';
-        } else if (title.contains('Здоровье') || title.contains('тонус')) {
-          icon = '🌿';
-        } else if (title.contains('Добрый совет')) {
-          icon = '💡';
-        } else if (title.contains('Пожелание')) {
-          icon = '✨';
-        }
+        final rawContent = parts.sublist(1).join('</b>').replaceAll(RegExp(r'<[^>]*>'), '');
+        final captured = <String>[];
+        String content = _stripTrailingSectionIcon(rawContent, captured);
+        String icon = _detectTopicIcon(title, pendingIcon);
+        pendingIcon = captured.isNotEmpty ? captured.last : null;
 
         topics.add(HoroscopeTopic(
           title: title,
@@ -118,6 +156,8 @@ class HoroscopeDay {
       greeting: greeting,
       topics: topics,
       rawText: raw,
+      updatedAt: updatedAt,
+      isPersonal: isPersonal,
     );
   }
 }

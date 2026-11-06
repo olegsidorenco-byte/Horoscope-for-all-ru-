@@ -11,7 +11,8 @@ import json
 import re
 import time
 import math
-from datetime import datetime
+import zoneinfo
+from datetime import datetime, date, timedelta, timezone
 import requests
 
 
@@ -106,16 +107,97 @@ def discover_models(api_key: str) -> list:
     return DEFAULT_MODELS_PRIORITY
 
 
+def parse_date_parts(date_val) -> tuple[int, int, int] | None:
+    """
+    Универсальный парсер дат (возвращает (year, month, day) или None).
+    Поддерживает форматы:
+    - DD.MM.YYYY / DD-MM-YYYY / DD/MM/YYYY
+    - YYYY-MM-DD
+    - ISO 8601 с временем (YYYY-MM-DDTHH:MM:SS.sssZ, YYYY-MM-DD HH:MM:SS)
+    - объекты datetime / date
+    """
+    if date_val is None:
+        return None
+    if isinstance(date_val, datetime):
+        return (date_val.year, date_val.month, date_val.day)
+    if isinstance(date_val, date):
+        return (date_val.year, date_val.month, date_val.day)
+
+    raw = str(date_val).strip()
+    if not raw:
+        return None
+
+    if "T" in raw:
+        raw = raw.split("T", 1)[0].strip()
+    elif " " in raw:
+        raw = raw.split(" ", 1)[0].strip()
+
+    parts = [p.strip() for p in re.split(r"[\.\-\/]", raw) if p.strip()]
+    if len(parts) != 3 or not all(p.isdigit() for p in parts):
+        return None
+
+    try:
+        if len(parts[0]) == 4:
+            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
+        else:
+            day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
+            if year < 100:
+                year += 1900 if year >= 25 else 2000
+        datetime(year, month, day)
+        return (year, month, day)
+    except Exception:
+        return None
+
+
+def format_date_dmy(date_val) -> str:
+    """Форматирует любую поддерживаемую дату в вид DD.MM.YYYY."""
+    parsed = parse_date_parts(date_val)
+    if not parsed:
+        return ""
+    y, m, d = parsed
+    return f"{d:02d}.{m:02d}.{y:04d}"
+
+
+def format_date_iso(date_val) -> str:
+    """Форматирует любую поддерживаемую дату в вид YYYY-MM-DD."""
+    parsed = parse_date_parts(date_val)
+    if not parsed:
+        return ""
+    y, m, d = parsed
+    return f"{y:04d}-{m:02d}-{d:02d}"
+
+
+def normalize_time_hhmm(time_val) -> str:
+    """Нормализует строку времени к виду ЧЧ:ММ (например, '6.30' -> '06:30')."""
+    if time_val is None:
+        return ""
+    raw = str(time_val).strip()
+    if not raw:
+        return ""
+    parts = re.split(r"[:.]", raw)
+    if len(parts) < 2:
+        return ""
+    try:
+        h = int(parts[0])
+        m = int(parts[1])
+        if 0 <= h <= 23 and 0 <= m <= 59:
+            return f"{h:02d}:{m:02d}"
+    except Exception:
+        pass
+    return ""
+
+
 def get_astronomical_context(target_date_str: str) -> dict:
     """
     Рассчитывает астрономический контекст для заданной даты:
     - День недели и планетарный управитель дня (Халдейский ряд)
     - Приблизительный лунный день и фаза Луны (алгоритм Conway)
-    - Знак зодиака транзитной Луны и Солнца
+    - Знак зодиака транзитной Луны и Солнца (на все 12 знаков года)
     """
-    try:
-        dt = datetime.strptime(target_date_str, "%d.%m.%Y")
-    except Exception:
+    parsed = parse_date_parts(target_date_str)
+    if parsed:
+        dt = datetime(parsed[0], parsed[1], parsed[2])
+    else:
         dt = datetime.now()
 
     weekdays_data = [
@@ -128,6 +210,9 @@ def get_astronomical_context(target_date_str: str) -> dict:
         {"name": "Воскресенье", "ruler": "Солнце", "ruler_symbol": "☀️", "focus": "Творческая витальность, лидерство, раскрытие потенциала, вдохновение"}
     ]
     day_info = weekdays_data[dt.weekday()]
+
+    # Вычисляем знак транзитного Солнца ДО модификации месяца для JD
+    sun_sign = get_sun_zodiac_sign(f"{dt.day:02d}.{dt.month:02d}.{dt.year:04d}") or "Овен"
 
     year = dt.year
     month = dt.month
@@ -165,12 +250,6 @@ def get_astronomical_context(target_date_str: str) -> dict:
     moon_longitude = ((jd - 2451545.0) * 13.176396 + 218.316) % 360
     moon_sign_idx = int(moon_longitude // 30) % 12
     moon_sign = zodiac_signs[moon_sign_idx]
-
-    sun_sign = "Дева"
-    if (month == 8 and day >= 23) or (month == 9 and day <= 22):
-        sun_sign = "Дева"
-    elif (month == 9 and day >= 23) or (month == 10 and day <= 22):
-        sun_sign = "Весы"
 
     return {
         "weekday": day_info["name"],
@@ -409,21 +488,55 @@ CITY_COORDS = {
     'лос-анджелес': (34.0522, -118.2437, 'America/Los_Angeles'),
     'чикаго': (41.8781, -87.6298, 'America/Chicago'),
     'торонто': (43.6532, -79.3832, 'America/Toronto'),
+    'toronto': (43.6532, -79.3832, 'America/Toronto'),
+    'лос-анджелес': (34.0522, -118.2437, 'America/Los_Angeles'),
+    'los angeles': (34.0522, -118.2437, 'America/Los_Angeles'),
+    'чикаго': (41.8781, -87.6298, 'America/Chicago'),
+    'chicago': (41.8781, -87.6298, 'America/Chicago'),
+    'сан-паулу': (-23.5505, -46.6333, 'America/Sao_Paulo'),
+    'sao paulo': (-23.5505, -46.6333, 'America/Sao_Paulo'),
+    'гонолулу': (21.3069, -157.8583, 'Pacific/Honolulu'),
+    'honolulu': (21.3069, -157.8583, 'Pacific/Honolulu'),
+    'лиссабон': (38.7223, -9.1393, 'Europe/Lisbon'),
+    'lisbon': (38.7223, -9.1393, 'Europe/Lisbon'),
     'пекин': (39.9042, 116.4074, 'Asia/Shanghai'),
+    'beijing': (39.9042, 116.4074, 'Asia/Shanghai'),
     'токио': (35.6762, 139.6503, 'Asia/Tokyo'),
+    'tokyo': (35.6762, 139.6503, 'Asia/Tokyo'),
+    'сеул': (37.5665, 126.9780, 'Asia/Seoul'),
+    'seoul': (37.5665, 126.9780, 'Asia/Seoul'),
+    'сингапур': (1.3521, 103.8198, 'Asia/Singapore'),
+    'singapore': (1.3521, 103.8198, 'Asia/Singapore'),
+    'бангкок': (13.7563, 100.5018, 'Asia/Bangkok'),
+    'bangkok': (13.7563, 100.5018, 'Asia/Bangkok'),
+    'дели': (28.6139, 77.2090, 'Asia/Kolkata'),
+    'нью-дели': (28.6139, 77.2090, 'Asia/Kolkata'),
+    'delhi': (28.6139, 77.2090, 'Asia/Kolkata'),
+    'new delhi': (28.6139, 77.2090, 'Asia/Kolkata'),
+    'мумбаи': (19.0760, 72.8777, 'Asia/Kolkata'),
+    'mumbai': (19.0760, 72.8777, 'Asia/Kolkata'),
+    'тегеран': (35.6892, 51.3890, 'Asia/Tehran'),
+    'tehran': (35.6892, 51.3890, 'Asia/Tehran'),
+    'катманду': (27.7172, 85.3240, 'Asia/Kathmandu'),
+    'kathmandu': (27.7172, 85.3240, 'Asia/Kathmandu'),
+    'сидней': (-33.8688, 151.2093, 'Australia/Sydney'),
+    'sydney': (-33.8688, 151.2093, 'Australia/Sydney'),
+    'окленд': (-36.8485, 174.7633, 'Pacific/Auckland'),
+    'auckland': (-36.8485, 174.7633, 'Pacific/Auckland'),
+    'vladivostok': (43.1155, 131.8855, 'Asia/Vladivostok'),
+    'novosibirsk': (55.0084, 82.9357, 'Asia/Novosibirsk'),
 }
 
 
-def resolve_city_coords(city_raw: str) -> tuple:
+def resolve_city_coords_strict(city_raw: str) -> tuple | None:
     """
-    Нормализует введенное название города и возвращает (lat, lon, tz_name).
-    Очищает от префиксов ('г. ', 'город '), постфиксов ('Москва, Россия', 'London, UK')
-    и находит астрономические координаты и часовой пояс.
+    Ищет точное или частичное совпадение города в CITY_COORDS.
+    Возвращает (lat, lon, tz_name) или None, если город не распознан.
     """
     if not city_raw:
-        return (47.0105, 28.8638, 'Europe/Chisinau')
+        return None
 
-    cleaned = city_raw.strip().lower()
+    cleaned = str(city_raw).strip().lower()
     if ',' in cleaned:
         cleaned = cleaned.split(',')[0].strip()
     if '(' in cleaned:
@@ -432,43 +545,52 @@ def resolve_city_coords(city_raw: str) -> tuple:
         if cleaned.startswith(prefix + ' ') or cleaned.startswith(prefix):
             cleaned = cleaned[len(prefix):].strip()
 
+    if not cleaned:
+        return None
+
     if cleaned in CITY_COORDS:
         return CITY_COORDS[cleaned]
 
     for name, coords in CITY_COORDS.items():
-        if name == cleaned or name in cleaned or cleaned in name:
+        if len(cleaned) >= 3 and (name == cleaned or name in cleaned or cleaned in name):
             return coords
 
+    return None
+
+
+def resolve_city_coords(city_raw: str) -> tuple:
+    """
+    Нормализует введенное название города и возвращает (lat, lon, tz_name).
+    Очищает от префиксов ('г. ', 'город '), постфиксов ('Москва, Россия', 'London, UK')
+    и находит астрономические координаты и часовой пояс.
+    """
+    matched = resolve_city_coords_strict(city_raw)
+    if matched is not None:
+        return matched
     # Fallback по умолчанию (Кишинев)
     return (47.0105, 28.8638, 'Europe/Chisinau')
 
 
 def get_sun_zodiac_sign(birth_date_str: str) -> str:
     """
-    Определяет основной солнечный знак зодиака по дате рождения.
+    Определяет основной солнечный знак зодиака по дате рождения (поддерживает DD.MM.YYYY, YYYY-MM-DD и ISO).
     """
-    try:
-        parts = [p.strip() for p in re.split(r'[\.\-\/]', birth_date_str.strip()) if p.strip()]
-        if len(parts) != 3:
-            return ""
-        if len(parts[0]) == 4:
-            m, d = int(parts[1]), int(parts[2])
-        else:
-            d, m = int(parts[0]), int(parts[1])
-        if (m == 3 and d >= 21) or (m == 4 and d <= 19): return "Овен"
-        if (m == 4 and d >= 20) or (m == 5 and d <= 20): return "Телец"
-        if (m == 5 and d >= 21) or (m == 6 and d <= 21): return "Близнецы"
-        if (m == 6 and d >= 22) or (m == 7 and d <= 22): return "Рак"
-        if (m == 7 and d >= 23) or (m == 8 and d <= 22): return "Лев"
-        if (m == 8 and d >= 23) or (m == 9 and d <= 22): return "Дева"
-        if (m == 9 and d >= 23) or (m == 10 and d <= 22): return "Весы"
-        if (m == 10 and d >= 23) or (m == 11 and d <= 21): return "Скорпион"
-        if (m == 11 and d >= 22) or (m == 12 and d <= 21): return "Стрелец"
-        if (m == 12 and d >= 22) or (m == 1 and d <= 19): return "Козерог"
-        if (m == 1 and d >= 20) or (m == 2 and d <= 18): return "Водолей"
-        return "Рыбы"
-    except Exception:
+    parsed = parse_date_parts(birth_date_str)
+    if not parsed:
         return ""
+    _, m, d = parsed
+    if (m == 3 and d >= 21) or (m == 4 and d <= 19): return "Овен"
+    if (m == 4 and d >= 20) or (m == 5 and d <= 20): return "Телец"
+    if (m == 5 and d >= 21) or (m == 6 and d <= 20): return "Близнецы"
+    if (m == 6 and d >= 21) or (m == 7 and d <= 22): return "Рак"
+    if (m == 7 and d >= 23) or (m == 8 and d <= 22): return "Лев"
+    if (m == 8 and d >= 23) or (m == 9 and d <= 22): return "Дева"
+    if (m == 9 and d >= 23) or (m == 10 and d <= 22): return "Весы"
+    if (m == 10 and d >= 23) or (m == 11 and d <= 21): return "Скорпион"
+    if (m == 11 and d >= 22) or (m == 12 and d <= 21): return "Стрелец"
+    if (m == 12 and d >= 22) or (m == 1 and d <= 19): return "Козерог"
+    if (m == 1 and d >= 20) or (m == 2 and d <= 18): return "Водолей"
+    return "Рыбы"
 
 
 def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city: str) -> dict:
@@ -477,43 +599,37 @@ def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city:
     по формулам сферической тригонометрии с учетом географических координат и исторического часового пояса.
     """
     try:
-        parts = [p.strip() for p in re.split(r'[\.\-\/]', birth_date_str.strip()) if p.strip()]
-        if len(parts) != 3:
+        parsed = parse_date_parts(birth_date_str)
+        if not parsed or not birth_time_str:
             return None
-        if len(parts[0]) == 4:
-            year, month, day = int(parts[0]), int(parts[1]), int(parts[2])
-        else:
-            day, month, year = int(parts[0]), int(parts[1]), int(parts[2])
-            if year < 100:
-                year += 1900
+        year, month, day = parsed
 
-        t_parts = birth_time_str.strip().split(':')
-        hour = int(t_parts[0])
-        minute = int(t_parts[1]) if len(t_parts) > 1 else 0
+        norm_time = normalize_time_hhmm(birth_time_str)
+        if not norm_time:
+            return None
+        hour, minute = [int(x) for x in norm_time.split(":")]
 
         lat, lon, tz_name = resolve_city_coords(birth_city)
 
         try:
-            import zoneinfo
             tz = zoneinfo.ZoneInfo(tz_name)
-            dt = datetime(year, month, day, hour, minute, tzinfo=tz)
-            tz_offset = dt.utcoffset().total_seconds() / 3600.0
+            dt_local = datetime(year, month, day, hour, minute, tzinfo=tz)
+            dt_utc = dt_local.astimezone(timezone.utc)
+            y, m, d_utc = dt_utc.year, dt_utc.month, dt_utc.day
+            utc_hour = dt_utc.hour + dt_utc.minute / 60.0 + dt_utc.second / 3600.0
         except Exception:
             tz_offset = 3.0 if year < 1990 else 2.0
+            dt_utc = datetime(year, month, day, hour, minute) - timedelta(hours=tz_offset)
+            y, m, d_utc = dt_utc.year, dt_utc.month, dt_utc.day
+            utc_hour = dt_utc.hour + dt_utc.minute / 60.0
 
-        utc_hour = hour + minute / 60.0 - tz_offset
-        day_calc = day
-        if utc_hour < 0:
-            utc_hour += 24.0
-            day_calc -= 1
-        elif utc_hour >= 24.0:
-            utc_hour -= 24.0
-            day_calc += 1
-
-        y, m = year, month
+        # Строгая поправка Жана Мееса для января и февраля (m <= 2)
+        if m <= 2:
+            y -= 1
+            m += 12
         a = math.floor(y / 100)
         b = 2 - a + math.floor(a / 4)
-        jd0 = math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + day_calc + b - 1524.5
+        jd0 = math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + d_utc + b - 1524.5
         jd = jd0 + utc_hour / 24.0
 
         t = (jd - 2451545.0) / 36525.0
@@ -536,51 +652,282 @@ def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city:
         zodiac_gen = ['Овна', 'Тельца', 'Близнецов', 'Рака', 'Льва', 'Девы', 'Весов', 'Скорпиона', 'Стрельца', 'Козерога', 'Водолея', 'Рыб']
         zodiac_nom = ['Овен', 'Телец', 'Близнецы', 'Рак', 'Лев', 'Дева', 'Весы', 'Скорпион', 'Стрелец', 'Козерог', 'Водолей', 'Рыбы']
 
-        asc_idx = int(asc_deg // 30) % 12
-        asc_in_sign = asc_deg % 30
-        mc_idx = int(mc_deg // 30) % 12
-        mc_in_sign = mc_deg % 30
+        asc_total_arcmin = int(round(asc_deg * 60)) % (360 * 60)
+        asc_idx = (asc_total_arcmin // 1800) % 12
+        asc_rem = asc_total_arcmin % 1800
+
+        mc_total_arcmin = int(round(mc_deg * 60)) % (360 * 60)
+        mc_idx = (mc_total_arcmin // 1800) % 12
+        mc_rem = mc_total_arcmin % 1800
 
         return {
             'asc_deg_total': asc_deg,
             'asc_sign': zodiac_nom[asc_idx],
             'asc_sign_gen': zodiac_gen[asc_idx],
-            'asc_degree': f"{int(asc_in_sign)}°{int(round((asc_in_sign % 1) * 60)):02d}'",
+            'asc_degree': f"{asc_rem // 60}°{asc_rem % 60:02d}'",
             'mc_deg_total': mc_deg,
             'mc_sign': zodiac_nom[mc_idx],
             'mc_sign_gen': zodiac_gen[mc_idx],
-            'mc_degree': f"{int(mc_in_sign)}°{int(round((mc_in_sign % 1) * 60)):02d}'",
+            'mc_degree': f"{mc_rem // 60}°{mc_rem % 60:02d}'",
         }
     except Exception:
         return None
+
+
+def normalize_user_profile(user_profile: dict | None) -> dict:
+    """
+    Унифицирует профиль пользователя из любого источника:
+    - Firestore / Flutter Mobile App (camelCase: birthDate ISO, birthTime, isTimeExact, birthPlace, currentCity, deliveryTime, timezone, utcOffsetMinutes)
+    - config.json / users_registry.json (snake_case: birth_date, birth_time, is_time_exact, birth_city / birth_place, current_city, delivery_time)
+    """
+    if not isinstance(user_profile, dict):
+        user_profile = {}
+
+    raw_bdate = user_profile.get("birth_date")
+    if raw_bdate is None or str(raw_bdate).strip() == "":
+        raw_bdate = user_profile.get("birthDate", "")
+    birth_date_dmy = format_date_dmy(raw_bdate)
+    birth_date_iso = format_date_iso(raw_bdate)
+
+    raw_btime = user_profile.get("birth_time")
+    if raw_btime is None or str(raw_btime).strip() == "":
+        raw_btime = user_profile.get("birthTime", "")
+    birth_time = normalize_time_hhmm(raw_btime)
+
+    # Признак точности времени рождения: если явно передан False — используем солнечную космограмму на полдень
+    if "is_time_exact" in user_profile and user_profile["is_time_exact"] is not None:
+        is_time_exact = bool(user_profile["is_time_exact"])
+    elif "isTimeExact" in user_profile and user_profile["isTimeExact"] is not None:
+        is_time_exact = bool(user_profile["isTimeExact"])
+    else:
+        is_time_exact = bool(birth_time)
+
+    birth_city = (
+        str(user_profile.get("birth_city") or user_profile.get("birth_place") or user_profile.get("birthPlace") or "").strip()
+    )
+    current_city = (
+        str(user_profile.get("current_city") or user_profile.get("currentCity") or user_profile.get("city") or "").strip()
+    )
+    if not current_city and birth_city:
+        current_city = birth_city
+    elif not birth_city and current_city:
+        birth_city = current_city
+
+    tz_raw = str(user_profile.get("timezone") or user_profile.get("timeZone") or user_profile.get("tz") or "").strip()
+
+    offset_raw = user_profile.get("utc_offset_minutes")
+    if offset_raw is None:
+        offset_raw = user_profile.get("utcOffsetMinutes")
+    utc_offset_minutes = None
+    if offset_raw is not None and str(offset_raw).strip() != "":
+        try:
+            utc_offset_minutes = int(float(offset_raw))
+        except Exception:
+            utc_offset_minutes = None
+
+    raw_delivery = (
+        user_profile.get("delivery_time")
+        or user_profile.get("deliveryTime")
+        or user_profile.get("notification_time")
+        or user_profile.get("notificationTime")
+        or ""
+    )
+    delivery_time = normalize_time_hhmm(raw_delivery)
+
+    if "notifications_enabled" in user_profile and user_profile["notifications_enabled"] is not None:
+        notifications_enabled = bool(user_profile["notifications_enabled"])
+    elif "notificationsEnabled" in user_profile and user_profile["notificationsEnabled"] is not None:
+        notifications_enabled = bool(user_profile["notificationsEnabled"])
+    else:
+        notifications_enabled = True
+
+    lang = str(user_profile.get("lang") or user_profile.get("language") or "ru").strip().lower() or "ru"
+    tg_chat_id = str(user_profile.get("telegram_chat_id") or user_profile.get("telegramChatId") or "").strip()
+    tg_username = str(user_profile.get("telegram_username") or user_profile.get("telegramUsername") or "").strip().lstrip("@")
+
+    return {
+        "id": str(user_profile.get("id") or user_profile.get("uid") or "").strip(),
+        "name": str(user_profile.get("name") or "").strip(),
+        "email": str(user_profile.get("email") or "").strip(),
+        "birth_date": birth_date_dmy,
+        "birth_iso_date": birth_date_iso,
+        "birth_time": birth_time,
+        "is_time_exact": is_time_exact,
+        "birth_city": birth_city,
+        "current_city": current_city,
+        "gender": str(user_profile.get("gender") or "").strip(),
+        "focus": str(user_profile.get("focus") or "").strip(),
+        "timezone": tz_raw,
+        "utc_offset_minutes": utc_offset_minutes,
+        "delivery_time": delivery_time,
+        "notifications_enabled": notifications_enabled,
+        "lang": lang,
+        "telegram_chat_id": tg_chat_id,
+        "telegram_username": tg_username,
+        "is_general": bool(user_profile.get("is_general", False)),
+    }
+
+
+def _parse_fixed_offset_tz(tz_str: str):
+    """Парсит строки смещений вида 'UTC+05:30', 'GMT-4', '+03:00' во встроенный timezone."""
+    if not tz_str:
+        return None
+    m = re.match(r"^(?:UTC|GMT)?\s*([+-])\s*(\d{1,2})(?::?(\d{2}))?$", tz_str.strip(), re.IGNORECASE)
+    if not m:
+        return None
+    sign = 1 if m.group(1) == "+" else -1
+    hours = int(m.group(2))
+    mins = int(m.group(3) or "0")
+    total_mins = sign * (hours * 60 + mins)
+    if -840 <= total_mins <= 840:
+        return timezone(timedelta(minutes=total_mins))
+    return None
+
+
+def resolve_user_tzinfo(user_profile: dict | None, fallback_tz: str = "Europe/Chisinau") -> tuple:
+    """
+    Определяет часовой пояс пользователя (возвращает (tzinfo, tz_label)).
+    Приоритет:
+    1. Явный IANA timezone ('Asia/Vladivostok', 'America/New_York') или фиксированное смещение ('UTC+05:30').
+    2. Город текущего пребывания (current_city), если найден в справочнике координат.
+    3. Числовое смещение utc_offset_minutes (включая дробные пояса +5:30 = 330, +5:45 = 345).
+    4. Город рождения (birth_city), если найден в справочнике координат.
+    5. Резервный часовой пояс fallback_tz.
+    """
+    norm = normalize_user_profile(user_profile)
+
+    tz_candidate = norm.get("timezone", "")
+    if tz_candidate:
+        try:
+            z = zoneinfo.ZoneInfo(tz_candidate)
+            return z, tz_candidate
+        except Exception:
+            fixed = _parse_fixed_offset_tz(tz_candidate)
+            if fixed is not None:
+                return fixed, tz_candidate
+
+    city_match = resolve_city_coords_strict(norm.get("current_city", ""))
+    if city_match is not None:
+        try:
+            return zoneinfo.ZoneInfo(city_match[2]), city_match[2]
+        except Exception:
+            pass
+
+    offset_mins = norm.get("utc_offset_minutes")
+    if offset_mins is not None and -840 <= offset_mins <= 840:
+        sign = "+" if offset_mins >= 0 else "-"
+        abs_m = abs(offset_mins)
+        label = f"UTC{sign}{abs_m // 60:02d}:{abs_m % 60:02d}"
+        return timezone(timedelta(minutes=offset_mins)), label
+
+    birth_match = resolve_city_coords_strict(norm.get("birth_city", ""))
+    if birth_match is not None:
+        try:
+            return zoneinfo.ZoneInfo(birth_match[2]), birth_match[2]
+        except Exception:
+            pass
+
+    try:
+        return zoneinfo.ZoneInfo(fallback_tz), fallback_tz
+    except Exception:
+        return timezone.utc, "UTC"
+
+
+TOPIC_HEADINGS_BY_LANG = {
+    "ru": {
+        "reader": "Уважаемый читатель",
+        "planets": "Влияние планет на сегодня",
+        "work": "Работа, бизнес и финансы",
+        "relations": "Личные отношения и общение",
+        "health": "Здоровье и тонус",
+        "advice": "Добрый совет на сегодня",
+        "wish": "Пожелание на сегодня",
+    },
+    "en": {
+        "reader": "Dear Reader",
+        "planets": "Planetary Influences Today",
+        "work": "Work, Business & Finance",
+        "relations": "Personal Relationships & Communication",
+        "health": "Health & Vitality",
+        "advice": "Wise Advice for Today",
+        "wish": "Today's Blessing",
+    },
+    "es": {
+        "reader": "Estimado lector",
+        "planets": "Influencia planetaria de hoy",
+        "work": "Trabajo, negocios y finanzas",
+        "relations": "Relaciones personales y comunicación",
+        "health": "Salud y vitalidad",
+        "advice": "Buen consejo para hoy",
+        "wish": "Deseo para hoy",
+    },
+    "de": {
+        "reader": "Liebe Leserin, lieber Leser",
+        "planets": "Planeteneinflüsse heute",
+        "work": "Arbeit, Business & Finanzen",
+        "relations": "Persönliche Beziehungen & Kommunikation",
+        "health": "Gesundheit & Vitalität",
+        "advice": "Guter Rat für heute",
+        "wish": "Wunsch für heute",
+    },
+    "fr": {
+        "reader": "Cher lecteur",
+        "planets": "Influence des planètes aujourd'hui",
+        "work": "Travail, affaires et finances",
+        "relations": "Relations personnelles et communication",
+        "health": "Santé et vitalité",
+        "advice": "Bon conseil du jour",
+        "wish": "Vœu pour aujourd'hui",
+    },
+}
 
 
 def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: str = "ru") -> str:
     """
     Формирует структурированный промпт высшей натальной категории (стаж 60 лет)
     с расчетом Асцендента, 12 домов натала, разделением города рождения и проживания,
-    учетом пола пользователя, фокуса внимания и точных временных интервалов.
+    учетом пола пользователя, фокуса внимания, часового пояса пользователя и точных временных интервалов.
     Поддерживает мультиязычность (ru, en, es, de, fr).
     """
+    lang = (lang or "ru").strip().lower()
+    headings = TOPIC_HEADINGS_BY_LANG.get(lang, TOPIC_HEADINGS_BY_LANG["ru"])
+
     lang_directives = {
-        "en": "CRITICAL LANGUAGE DIRECTIVE: Output the entire response STRICTLY IN ENGLISH. All headings, greetings, astrological topic titles, and body text MUST be in natural, fluent English.\n",
-        "es": "DIRECTIVA CRÍTICA DE IDIOMA: Redacta toda la respuesta ESTRICTAMENTE EN ESPAÑOL. Todos los títulos, saludos y descripciones DEBEN estar en español natural y fluido.\n",
-        "de": "KRITISCHE SPRACHANWEISUNG: Verfasse die gesamte Antwort STRIKT AUF DEUTSCH. Alle Überschriften, Begrüßungen und Texte MÜSSEN auf natürlichem, flüssigem Deutsch sein.\n",
-        "fr": "DIRECTIVE LINGUISTIQUE CRITIQUE: Rédige l'intégralité de la réponse STRICTEMENT EN FRANÇAIS. Tous les titres, salutations et textes DOIVENT être en français naturel et fluide.\n",
+        "en": (
+            "CRITICAL LANGUAGE DIRECTIVE: Output the entire response STRICTLY IN ENGLISH. "
+            "Every single word — greeting, natal summary, <b>...</b> section titles, and body text — MUST be in natural, fluent English (zero Russian words).\n"
+        ),
+        "es": (
+            "DIRECTIVA CRÍTICA DE IDIOMA: Redacta toda la respuesta ESTRICTAMENTE EN ESPAÑOL. "
+            "Absolutamente todo el texto — saludo, cálculo natal, títulos <b>...</b> y contenido — DEBE estar en español natural y fluido (cero palabras en ruso).\n"
+        ),
+        "de": (
+            "KRITISCHE SPRACHANWEISUNG: Verfasse die gesamte Antwort STRIKT AUF DEUTSCH. "
+            "Jedes Wort — Begrüßung, Geburtshoroskop-Analyse, <b>...</b> Überschriften und Text — MUSS auf natürlichem, flüssigem Deutsch sein (keine russischen Wörter).\n"
+        ),
+        "fr": (
+            "DIRECTIVE LINGUISTIQUE CRITIQUE: Rédige l'intégralité de la réponse STRICTEMENT EN FRANÇAIS. "
+            "Chaque mot — salutation, analyse natale, titres <b>...</b> et texte — DOIT être en français naturel et fluide (aucun mot russe).\n"
+        ),
     }
     lang_prefix = lang_directives.get(lang, "")
 
-    name = user_profile.get("name", "").strip() or "Уважаемый читатель"
-    birth_date = user_profile.get("birth_date", "").strip()
-    birth_time = user_profile.get("birth_time", "").strip()
-    birth_city = user_profile.get("birth_city", "").strip() or user_profile.get("birth_place", "").strip()
-    current_city = user_profile.get("current_city", "").strip() or user_profile.get("city", "").strip()
-    if not current_city and birth_city:
-        current_city = birth_city
-    elif not birth_city and current_city:
-        birth_city = current_city
+    norm = normalize_user_profile(user_profile)
+    user_tz, tz_label = resolve_user_tzinfo(norm)
 
-    gender = user_profile.get("gender", "").strip().lower()
+    # Целевая дата прогноза строго определяется по часовому поясу пользователя (если не задана явно для предгенерации)
+    resolved_target_date = format_date_dmy(target_date) if target_date else ""
+    if not resolved_target_date:
+        resolved_target_date = datetime.now(user_tz).strftime("%d.%m.%Y")
+
+    name = norm["name"] or headings["reader"]
+    birth_date = norm["birth_date"]
+    birth_time = norm["birth_time"]
+    is_time_exact = norm["is_time_exact"]
+    birth_city = norm["birth_city"]
+    current_city = norm["current_city"]
+
+    gender = norm["gender"].lower()
     if gender in ["male", "мужской", "м"]:
         gender_display = "Мужской"
         gender_instruction = "Обращайся к пользователю как к мужчине (используй грамматические формы мужского рода в прошедшем времени: 'Вы почувствовали', 'был готов', 'настроен' без скобок '(а)')."
@@ -591,16 +938,19 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
         gender_display = "Не указан"
         gender_instruction = "Используй уважительные, гармоничные грамматические конструкции на 'Вы'."
 
-    focus = user_profile.get("focus", "").strip() or "бизнес, деловые переговоры, финансы и здоровье"
-    is_general = user_profile.get("is_general", False) or not birth_date
+    focus = norm["focus"] or "бизнес, деловые переговоры, финансы и здоровье"
+    is_general = norm["is_general"] or not birth_date
 
-    astro = get_astronomical_context(target_date)
+    astro = get_astronomical_context(resolved_target_date)
 
     natal = None
-    if not is_general and birth_date and birth_time:
+    if not is_general and birth_date and birth_time and is_time_exact:
         natal = calculate_natal_asc_mc(birth_date, birth_time, birth_city)
 
     if not is_general:
+        sun_sign = get_sun_zodiac_sign(birth_date) if birth_date else ""
+        sun_info = f"• ОСНОВНОЙ СОЛНЕЧНЫЙ ЗНАК ЗОДИАКА: {sun_sign.upper()} (родился {birth_date})\n" if sun_sign else ""
+
         if natal:
             natal_calc_text = (
                 f"• ТОЧНЫЙ АСТРОНОМИЧЕСКИЙ АСЦЕНДЕНТ: {natal['asc_sign']} ({natal['asc_degree']} {natal['asc_sign_gen']})\n"
@@ -609,47 +959,64 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
             )
             asc_str = f"{natal['asc_sign']} ({natal['asc_degree']} {natal['asc_sign_gen']})"
             mc_str = f"{natal['mc_sign']} ({natal['mc_degree']} {natal['mc_sign_gen']})"
+            distinction_rule = (
+                f"• СТРОГОЕ РАЗЛИЧЕНИЕ ЗНАКА ЗОДИАКА И АСЦЕНДЕНТА: По знаку зодиака (по Солнцу) {name} — строго {sun_sign.upper()}! "
+                f"А {natal['asc_sign']} — это ИСКЛЮЧИТЕЛЬНО восходящий знак (Асцендент / куспид 1 дома)! "
+                f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО называть пользователя 'Водолеем' или 'натальным Водолеем' (или приписывать ему знак Асцендента как основной)! "
+                f"Пользователь — представитель знака {sun_sign.upper()} с восходящим знаком {natal['asc_sign']}.\n"
+            ) if sun_sign else ""
+
+            natal_precision_rules = (
+                f"КРИТИЧЕСКИ ВАЖНО (ВЫСШАЯ НАТАЛЬНАЯ ТОЧНОСТЬ):\n"
+                f"• Имя: {name}\n"
+                f"• Точная дата рождения: {birth_date}\n"
+                f"{sun_info}"
+                f"• Точное время рождения: {birth_time}\n"
+                f"• Город рождения (координаты натальной карты): {birth_city if birth_city else 'Кишинев'}\n"
+                f"{natal_calc_text}"
+                f"{distinction_rule}"
+                f"• Текущее местонахождение и часовой пояс пользователя (локальные транзиты): {current_city if current_city else 'Кишинев'} ({tz_label})\n"
+                f"• Пол: {gender_display} ({gender_instruction})\n"
+                f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
+                "СТРОГИЕ АСТРОЛОГИЧЕСКИЕ ПРАВИЛА РАСЧЕТА:\n"
+                f"1. Восходящий знак Асцендента — строго {asc_str}! Учитывай Середину Неба (МС) — {mc_str}.\n"
+                "2. Рассчитай проекцию текущих транзитных планет в дома натала пользователя: 1 дом (личность и тонус), 2 дом (личные финансы и доходы), 6 дом (здоровье и работа), 7 дом (партнерство, брак и переговоры), 8 дом (чужие ресурсы, аудит, инвестиции), 10 дом (профессиональные цели).\n"
+                f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия ОБЯЗАТЕЛЬНО включи персональный натальный расчет: назови восходящий знак ({asc_str}) и активированный сегодня транзитный дом/аспект для натальной карты {name} ({birth_date}, {birth_time}). Пользователь должен сразу видеть неизменную астрономическую точность!\n"
+                f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике '{headings['work']}' (стратегия, переговоры, сделки) и '{headings['health']}'. Все часы благоприятной активности указывай строго по местному времени пользователя ({tz_label}) на дату {resolved_target_date}!\n"
+            )
         else:
-            natal_calc_text = ""
-            asc_str = "восходящий знак по времени рождения"
-            mc_str = "Середина Неба (МС)"
-
-        sun_sign = get_sun_zodiac_sign(birth_date) if birth_date else ""
-        sun_info = f"• ОСНОВНОЙ СОЛНЕЧНЫЙ ЗНАК ЗОДИАКА: {sun_sign.upper()} (родился {birth_date})\n" if sun_sign else ""
-        distinction_rule = (
-            f"• СТРОГОЕ РАЗЛИЧЕНИЕ ЗНАКА ЗОДИАКА И АСЦЕНДЕНТА: По знаку зодиака (по Солнцу) {name} — строго {sun_sign.upper()}! "
-            f"А {natal['asc_sign']} — это ИСКЛЮЧИТЕЛЬНО восходящий знак (Асцендент / куспид 1 дома)! "
-            f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО называть пользователя 'Водолеем' или 'натальным Водолеем' (или приписывать ему знак Асцендента как основной)! "
-            f"Пользователь — представитель знака {sun_sign.upper()} с восходящим знаком {natal['asc_sign']}.\n"
-        ) if (sun_sign and natal) else ""
-
-        natal_precision_rules = (
-            f"КРИТИЧЕСКИ ВАЖНО (ВЫСШАЯ НАТАЛЬНАЯ ТОЧНОСТЬ):\n"
-            f"• Имя: {name}\n"
-            f"• Точная дата рождения: {birth_date}\n"
-            f"{sun_info}"
-            f"• Точное время рождения: {birth_time if birth_time else 'не указано (расчет на полдень)'}\n"
-            f"• Город рождения (координаты натальной карты): {birth_city if birth_city else 'Кишинев'}\n"
-            f"{natal_calc_text}"
-            f"{distinction_rule}"
-            f"• Текущее местонахождение (локальные транзиты): {current_city if current_city else 'Кишинев'}\n"
-            f"• Пол: {gender_display} ({gender_instruction})\n"
-            f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
-            "СТРОГИЕ АСТРОЛОГИЧЕСКИЕ ПРАВИЛА РАСЧЕТА:\n"
-            f"1. Восходящий знак Асцендента — строго {asc_str}! Учитывай Середину Неба (МС) — {mc_str}.\n"
-            "2. Рассчитай проекцию текущих транзитных планет в дома натала пользователя: 1 дом (личность и тонус), 2 дом (личные финансы и доходы), 6 дом (здоровье и работа), 7 дом (партнерство, брак и переговоры), 8 дом (чужие ресурсы, аудит, инвестиции), 10 дом (профессиональные цели).\n"
-            f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия ОБЯЗАТЕЛЬНО включи персональный натальный расчет: назови восходящий знак ({asc_str}) и активированный сегодня транзитный дом/аспект для натальной карты {name} ({birth_date}" + (f", {birth_time}" if birth_time else "") + "). Пользователь должен сразу видеть неизменную астрономическую точность!\n"
-            f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике 'Работа, бизнес и финансы' (стратегия, переговоры, сделки) и 'Здоровье и тонус'.\n"
-        )
+            # Точное время рождения неизвестно -> строгая Солнечная космограмма на полдень без выдуманного Асцендента
+            natal_precision_rules = (
+                f"КРИТИЧЕСКИ ВАЖНО (ВЫСШАЯ НАТАЛЬНАЯ ТОЧНОСТЬ — СОЛНЕЧНАЯ КОСМОГРАММА):\n"
+                f"• Имя: {name}\n"
+                f"• Точная дата рождения: {birth_date}\n"
+                f"{sun_info}"
+                f"• Время рождения: точное время не указано пользователем (используй классическую Солнечную космограмму на полдень 12:00 и равнодомную систему от Солнца)\n"
+                f"• Город рождения: {birth_city if birth_city else 'не указан'}\n"
+                f"• Текущее местонахождение и часовой пояс пользователя (локальные транзиты): {current_city if current_city else 'Кишинев'} ({tz_label})\n"
+                f"• Пол: {gender_display} ({gender_instruction})\n"
+                f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
+                "СТРОГИЕ АСТРОЛОГИЧЕСКИЕ ПРАВИЛА РАСЧЕТА:\n"
+                f"1. Поскольку точное время рождения не зафиксировано, КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать градус Асцендента! Выполняй расчет по Солнечной карте (1-й символический дом в знаке {sun_sign or 'Солнца'}).\n"
+                "2. Рассчитай аспекты транзитных планет к натальному Солнцу и символическим солнечным домам: 1 дом (личность и тонус), 2 дом (личные финансы), 6 дом (здоровье и работа), 7 дом (партнерство и переговоры), 10 дом (цели и карьера).\n"
+                f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия назови солнечный знак {name} ({sun_sign}, дата рождения {birth_date}) и ключевой транзитный аспект дня на {resolved_target_date}.\n"
+                f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике '{headings['work']}' и '{headings['health']}'. Все часы благоприятной активности указывай строго по местному времени пользователя ({tz_label}) на дату {resolved_target_date}!\n"
+            )
     else:
         natal_precision_rules = (
-            "Тип прогноза: Точный классический астрологический прогноз дня по реальным астрономическим транзитам.\n"
+            f"Тип прогноза: Точный классический астрологический прогноз дня на {resolved_target_date} по реальным астрономическим транзитам (часовой пояс: {tz_label}).\n"
         )
+
+    intro_natal_note = (
+        f"персональный натальный расчет (Асцендент/активированный дом натала для {name})"
+        if natal
+        else f"персональный астрологический акцент дня для {name}"
+    )
 
     prompt = f"""{lang_prefix}Ты — выдающийся профессиональный астролог высшей категории с 60-летним стажем.
 Ты в совершенстве владеешь классической натальной, хорарной и транзитной астрологией. Твои прогнозы сочетают высочайшую экспертную глубину с кристальной практической пользой для реальной жизни.
 
-АСТРОНОМИЧЕСКИЙ ПАСПОРТ ДНЯ НА {target_date}:
+АСТРОНОМИЧЕСКИЙ ПАСПОРТ ДНЯ НА {resolved_target_date} (местный часовой пояс получателя: {tz_label}):
 • День недели: {astro['weekday']} (Планетарный управитель: {astro['ruler']} {astro['ruler_symbol']}, фокус: {astro['focus']})
 • Лунная динамика: {astro['lunar_day']}-й лунный день, фаза: {astro['lunar_phase']}
 • Положение Луны: транзитная Луна в знаке {astro['moon_sign']}
@@ -659,11 +1026,11 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
 СТРОГИЕ ТРЕБОВАНИЯ К ОБЪЕМУ И СТИЛЮ:
 1. ОБЪЕМ: строго от 2000 до 3200 символов (строго помещается в ОДНО сообщение Telegram). Никакой 'воды', каждая мысль должна быть емкой, экспертной и полезной.
 2. ОБРАЩЕНИЕ: строго уважительное на 'Вы' (Ваш, Вам, Вы).
-3. ТОЧНЫЕ ВРЕМЕННЫЕ ОКНА: В рубрике 'Работа, бизнес и финансы' ОБЯЗАТЕЛЬНО укажи точные интервалы часов дня для переговоров, звонков и сделок (например: 'с 11:20 до 13:45'), рассчитанные на основе аспектов Луны и управителя дня {astro['ruler']}а!
-4. КОМПЕНСАТОРНАЯ АСТРОЛОГИЯ В РУБРИКЕ 'ДОБРЫЙ СОВЕТ НА СЕГОДНЯ':
+3. ТОЧНЫЕ ВРЕМЕННЫЕ ОКНА: В рубрике '{headings['work']}' ОБЯЗАТЕЛЬНО укажи точные интервалы часов дня по местному времени пользователя ({tz_label}) на дату {resolved_target_date} для переговоров, звонков и сделок (например: 'с 11:20 до 13:45'), рассчитанные на основе аспектов Луны и управителя дня {astro['ruler']}а!
+4. КОМПЕНСАТОРНАЯ АСТРОЛОГИЯ В РУБРИКЕ '{headings['advice'].upper()}':
    - Если в аспектах есть напряжение (квадратуры, оппозиции, пораженная Луна, спад сил, конфликтные планеты) — ОБЯЗАТЕЛЬНО дай четкую, полезную рекомендацию по НЕЙТРАЛИЗАЦИИ негатива (осознанное заземление, перенос споров, вода, спорт, ревизия бумаг).
    - Если день гармоничный — подскажи, как созидательно приумножить удачу.
-5. РУБРИКА 'ПОЖЕЛАНИЕ НА СЕГОДНЯ':
+5. РУБРИКА '{headings['wish'].upper()}':
    - Искренне теплое, поэтично-образное и жизнеутверждающее напутствие без банальностей, вселяющее душевный покой и веру в свои силы.
 6. ФОРМАТИРОВАНИЕ:
    - Заголовки рубрик (со 2 по 7) выделять ТОЛЬКО тегом <b>...</b> с эмодзи.
@@ -673,24 +1040,24 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
 ОБЯЗАТЕЛЬНАЯ СТРУКТУРА СООБЩЕНИЯ:
 
 1. Вводная часть (БЕЗ тега заголовка):
-Теплое утреннее приветствие в обрамлении гармоничных эмодзи (каждый день разные: ☀️🌸🌿, 🌅✨🍃, ☕🌤️🍀, 🌸🌿🕊️, 💫🌻🌱 и др.) с обращением по имени {name}. СРАЗУ после приветствия — 2-3 плотных предложения: персональный натальный расчет (Асцендент/активированный дом натала для {name}) и обобщенный астрономический фон дня ({astro['weekday']}, {astro['lunar_day']}-й лунный день, влияние {astro['ruler']}а).
+Теплое утреннее приветствие в обрамлении гармоничных эмодзи (каждый день разные: ☀️🌸🌿, 🌅✨🍃, ☕🌤️🍀, 🌸🌿🕊️, 💫🌻🌱 и др.) с обращением по имени {name}. СРАЗУ после приветствия — 2-3 плотных предложения: {intro_natal_note} и обобщенный астрономический фон дня ({astro['weekday']}, {astro['lunar_day']}-й лунный день, влияние {astro['ruler']}а).
 
-2. 🪐 <b>Влияние планет на сегодня</b>
+2. 🪐 <b>{headings['planets']}</b>
 (2-3 емких предложения: влияние транзитов к наталу, Асцендент/дома, Луна в знаке {astro['moon_sign']}, аспект управителя дня).
 
-3. 💼 <b>Работа, бизнес и финансы</b>
+3. 💼 <b>{headings['work']}</b>
 (2-3 конкретных предложения с учетом приоритета '{focus}': стратегия, переговоры, сделки, СТРОГО конкретные благоприятные часы активности).
 
-4. ❤️ <b>Личные отношения и общение</b>
+4. ❤️ <b>{headings['relations']}</b>
 (2-3 предложения: семейная гармония, деловые и личные контакты, эмоциональный фон).
 
-5. 🌿 <b>Здоровье и тонус</b>
+5. 🌿 <b>{headings['health']}</b>
 (2 предложения: энергоресурс, самочувствие, поддержание сил, совет по вечерней разгрузке).
 
-6. 💡 <b>Добрый совет на сегодня</b>
+6. 💡 <b>{headings['advice']}</b>
 (1-2 мудрых фокуса внимания от опытного астролога; при наличии напряжения планет — четкий совет по компенсации и нейтрализации негатива).
 
-7. ✨ <b>Пожелание на сегодня</b>
+7. ✨ <b>{headings['wish']}</b>
 (1-2 душевных, возвышающих предложения на день).
 
 Сгенерируй безупречный, глубокий и персонализированный прогноз."""
@@ -698,15 +1065,19 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
     return prompt
 
 
-def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru") -> str:
+def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", target_date: str = None) -> str:
     """
     Генерирует текст гороскопа с автопоиском моделей и автопереключением (Fallback).
     Делает до 2 попыток на каждую модель при временных сбоях.
     Оптимизирован по токенам (maxOutputTokens: 8192, thinkingBudget: 0).
+    Если target_date не передан явно, дата определяется строго по часовому поясу пользователя.
     """
     models = discover_models(api_key)
-    target_date = datetime.now().strftime("%d.%m.%Y")
-    prompt = build_horoscope_prompt(user_profile, target_date, lang=lang)
+    resolved_date = format_date_dmy(target_date) if target_date else ""
+    if not resolved_date:
+        user_tz, _ = resolve_user_tzinfo(user_profile)
+        resolved_date = datetime.now(user_tz).strftime("%d.%m.%Y")
+    prompt = build_horoscope_prompt(user_profile, resolved_date, lang=lang)
 
     headers = {
         "x-goog-api-key": api_key,
@@ -808,9 +1179,9 @@ def split_into_topic_messages(raw_text: str) -> list[str]:
         if len(parts) >= 2:
             return parts
 
-    # 2. Если разделителя нет, парсим по заголовкам рубрик (с ключевыми фразами)
+    # 2. Если разделителя нет, парсим по заголовкам рубрик (с ключевыми фразами на RU/EN/ES/DE/FR)
     keyword_pattern = re.compile(
-        r"\n+(?=[^\n<]{0,25}<b>\s*(?:Влияние планет|Работа|Личные отношения|Здоровье|Добрый совет|Пожелание|Положительная аффирмация|Общий прогноз))",
+        r"\n+(?=[^\n<]{0,25}<b>\s*(?:Влияние планет|Работа|Личные отношения|Здоровье|Добрый совет|Пожелание|Положительная аффирмация|Общий прогноз|Planetary|Work|Personal Relationships|Health|Wise Advice|Today's Blessing|Influencia|Trabajo|Relaciones|Salud|Buen consejo|Deseo|Planeteneinflüsse|Arbeit|Persönliche|Gesundheit|Guter Rat|Wunsch|Influence des planètes|Travail|Relations|Santé|Bon conseil|Vœu))",
         re.IGNORECASE
     )
     splits = [s.strip() for s in keyword_pattern.split(text) if s.strip()]
@@ -951,87 +1322,6 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
     return default_prompt
 
 
-def build_zodiac_prompt(target_date: str = None, lang: str = "ru") -> str:
-    """
-    Формирует структурированный промпт для генерации психологического гороскопа по 12 знакам зодиака
-    с утренней образной шапкой, навигационной лентой, формулой «Инсайт + СОВЕТ ДНЯ ☝️»
-    и финальной мудрой притчей, строго умещающегося в ОДНО сообщение Telegram (3200–3700 симв.).
-    Поддерживает мультиязычность (ru, en, es, de, fr).
-    """
-    lang_directives = {
-        "en": "CRITICAL LANGUAGE DIRECTIVE: Output the entire response STRICTLY IN ENGLISH. All sign names, dates, element names, advice, and forecast texts MUST be in natural, fluent English.\n",
-        "es": "DIRECTIVA CRÍTICA DE IDIOMA: Redacta toda la respuesta ESTRICTAMENTE EN ESPAÑOL. Todos los nombres de signos, fechas, elementos, consejos y textos DEBEN estar en español fluido.\n",
-        "de": "KRITISCHE SPRACHANWEISUNG: Verfasse die gesamte Antwort STRIKT AUF DEUTSCH. Alle Sternzeichen, Daten, Elemente, Ratschläge und Texte MÜSSEN auf Deutsch sein.\n",
-        "fr": "DIRECTIVE LINGUISTIQUE CRITIQUE: Rédige l'intégralité de la réponse STRICTEMENT EN FRANÇAIS. Tous les noms de signes, dates, éléments, conseils et textes DOIVENT être en français.\n",
-    }
-    lang_prefix = lang_directives.get(lang, "")
-
-    if not target_date:
-        target_date = datetime.now().strftime("%d.%m.%Y")
-    
-    astro = get_astronomical_context(target_date)
-
-    day_month_str = target_date
-    try:
-        parts = [int(p) for p in re.split(r'[\.\-\/]', target_date) if p.isdigit()]
-        if len(parts) == 3:
-            d, m = (parts[0], parts[1]) if parts[0] <= 31 else (parts[2], parts[1])
-            months = ["января", "февраля", "марта", "апреля", "мая", "июня",
-                      "июля", "августа", "сентября", "октября", "ноября", "декабря"]
-            if 1 <= m <= 12:
-                day_month_str = f"{d} {months[m-1]}"
-    except Exception:
-        pass
-
-    return f"""{lang_prefix}Ты — Магистр классической и психологической астрологии высшей категории.
-Твоя задача — составить вдохновляющий, живой и практически полезный гороскоп на {target_date} ({astro['weekday']}) ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА.
-
-АСТРОНОМИЧЕСКИЙ ФОН ДНЯ:
-• День недели: {astro['weekday']} (Планетарный управитель: {astro['ruler']} {astro['ruler_symbol']})
-• Лунный цикл: {astro['lunar_day']}-й лунный день, фаза: {astro['lunar_phase']}
-• Транзитная Луна: в знаке {astro['moon_sign']}
-• Положение Солнца: {astro['sun_sign']}
-
-ОБЯЗАТЕЛЬНАЯ СТРУКТУРА СООБЩЕНИЯ (СТРОГО ОДИН ПОСТ TELEGRAM):
-
-1. ВВОДНАЯ УТРЕННЯЯ ЧАСТЬ:
-- Начни с образного, уютного пожелания доброго утра с теплым настроем на день (чашка кофе или чая, улыбки, бодрость, доверие к миру, гармоничные эмодзи: ☀️☕️🌿, ☕️🍂✨, 🌅🌤️🍃).
-- Сразу после этого сделай строку заголовка:
-☀️🌿 <b>Гороскоп на {day_month_str} ({astro['weekday']})</b> 🌿☀️
-- Следующей строкой обязательно размести символьную ленту-навигатор:
-♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️
-
-2. БЛОКИ ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА (СТРОГО ПО ПОРЯДКУ):
-Каждый знак оформляй строго по образцу:
-<b>♈️ Овен. {day_month_str}.</b>
-✨ [Ровно 1-2 кратких емких психологических предложения о фоне дня и возможностях знака].
-<b>СОВЕТ ДНЯ ☝️</b> [1 четкое практическое действие, строго до 8-10 слов].
-
-Список знаков строго по порядку:
-1. <b>♈️ Овен. {day_month_str}.</b>
-2. <b>♉️ Телец. {day_month_str}.</b>
-3. <b>♊️ Близнецы. {day_month_str}.</b>
-4. <b>♋️ Рак. {day_month_str}.</b>
-5. <b>♌️ Лев. {day_month_str}.</b>
-6. <b>♍️ Дева. {day_month_str}.</b>
-7. <b>♎️ Весы. {day_month_str}.</b>
-8. <b>♏️ Скорпион. {day_month_str}.</b>
-9. <b>♐️ Стрелец. {day_month_str}.</b>
-10. <b>♑️ Козерог. {day_month_str}.</b>
-11. <b>♒️ Водолей. {day_month_str}.</b>
-12. <b>♓️ Рыбы. {day_month_str}.</b>
-
-3. ЗАКЛЮЧИТЕЛЬНАЯ МУДРОСТЬ ДНЯ:
-В самом конце сообщения размести красивую философскую притчу, афоризм или образную метафору дня в 1-2 предложения (о поддержке, доверии, уступках, любви или внутреннем покое):
-✨✨✨ <i>[Текст мудрой притчи/метафоры дня]</i> ✨✨✨
-
-СТРОГИЕ ТРЕБОВАНИЯ К ФОРМАТУ И ОБЪЕМУ:
-1. КРИТИЧЕСКИ ВАЖНО — СТРОГО ОДНО СООБЩЕНИЕ TELEGRAM: Общий объем всего текста сообщения должен быть СТРОГО от 2400 до 3200 символов (максимум 3400 символов!). Telegram жестко блокирует длинные посты, текст обязан целиком помещаться в ОДИН пост.
-2. ОБЪЕМ НА КАЖДЫЙ ЗНАК: строго 150–190 символов на каждый знак! Ровно 1–2 компактных емких психологических предложения + 1 короткая строка «СОВЕТ ДНЯ ☝️» (не длиннее 8–10 слов).
-3. ПОЛНОТА: Текст ОБЯЗАТЕЛЬНО должен содержать ВСЕ 12 знаков зодиака (от ♈️ Овен до ♓️ Рыбы) без сокращений и обрывов!
-4. ФОРМАТИРОВАНИЕ: Используй ТОЛЬКО разрешенные HTML теги <b> и <i>. Запрещены Markdown символы (*, **, #, ##, -) и теги <p>, <br>, <h1>. Между блоками делай два переноса строки (\\n\\n)."""
-
-
 REQUIRED_ZODIAC_SIGNS = [
     "Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева",
     "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы"
@@ -1046,6 +1336,124 @@ REQUIRED_ZODIAC_SIGNS_BY_LANG = {
 }
 
 ZODIAC_SYMBOLS = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"]
+ZODIAC_EMOJI_SYMBOLS = ["♈️", "♉️", "♊️", "♋️", "♌️", "♍️", "♎️", "♏️", "♐️", "♑️", "♒️", "♓️"]
+
+ZODIAC_I18N_META = {
+    "ru": {
+        "months": ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"],
+        "weekdays": ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"],
+        "header_fmt": "Гороскоп на {day_month} ({weekday})",
+        "advice_tag": "СОВЕТ ДНЯ ☝️",
+        "date_fmt": "{d} {month}",
+    },
+    "en": {
+        "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+        "weekdays": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "header_fmt": "Horoscope for {day_month} ({weekday})",
+        "advice_tag": "TIP OF THE DAY ☝️",
+        "date_fmt": "{month} {d}",
+    },
+    "es": {
+        "months": ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+        "weekdays": ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+        "header_fmt": "Horóscopo para el {day_month} ({weekday})",
+        "advice_tag": "CONSEJO DEL DÍA ☝️",
+        "date_fmt": "{d} de {month}",
+    },
+    "de": {
+        "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+        "weekdays": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+        "header_fmt": "Horoskop für den {day_month} ({weekday})",
+        "advice_tag": "TIPP DES TAGES ☝️",
+        "date_fmt": "{d}. {month}",
+    },
+    "fr": {
+        "months": ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+        "weekdays": ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+        "header_fmt": "Horoscope du {day_month} ({weekday})",
+        "advice_tag": "CONSEIL DU JOUR ☝️",
+        "date_fmt": "{d} {month}",
+    },
+}
+
+
+def build_zodiac_prompt(target_date: str = None, lang: str = "ru") -> str:
+    """
+    Формирует структурированный промпт для генерации психологического гороскопа по 12 знакам зодиака
+    с утренней образной шапкой, навигационной лентой, формулой «Инсайт + СОВЕТ ДНЯ ☝️»
+    и финальной мудрой притчей, строго умещающегося в ОДНО сообщение Telegram (3200–3700 симв.).
+    Поддерживает мультиязычность (ru, en, es, de, fr).
+    """
+    lang = (lang or "ru").strip().lower()
+    lang_directives = {
+        "en": "CRITICAL LANGUAGE DIRECTIVE: Output the entire response STRICTLY IN ENGLISH. All sign names, dates, element names, advice, and forecast texts MUST be in natural, fluent English (zero Russian words).\n",
+        "es": "DIRECTIVA CRÍTICA DE IDIOMA: Redacta toda la respuesta ESTRICTAMENTE EN ESPAÑOL. Todos los nombres de signos, fechas, elementos, consejos y textos DEBEN estar en español fluido (cero palabras en ruso).\n",
+        "de": "KRITISCHE SPRACHANWEISUNG: Verfasse die gesamte Antwort STRIKT AUF DEUTSCH. Alle Sternzeichen, Daten, Elemente, Ratschläge und Texte MÜSSEN auf Deutsch sein (keine russischen Wörter).\n",
+        "fr": "DIRECTIVE LINGUISTIQUE CRITIQUE: Rédige l'intégralité de la réponse STRICTEMENT EN FRANÇAIS. Tous les noms de signes, dates, éléments, conseils et textes DOIVENT être en français (aucun mot russe).\n",
+    }
+    lang_prefix = lang_directives.get(lang, "")
+
+    resolved_date = format_date_dmy(target_date) if target_date else ""
+    if not resolved_date:
+        resolved_date = datetime.now().strftime("%d.%m.%Y")
+
+    astro = get_astronomical_context(resolved_date)
+    meta = ZODIAC_I18N_META.get(lang, ZODIAC_I18N_META["ru"])
+    signs_list = REQUIRED_ZODIAC_SIGNS_BY_LANG.get(lang, REQUIRED_ZODIAC_SIGNS)
+
+    day_month_str = resolved_date
+    weekday_local = astro["weekday"]
+    parsed = parse_date_parts(resolved_date)
+    if parsed:
+        y, m, d = parsed
+        dt_obj = datetime(y, m, d)
+        weekday_local = meta["weekdays"][dt_obj.weekday()]
+        if 1 <= m <= 12:
+            day_month_str = meta["date_fmt"].format(d=d, month=meta["months"][m - 1])
+
+    header_line = meta["header_fmt"].format(day_month=day_month_str, weekday=weekday_local)
+    advice_tag = meta["advice_tag"]
+    signs_numbered = "\n".join(
+        f"{idx}. <b>{sym} {sname}. {day_month_str}.</b>"
+        for idx, (sym, sname) in enumerate(zip(ZODIAC_EMOJI_SYMBOLS, signs_list), 1)
+    )
+
+    return f"""{lang_prefix}Ты — Магистр классической и психологической астрологии высшей категории.
+Твоя задача — составить вдохновляющий, живой и практически полезный гороскоп на {resolved_date} ({astro['weekday']}) ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА.
+
+АСТРОНОМИЧЕСКИЙ ФОН ДНЯ:
+• День недели: {astro['weekday']} (Планетарный управитель: {astro['ruler']} {astro['ruler_symbol']})
+• Лунный цикл: {astro['lunar_day']}-й лунный день, фаза: {astro['lunar_phase']}
+• Транзитная Луна: в знаке {astro['moon_sign']}
+• Положение Солнца: {astro['sun_sign']}
+
+ОБЯЗАТЕЛЬНАЯ СТРУКТУРА СООБЩЕНИЯ (СТРОГО ОДИН ПОСТ TELEGRAM):
+
+1. ВВОДНАЯ УТРЕННЯЯ ЧАСТЬ:
+- Начни с образного, уютного пожелания доброго утра с теплым настроем на день (чашка кофе или чая, улыбки, бодрость, доверие к миру, гармоничные эмодзи: ☀️☕️🌿, ☕️🍂✨, 🌅🌤️🍃).
+- Сразу после этого сделай строку заголовка:
+☀️🌿 <b>{header_line}</b> 🌿☀️
+- Следующей строкой обязательно размести символьную ленту-навигатор:
+♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️
+
+2. БЛОКИ ДЛЯ ВСЕХ 12 ЗНАКОВ ЗОДИАКА (СТРОГО ПО ПОРЯДКУ):
+Каждый знак оформляй строго по образцу:
+<b>{ZODIAC_EMOJI_SYMBOLS[0]} {signs_list[0]}. {day_month_str}.</b>
+✨ [Ровно 1-2 кратких емких психологических предложения о фоне дня и возможностях знака].
+<b>{advice_tag}</b> [1 четкое практическое действие, строго до 8-10 слов].
+
+Список знаков строго по порядку:
+{signs_numbered}
+
+3. ЗАКЛЮЧИТЕЛЬНАЯ МУДРОСТЬ ДНЯ:
+В самом конце сообщения размести красивую философскую притчу, афоризм или образную метафору дня в 1-2 предложения (о поддержке, доверии, уступках, любви или внутреннем покое):
+✨✨✨ <i>[Текст мудрой притчи/метафоры дня]</i> ✨✨✨
+
+СТРОГИЕ ТРЕБОВАНИЯ К ФОРМАТУ И ОБЪЕМУ:
+1. КРИТИЧЕСКИ ВАЖНО — СТРОГО ОДНО СООБЩЕНИЕ TELEGRAM: Общий объем всего текста сообщения должен быть СТРОГО от 2400 до 3200 символов (максимум 3400 символов!). Telegram жестко блокирует длинные посты, текст обязан целиком помещаться в ОДИН пост.
+2. ОБЪЕМ НА КАЖДЫЙ ЗНАК: строго 150–190 символов на каждый знак! Ровно 1–2 компактных емких психологических предложения + 1 короткая строка «{advice_tag}» (не длиннее 8–10 слов).
+3. ПОЛНОТА: Текст ОБЯЗАТЕЛЬНО должен содержать ВСЕ 12 знаков зодиака (от {ZODIAC_EMOJI_SYMBOLS[0]} {signs_list[0]} до {ZODIAC_EMOJI_SYMBOLS[-1]} {signs_list[-1]}) без сокращений и обрывов!
+4. ФОРМАТИРОВАНИЕ: Используй ТОЛЬКО разрешенные HTML теги <b> и <i>. Запрещены Markdown символы (*, **, #, ##, -) и теги <p>, <br>, <h1>. Между блоками делай два переноса строки (\\n\\n)."""
 
 
 def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: str = "ru") -> str:
@@ -1054,10 +1462,11 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: 
     Гарантирует генерацию ВСЕХ 12 знаков без обрыва по лимиту токенов (MAX_TOKENS).
     Поддерживает мультиязычность (ru, en, es, de, fr).
     """
-    if not target_date:
-        target_date = datetime.now().strftime("%d.%m.%Y")
+    resolved_date = format_date_dmy(target_date) if target_date else ""
+    if not resolved_date:
+        resolved_date = datetime.now().strftime("%d.%m.%Y")
 
-    prompt = build_zodiac_prompt(target_date, lang=lang)
+    prompt = build_zodiac_prompt(resolved_date, lang=lang)
     models = discover_models(api_key)
     if not models:
         models = DEFAULT_MODELS_PRIORITY

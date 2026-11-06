@@ -95,6 +95,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       focus: _focusController.text.trim().isNotEmpty
           ? _focusController.text.trim()
           : (p.focus.isNotEmpty ? p.focus : "бизнес, деловые переговоры, финансы и здоровье"),
+      timezone: p.timezone,
+      utcOffsetMinutes: p.utcOffsetMinutes,
+      deliveryTime: p.deliveryTime,
+      notificationsEnabled: p.notificationsEnabled,
+      lang: p.lang,
     );
   }
 
@@ -202,10 +207,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     final profile = _buildCurrentProfile();
+    if (widget.initialProfile?.natalConfigSignature != profile.natalConfigSignature) {
+      await StorageService.clearPersonalHoroscopeCache();
+    }
     await AuthService.syncCurrentProfile(profile);
 
-    // Автоматически синхронизируем выбранный знак зодиака под дату рождения
-    await StorageService.setSelectedZodiacSign(profile.zodiacSign.toLowerCase());
+    // Автоматически синхронизируем выбранный системный ID знака зодиака под дату рождения
+    await StorageService.setSelectedZodiacSign(profile.zodiacSignId);
 
     if (mounted) {
       setState(() {

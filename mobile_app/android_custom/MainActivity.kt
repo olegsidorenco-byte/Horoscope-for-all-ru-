@@ -22,11 +22,19 @@ class MainActivity: FlutterActivity() {
             when (call.method) {
                 "startService" -> {
                     try {
-                        HoroscopeAlarmReceiver.scheduleAlarm(this, 1000L)
-                        HoroscopeAlarmReceiver.triggerImmediateCheck(this)
+                        HoroscopeAlarmReceiver.scheduleAlarm(this)
+                        HoroscopeAlarmReceiver.triggerImmediateCheck(this, silentOnly = true)
                         result.success(true)
                     } catch (e: Exception) {
                         result.error("START_FAILED", e.message, null)
+                    }
+                }
+                "rescheduleAlarms" -> {
+                    try {
+                        HoroscopeAlarmReceiver.scheduleAlarm(this)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("RESCHEDULE_FAILED", e.message, null)
                     }
                 }
                 "stopService" -> {

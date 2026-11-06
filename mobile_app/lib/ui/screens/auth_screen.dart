@@ -146,9 +146,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   void _showForgotPasswordDialog() {
     final emailCtrl = TextEditingController(text: _loginContactController.text.trim());
-    final newPassCtrl = TextEditingController();
-    final confirmPassCtrl = TextEditingController();
     String? localError;
+    bool isSending = false;
 
     showDialog(
       context: context,
@@ -161,13 +160,15 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 borderRadius: BorderRadius.circular(20),
                 side: const BorderSide(color: CosmicTheme.goldAccent, width: 1.2),
               ),
-              title: Row(
-                children: const [
+              title: const Row(
+                children: [
                   Icon(Icons.lock_reset_rounded, color: CosmicTheme.goldAccent, size: 24),
                   SizedBox(width: 10),
-                  Text(
-                    'Восстановление пароля',
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'Восстановление пароля',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
@@ -177,7 +178,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Введите адрес электронной почты, указанный при регистрации, и установите новый пароль:',
+                      'Введите адрес электронной почты, указанный при регистрации. Firebase отправит вам защищенную ссылку для сброса пароля:',
                       style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
                     ),
                     const SizedBox(height: 14),
@@ -203,38 +204,12 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: newPassCtrl,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: 'Новый пароль (от 6 символов)',
-                        prefixIcon: const Icon(Icons.key_outlined, color: CosmicTheme.cyanAccent),
-                        filled: true,
-                        fillColor: Colors.black26,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: confirmPassCtrl,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: 'Повторите новый пароль',
-                        prefixIcon: const Icon(Icons.check_circle_outline, color: CosmicTheme.cyanAccent),
-                        filled: true,
-                        fillColor: Colors.black26,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
                   ],
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(ctx),
+                  onPressed: isSending ? null : () => Navigator.pop(ctx),
                   child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
                 ),
                 ElevatedButton(
@@ -243,44 +218,46 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     foregroundColor: Colors.black,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  onPressed: () async {
-                    final email = emailCtrl.text.trim();
-                    final pass = newPassCtrl.text;
-                    final confirm = confirmPassCtrl.text;
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          final email = emailCtrl.text.trim();
+                          if (email.isEmpty || !AuthService.isEmail(email)) {
+                            setDialogState(() => localError = 'Введите корректный адрес электронной почты');
+                            return;
+                          }
 
-                    if (email.isEmpty || !AuthService.isEmail(email)) {
-                      setDialogState(() => localError = 'Введите корректный адрес электронной почты');
-                      return;
-                    }
-                    if (pass.length < 6) {
-                      setDialogState(() => localError = 'Пароль должен быть не менее 6 символов');
-                      return;
-                    }
-                    if (pass != confirm) {
-                      setDialogState(() => localError = 'Пароли не совпадают');
-                      return;
-                    }
+                          setDialogState(() {
+                            isSending = true;
+                            localError = null;
+                          });
 
-                    try {
-                      await AuthService.resetPassword(email: email, newPassword: pass);
-                      if (context.mounted) {
-                        Navigator.pop(ctx);
-                        _loginContactController.text = email;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Color(0xFF1E2235),
-                            content: Text(
-                              '✅ Пароль успешно обновлен! Теперь выполните вход с новым паролем.',
-                              style: TextStyle(color: CosmicTheme.goldAccent),
-                            ),
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      setDialogState(() => localError = e.toString().replaceAll('Exception: ', ''));
-                    }
-                  },
-                  child: const Text('Сохранить пароль', style: TextStyle(fontWeight: FontWeight.bold)),
+                          try {
+                            await AuthService.sendPasswordReset(email);
+                            if (context.mounted) {
+                              Navigator.pop(ctx);
+                              _loginContactController.text = email;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  backgroundColor: const Color(0xFF1E2235),
+                                  content: Text(
+                                    '📩 Письмо для сброса пароля отправлено на $email!',
+                                    style: const TextStyle(color: CosmicTheme.goldAccent),
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            setDialogState(() {
+                              isSending = false;
+                              localError = e.toString().replaceAll('Exception: ', '');
+                            });
+                          }
+                        },
+                  child: Text(
+                    isSending ? 'Отправка...' : 'Отправить письмо',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             );
