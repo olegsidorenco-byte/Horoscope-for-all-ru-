@@ -927,18 +927,52 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
     birth_city = norm["birth_city"]
     current_city = norm["current_city"]
 
-    gender = norm["gender"].lower()
-    if gender in ["male", "мужской", "м"]:
-        gender_display = "Мужской"
-        gender_instruction = "Обращайся к пользователю как к мужчине (используй грамматические формы мужского рода в прошедшем времени: 'Вы почувствовали', 'был готов', 'настроен' без скобок '(а)')."
-    elif gender in ["female", "женский", "ж"]:
-        gender_display = "Женский"
-        gender_instruction = "Обращайся к пользователю как к женщине (используй грамматические формы женского рода в прошедшем времени: 'Вы почувствовали', 'была готова', 'настроена' без скобок '(а)')."
-    else:
-        gender_display = "Не указан"
-        gender_instruction = "Используй уважительные, гармоничные грамматические конструкции на 'Вы'."
+    # При генерации на иностранных языках транслитерируем дефолтные русскоязычные поля профиля,
+    # чтобы кириллические слова ("Олег", "Кишинев", русский focus) не провоцировали ИИ переходить на русский язык.
+    if lang != "ru":
+        if name.strip().lower() == "олег":
+            name = "Oleg"
+        elif name.strip().lower() in ("уважаемый читатель", "уважаемый подписчик", "пользователь"):
+            name = headings["reader"]
+        if birth_city.strip().lower() in ("кишинев", "кишинёв"):
+            birth_city = "Chisinau"
+        if current_city.strip().lower() in ("кишинев", "кишинёв"):
+            current_city = "Chisinau"
 
-    focus = norm["focus"] or "бизнес, деловые переговоры, финансы и здоровье"
+    gender = norm["gender"].lower()
+    if lang == "ru":
+        if gender in ["male", "мужской", "м"]:
+            gender_display = "Мужской"
+            gender_instruction = "Обращайся к пользователю как к мужчине (используй грамматические формы мужского рода в прошедшем времени: 'Вы почувствовали', 'был готов', 'настроен' без скобок '(а)')."
+        elif gender in ["female", "женский", "ж"]:
+            gender_display = "Женский"
+            gender_instruction = "Обращайся к пользователю как к женщине (используй грамматические формы женского рода в прошедшем времени: 'Вы почувствовали', 'была готова', 'настроена' без скобок '(а)')."
+        else:
+            gender_display = "Не указан"
+            gender_instruction = "Используй уважительные, гармоничные грамматические конструкции на 'Вы'."
+    else:
+        if gender in ["male", "мужской", "м"]:
+            gender_display = "Male"
+            gender_instruction = "Address the user as male using respectful formal pronouns in the target language ('vous' in French, 'usted' in Spanish, 'Sie' in German, 'you' in English) and masculine grammatical agreement."
+        elif gender in ["female", "женский", "ж"]:
+            gender_display = "Female"
+            gender_instruction = "Address the user as female using respectful formal pronouns in the target language ('vous' in French, 'usted' in Spanish, 'Sie' in German, 'you' in English) and feminine grammatical agreement."
+        else:
+            gender_display = "Unspecified"
+            gender_instruction = "Use respectful formal address in the target language ('vous' in French, 'usted' in Spanish, 'Sie' in German, 'you' in English)."
+
+    default_focus_by_lang = {
+        "ru": "бизнес, деловые переговоры, финансы и здоровье",
+        "en": "business, negotiations, finance, and health",
+        "es": "negocios, negociaciones comerciales, finanzas y salud",
+        "de": "Geschäft, Verhandlungen, Finanzen und Gesundheit",
+        "fr": "affaires, négociations commerciales, finances et santé",
+    }
+    raw_focus = norm["focus"] or ""
+    if lang != "ru" and (not raw_focus or raw_focus.strip().lower() == "бизнес, деловые переговоры, финансы и здоровье"):
+        focus = default_focus_by_lang.get(lang, default_focus_by_lang["en"])
+    else:
+        focus = raw_focus or default_focus_by_lang["ru"]
     is_general = norm["is_general"] or not birth_date
 
     astro = get_astronomical_context(resolved_target_date)
@@ -1013,6 +1047,49 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
         else f"персональный астрологический акцент дня для {name}"
     )
 
+    address_rule = (
+        "2. ОБРАЩЕНИЕ: строго уважительное на 'Вы' (Ваш, Вам, Вы)."
+        if lang == "ru"
+        else "2. ОБРАЩЕНИЕ: используй уважительное формальное обращение на целевом языке ('vous' во французском, 'usted' в испанском, 'Sie' в немецком, 'you' в английском)."
+    )
+
+    closing_mandates = {
+        "ru": "Сгенерируй безупречный, глубокий и персонализированный прогноз строго на русском языке.",
+        "en": (
+            "FINAL MANDATORY LANGUAGE REQUIREMENT (ENGLISH ONLY):\n"
+            "The technical astronomical reference data above contains Russian terms for internal calculation only. "
+            "You MUST translate all zodiac sign names (e.g., Водолей -> Aquarius, Близнецы -> Gemini, Скорпион -> Scorpio), "
+            "planet names, lunar phases, weekdays, city names, and the user's name into natural, fluent ENGLISH.\n"
+            "Write 100% of your output (introductory greeting, astrological analysis, <b>...</b> headings, and all 6 sections) "
+            "STRICTLY IN ENGLISH. Do NOT output a single Russian word or Cyrillic character!"
+        ),
+        "es": (
+            "REQUISITO FINAL OBLIGATORIO DE IDIOMA (SOLO ESPAÑOL):\n"
+            "Los datos astronómicos técnicos anteriores contienen términos en ruso únicamente como referencia interna de cálculo. "
+            "DEBES traducir todos los nombres de signos zodiacales (ej. Водолей -> Acuario, Близнецы -> Géminis, Скорпион -> Escorpio), "
+            "planetas, fases lunares, días de la semana, ciudades y el nombre del usuario a un ESPAÑOL impecable y natural.\n"
+            "Redacta el 100 % de tu respuesta (saludo inicial, análisis astrológico, títulos <b>...</b> y las 6 secciones) "
+            "ESTRICTAMENTE EN ESPAÑOL. ¡NO escribas NI UNA SOLA palabra en ruso ni ningún carácter cirílico!"
+        ),
+        "de": (
+            "ABSCHLIESSENDE VERBINDLICHE SPRACHANWEISUNG (NUR DEUTSCH):\n"
+            "Die oben genannten technischen astronomischen Daten enthalten russische Begriffe nur als interne Berechnungsreferenz. "
+            "Du MUSST alle Sternzeichen (z. B. Водолей -> Wassermann, Близнецы -> Zwillinge, Скорпион -> Skorpion), "
+            "Planeten, Mondphasen, Wochentage, Städtenamen und den Namen des Nutzers in natürliches, flüssiges DEUTSCH übersetzen.\n"
+            "Verfasse 100 % deiner Antwort (Begrüßung, astrologische Analyse, <b>...</b> Überschriften und alle 6 Rubriken) "
+            "STRIKT AUF DEUTSCH. Verwende KEIN EINZIGES russisches Wort und KEINE kyrillischen Buchstaben!"
+        ),
+        "fr": (
+            "IMPÉRATIF ABSOLU DE LANGUE EN CONCLUSION (FRANÇAIS UNIQUEMENT) :\n"
+            "Les données astronomiques techniques ci-dessus contiennent des termes en russe uniquement à titre de référence interne de calcul. "
+            "Tu DOIS impérativement traduire tous les noms de signes du zodiaque (ex. Водолей -> Verseau, Близнецы -> Gémeaux, Скорпион -> Scorpion), "
+            "de planètes, de phases lunaires, de jours de la semaine, de villes et le prénom de l'utilisateur dans un FRANÇAIS naturel et irréprochable.\n"
+            "Rédige 100 % de ta réponse (salutation d'introduction, calculs astrologiques, titres <b>...</b> et contenu des 6 rubriques) "
+            "EXCLUSIVEMENT EN FRANÇAIS. N'écris PAS UN SEUL MOT en russe ni aucun caractère cyrillique !"
+        ),
+    }
+    closing_instruction = closing_mandates.get(lang, closing_mandates["ru"])
+
     prompt = f"""{lang_prefix}Ты — выдающийся профессиональный астролог высшей категории с 60-летним стажем.
 Ты в совершенстве владеешь классической натальной, хорарной и транзитной астрологией. Твои прогнозы сочетают высочайшую экспертную глубину с кристальной практической пользой для реальной жизни.
 
@@ -1025,8 +1102,8 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
 {natal_precision_rules}
 СТРОГИЕ ТРЕБОВАНИЯ К ОБЪЕМУ И СТИЛЮ:
 1. ОБЪЕМ: строго от 2000 до 3200 символов (строго помещается в ОДНО сообщение Telegram). Никакой 'воды', каждая мысль должна быть емкой, экспертной и полезной.
-2. ОБРАЩЕНИЕ: строго уважительное на 'Вы' (Ваш, Вам, Вы).
-3. ТОЧНЫЕ ВРЕМЕННЫЕ ОКНА: В рубрике '{headings['work']}' ОБЯЗАТЕЛЬНО укажи точные интервалы часов дня по местному времени пользователя ({tz_label}) на дату {resolved_target_date} для переговоров, звонков и сделок (например: 'с 11:20 до 13:45'), рассчитанные на основе аспектов Луны и управителя дня {astro['ruler']}а!
+{address_rule}
+3. ТОЧНЫЕ ВРЕМЕННЫЕ ОКНА: В рубрике '{headings['work']}' ОБЯЗАТЕЛЬНО укажи точные интервалы часов дня по местному времени пользователя ({tz_label}) на дату {resolved_target_date} для переговоров, звонков и сделок (например: '11:20–13:45'), рассчитанные на основе аспектов Луны и управителя дня {astro['ruler']}а!
 4. КОМПЕНСАТОРНАЯ АСТРОЛОГИЯ В РУБРИКЕ '{headings['advice'].upper()}':
    - Если в аспектах есть напряжение (квадратуры, оппозиции, пораженная Луна, спад сил, конфликтные планеты) — ОБЯЗАТЕЛЬНО дай четкую, полезную рекомендацию по НЕЙТРАЛИЗАЦИИ негатива (осознанное заземление, перенос споров, вода, спорт, ревизия бумаг).
    - Если день гармоничный — подскажи, как созидательно приумножить удачу.
@@ -1060,9 +1137,85 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
 7. ✨ <b>{headings['wish']}</b>
 (1-2 душевных, возвышающих предложения на день).
 
-Сгенерируй безупречный, глубокий и персонализированный прогноз."""
+{closing_instruction}"""
 
     return prompt
+
+
+TARGET_LANG_FULL_NAMES = {
+    "en": "English",
+    "es": "Spanish (Español)",
+    "de": "German (Deutsch)",
+    "fr": "French (Français)",
+}
+
+
+def has_unwanted_cyrillic(text: str, lang: str) -> bool:
+    """
+    Проверяет, содержит ли сгенерированный текст на иностранном языке (en, es, de, fr)
+    нежелательные кириллические слова/предложения.
+    """
+    lang_norm = (lang or "ru").strip().lower()
+    if lang_norm == "ru":
+        return False
+    return bool(re.search(r"[а-яА-ЯёЁ]{2,}", text or ""))
+
+
+def _enforce_target_language(text: str, lang: str, models: list[str], headers: dict) -> str:
+    """
+    Если модель случайно оставила русские фразы при генерации на en/es/de/fr,
+    выполняет принудительный перевод всего текста на целевой язык с сохранением структуры <b>...</b> и эмодзи.
+    """
+    lang_norm = (lang or "ru").strip().lower()
+    if not has_unwanted_cyrillic(text, lang_norm):
+        return text
+
+    target_lang_name = TARGET_LANG_FULL_NAMES.get(lang_norm, "English")
+    headings = TOPIC_HEADINGS_BY_LANG.get(lang_norm, TOPIC_HEADINGS_BY_LANG["en"])
+    print(f"🌐 [Language Guard] Обнаружена кириллица для lang='{lang_norm}'. Выполняется перевод на {target_lang_name}...")
+
+    translate_prompt = (
+        f"You are an expert astrological translator. Translate the following horoscope text into pure, natural, fluent {target_lang_name}.\n"
+        f"STRICT RULES:\n"
+        f"1. Keep the EXACT structure: introductory greeting paragraph followed by the 6 sections with emojis and HTML <b>...</b> tags separated by double newlines (\\n\\n).\n"
+        f"2. Use these exact 6 section titles inside <b>...</b>:\n"
+        f"   - 🪐 <b>{headings['planets']}</b>\n"
+        f"   - 💼 <b>{headings['work']}</b>\n"
+        f"   - ❤️ <b>{headings['relations']}</b>\n"
+        f"   - 🌿 <b>{headings['health']}</b>\n"
+        f"   - 💡 <b>{headings['advice']}</b>\n"
+        f"   - ✨ <b>{headings['wish']}</b>\n"
+        f"3. Translate ALL Russian words, zodiac signs, planet names, city names, and personal names into {target_lang_name}.\n"
+        f"4. Output ONLY the translated horoscope text with ZERO Cyrillic characters and NO Markdown symbols (*, **, #).\n\n"
+        f"TEXT TO TRANSLATE:\n{text}"
+    )
+
+    translate_payload = {
+        "contents": [{"parts": [{"text": translate_prompt}]}],
+        "generationConfig": {
+            "temperature": 0.25,
+            "maxOutputTokens": 8192,
+            "topP": 0.9,
+        },
+    }
+
+    for model in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        try:
+            resp = requests.post(url, headers=headers, json=translate_payload, timeout=45)
+            if resp.status_code == 200:
+                candidates = resp.json().get("candidates", [])
+                if candidates:
+                    parts = candidates[0].get("content", {}).get("parts", [])
+                    if parts:
+                        translated = clean_markdown_formatting(parts[0].get("text", "").strip())
+                        if translated and not has_unwanted_cyrillic(translated, lang_norm):
+                            print(f"✅ [Language Guard] Текст успешно переведен на {target_lang_name} моделью {model}!")
+                            return translated
+        except Exception as err:
+            print(f"⚠️ [Language Guard] Ошибка перевода через {model}: {err}")
+
+    return text
 
 
 def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", target_date: str = None) -> str:
@@ -1072,12 +1225,13 @@ def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", 
     Оптимизирован по токенам (maxOutputTokens: 8192, thinkingBudget: 0).
     Если target_date не передан явно, дата определяется строго по часовому поясу пользователя.
     """
+    lang_clean = (lang or "ru").strip().lower()
     models = discover_models(api_key)
     resolved_date = format_date_dmy(target_date) if target_date else ""
     if not resolved_date:
         user_tz, _ = resolve_user_tzinfo(user_profile)
         resolved_date = datetime.now(user_tz).strftime("%d.%m.%Y")
-    prompt = build_horoscope_prompt(user_profile, resolved_date, lang=lang)
+    prompt = build_horoscope_prompt(user_profile, resolved_date, lang=lang_clean)
 
     headers = {
         "x-goog-api-key": api_key,
@@ -1127,6 +1281,12 @@ def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", 
                             text = parts[0].get("text", "").strip()
                             # Очищаем от возможных случайных markdown-символов в заголовках
                             cleaned_text = clean_markdown_formatting(text)
+                            if has_unwanted_cyrillic(cleaned_text, lang_clean):
+                                cleaned_text = _enforce_target_language(cleaned_text, lang_clean, models, headers)
+                            if has_unwanted_cyrillic(cleaned_text, lang_clean):
+                                last_error = f"Модель {model} вернула кириллицу для языка {lang_clean}"
+                                print(f"⚠️ {last_error}, пробуем следующую попытку/модель...")
+                                continue
                             print(f"✅ Текст успешно сгенерирован моделью {model} ({len(cleaned_text)} симв.)!")
                             return cleaned_text
                 

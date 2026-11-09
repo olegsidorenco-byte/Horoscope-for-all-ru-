@@ -871,6 +871,64 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 20 пройден: Cloud Run API, часовопоясной target_date и инвалидация натального кэша проверены.")
 
+    def test_21_no_cyrillic_in_foreign_horoscopes_and_prompt_guard(self):
+        """Проверка отсутствия кириллицы в актуальных прогнозах на en/es/de/fr и работы языкового предохранителя."""
+        import json
+        from ai_service import build_horoscope_prompt, has_unwanted_cyrillic
+
+        # 1. Функция детекции кириллических утечек
+        self.assertFalse(has_unwanted_cyrillic("Bonjour cher Oleg, la Lune est en Scorpion.", "fr"))
+        self.assertTrue(has_unwanted_cyrillic("Bonjour, транзитная Луна в Скорпионе.", "fr"))
+        self.assertFalse(has_unwanted_cyrillic("Доброе утро, транзитная Луна в Скорпионе.", "ru"))
+
+        # 2. Промпт для французского языка обязан транслитерировать дефолтное имя/город автора и завершаться строгой французской директивой
+        fr_prompt = build_horoscope_prompt(
+            {
+                "name": "Олег",
+                "birth_date": "23.05.1978",
+                "birth_time": "00:50",
+                "birth_city": "Кишинев",
+                "current_city": "Кишинев",
+                "gender": "male",
+            },
+            target_date="09.11.2026",
+            lang="fr",
+        )
+        self.assertIn("IMPÉRATIF ABSOLU DE LANGUE EN CONCLUSION (FRANÇAIS UNIQUEMENT)", fr_prompt)
+        self.assertIn("Oleg", fr_prompt)
+        self.assertIn("Chisinau", fr_prompt)
+        self.assertNotIn("Вы почувствовали", fr_prompt)
+
+        # 3. Все актуальные файлы latest_horoscope_{en,es,de,fr}.json обязаны быть без кириллицы
+        for lang in ("en", "es", "de", "fr"):
+            for base_dir in ("data", os.path.join("mobile_app", "assets", "data")):
+                fpath = os.path.join(base_dir, f"latest_horoscope_{lang}.json")
+                self.assertTrue(os.path.exists(fpath), f"Отсутствует файл {fpath}")
+                with open(fpath, "r", encoding="utf-8") as f:
+                    doc = json.load(f)
+                self.assertFalse(
+                    has_unwanted_cyrillic(doc.get("greeting", ""), lang),
+                    f"Обнаружена кириллица в greeting файла {fpath}",
+                )
+                self.assertFalse(
+                    has_unwanted_cyrillic(doc.get("raw_text", ""), lang),
+                    f"Обнаружена кириллица в raw_text файла {fpath}",
+                )
+                for topic in doc.get("topics", []):
+                    self.assertFalse(
+                        has_unwanted_cyrillic(topic.get("content", ""), lang),
+                        f"Обнаружена кириллица в рубрике '{topic.get('title')}' файла {fpath}",
+                    )
+
+        # 4. Проверка локализации приветствия и карточек в mobile_app/lib/models/user_profile.dart
+        with open(os.path.join("mobile_app", "lib", "models", "user_profile.dart"), "r", encoding="utf-8") as f:
+            dart_code = f.read()
+        self.assertIn("Bienvenue dans Astro Horoscope", dart_code)
+        self.assertIn("String formatGreeting(String rawGreeting, {String? langCode})", dart_code)
+        self.assertIn("String formatTopicContent(String content, {String? langCode})", dart_code)
+
+        print("✅ Тест 21 пройден: Французский, английский, испанский и немецкий прогнозы чисты от кириллицы.")
+
 
 if __name__ == "__main__":
     unittest.main()

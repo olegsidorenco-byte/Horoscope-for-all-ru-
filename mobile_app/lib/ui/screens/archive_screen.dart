@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/horoscope_model.dart';
 import '../../models/user_profile.dart';
 import '../../services/horoscope_sync_service.dart';
@@ -334,12 +335,13 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
       );
     }
 
+    final langCode = AppLocalizations.of(context).langCode;
     return ListView(
       controller: controller,
       physics: const BouncingScrollPhysics(),
       children: [
         GreetingHeader(
-          greetingText: _userProfile.formatGreeting(_day!.greeting),
+          greetingText: _userProfile.formatGreeting(_day!.greeting, langCode: langCode),
           dateStr: _day!.date,
           isLoading: false,
           onRefresh: _loadDay,
@@ -347,7 +349,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
         ..._day!.topics.asMap().entries.map((entry) {
           final personalizedTopic = HoroscopeTopic(
             title: entry.value.title,
-            content: _userProfile.formatTopicContent(entry.value.content),
+            content: _userProfile.formatTopicContent(entry.value.content, langCode: langCode),
             icon: entry.value.icon,
           );
           return TopicCard(

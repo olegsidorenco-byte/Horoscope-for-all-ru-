@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ui' show PlatformDispatcher;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile.dart';
 import '../models/horoscope_model.dart';
@@ -17,10 +18,33 @@ class StorageService {
   static const String _prefixDay = 'cosmic_day_json_';
   static const String _prefixPersonal = 'cosmic_personal_horoscope_';
 
+  static const Set<String> _supportedLangs = {'ru', 'en', 'es', 'de', 'fr'};
+
+  /// Проверяет, не содержит ли прогноз на иностранном языке (fr/en/es/de) ошибочную кириллицу
+  static bool hasCorruptedLanguage(HoroscopeDay day, String langCode) {
+    final normLang = langCode.trim().toLowerCase();
+    if (normLang == 'ru') return false;
+    final sample = '${day.greeting} ${day.rawText} ${day.topics.map((t) => t.content).join(" ")}';
+    return RegExp(r'[а-яА-ЯёЁ]{3,}').hasMatch(sample);
+  }
+
   // Выбранный язык приложения (ru, en, es, de, fr)
   static Future<String> getLanguageCode() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_keyLanguage) ?? 'en';
+    final saved = prefs.getString(_keyLanguage)?.trim().toLowerCase();
+    if (saved != null && _supportedLangs.contains(saved)) {
+      return saved;
+    }
+    // Если язык еще не сохранялся явно, определяем по системной локали смартфона и фиксируем в SharedPreferences
+    String detected = 'en';
+    try {
+      final sysLang = PlatformDispatcher.instance.locale.languageCode.trim().toLowerCase();
+      if (_supportedLangs.contains(sysLang)) {
+        detected = sysLang;
+      }
+    } catch (_) {}
+    await prefs.setString(_keyLanguage, detected);
+    return detected;
   }
 
   static Future<void> setLanguageCode(String langCode) async {
@@ -72,7 +96,12 @@ class StorageService {
     }
     if (str != null && str.isNotEmpty) {
       try {
-        return HoroscopeDay.fromJson(jsonDecode(str));
+        final day = HoroscopeDay.fromJson(jsonDecode(str));
+        if (hasCorruptedLanguage(day, lang)) {
+          await prefs.remove('${_keyLatest}_$lang');
+          return null;
+        }
+        return day;
       } catch (_) {}
     }
     return null;
@@ -145,7 +174,12 @@ class StorageService {
       }
       final hJson = Map<String, dynamic>.from(decoded['horoscope'] as Map);
       hJson['is_personal'] = true;
-      return HoroscopeDay.fromJson(hJson);
+      final day = HoroscopeDay.fromJson(hJson);
+      if (hasCorruptedLanguage(day, lang)) {
+        await prefs.remove(key);
+        return null;
+      }
+      return day;
     } catch (_) {
       return null;
     }
@@ -168,11 +202,18 @@ class StorageService {
 
   static Future<HoroscopeDay?> getCachedDayHoroscope(String date, [String? langCode]) async {
     final prefs = await SharedPreferences.getInstance();
-    final suffix = (langCode != null && langCode.isNotEmpty && langCode != 'ru') ? '_$langCode' : '';
-    final str = prefs.getString('$_prefixDay$date$suffix');
+    final lang = langCode ?? await getLanguageCode();
+    final suffix = (lang.isNotEmpty && lang != 'ru') ? '_$lang' : '';
+    final key = '$_prefixDay$date$suffix';
+    final str = prefs.getString(key);
     if (str != null && str.isNotEmpty) {
       try {
-        return HoroscopeDay.fromJson(jsonDecode(str));
+        final day = HoroscopeDay.fromJson(jsonDecode(str));
+        if (hasCorruptedLanguage(day, lang)) {
+          await prefs.remove(key);
+          return null;
+        }
+        return day;
       } catch (_) {}
     }
     return null;

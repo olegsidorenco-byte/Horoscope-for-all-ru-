@@ -21,6 +21,7 @@ from config_loader import get_config, validate_secrets
 from ai_service import (
     generate_horoscope_text,
     generate_zodiac_horoscope_text,
+    has_unwanted_cyrillic,
     normalize_user_profile,
     format_date_dmy,
 )
@@ -137,15 +138,20 @@ def _ensure_author_multilingual_for_date(
         arch_name = f"horoscope_{iso_key}.json" if lang == "ru" else f"horoscope_{iso_key}_{lang}.json"
         arch_path = os.path.join(ARCHIVE_DIR, arch_name)
 
-        # Если файл уже есть И для RU совпадает актуальный натальный хэш — пропускаем повторную генерацию
+        # Если файл уже есть И для RU совпадает актуальный натальный хэш,
+        # а для иностранных языков текст не содержит кириллических утечек — пропускаем повторную генерацию
         if os.path.exists(arch_path) and (lang != "ru" or bool(ru_text)):
-            if lang == "ru" and not ru_text:
-                try:
-                    with open(arch_path, "r", encoding="utf-8") as f:
-                        ru_text = json.load(f).get("raw_text", "")
-                except Exception:
-                    pass
-            continue
+            try:
+                with open(arch_path, "r", encoding="utf-8") as f:
+                    existing_raw = json.load(f).get("raw_text", "")
+            except Exception:
+                existing_raw = ""
+
+            if existing_raw and not has_unwanted_cyrillic(existing_raw, lang):
+                if lang == "ru" and not ru_text:
+                    ru_text = existing_raw
+                continue
+            print(f"♻️ [Персональный {target_dmy}] Перегенерация архива для {lang} (обнаружена кириллица или пустой файл)...")
 
         print(f"⏳ [Персональный {target_dmy}] Генерация прогноза для языка: {lang}...")
         h_text = generate_horoscope_text(api_key, author_profile, lang=lang, target_date=target_dmy)

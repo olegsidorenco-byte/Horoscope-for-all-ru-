@@ -75,6 +75,7 @@ class HoroscopeSyncService {
                   'delivery_time': deliveryTime,
                   'notifications_enabled': notifEnabled,
                   'force_refresh': forceRefresh,
+                  'profile': profile.toJson(),
                 }),
               )
               .timeout(const Duration(seconds: 25));
@@ -106,15 +107,17 @@ class HoroscopeSyncService {
               );
             }
 
-            await StorageService.cachePersonalHoroscope(
-              uid: user.uid,
-              date: respDate,
-              lang: lang,
-              natalSignature: natalSig,
-              horoscope: parsedHoroscope,
-            );
-            await StorageService.cacheLatestHoroscope(parsedHoroscope.toJson(), lang);
-            return parsedHoroscope;
+            if (!StorageService.hasCorruptedLanguage(parsedHoroscope, lang)) {
+              await StorageService.cachePersonalHoroscope(
+                uid: user.uid,
+                date: respDate,
+                lang: lang,
+                natalSignature: natalSig,
+                horoscope: parsedHoroscope,
+              );
+              await StorageService.cacheLatestHoroscope(parsedHoroscope.toJson(), lang);
+              return parsedHoroscope;
+            }
           }
         }
       } catch (e) {

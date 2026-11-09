@@ -395,7 +395,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
           // Заголовок и приветствие
           GreetingHeader(
-            greetingText: _getPersonalizedGreeting(_horoscope!.greeting),
+            greetingText: _getPersonalizedGreeting(_horoscope!.greeting, l10n.langCode),
             dateStr: _horoscope!.date,
             isLoading: _isLoading,
             onRefresh: () => _fetchLatestHoroscope(forceRefresh: true),
@@ -416,7 +416,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               title: topic.title,
               content: _horoscope!.isPersonal
                   ? topic.content
-                  : _userProfile.formatTopicContent(topic.content),
+                  : _userProfile.formatTopicContent(topic.content, langCode: l10n.langCode),
               icon: topic.icon,
             );
             return TopicCard(
@@ -430,14 +430,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  String _getPersonalizedGreeting(String rawGreeting) {
+  String _getPersonalizedGreeting(String rawGreeting, String langCode) {
     if (_horoscope != null && _horoscope!.isPersonal && rawGreeting.trim().isNotEmpty) {
       return rawGreeting;
     }
-    return _userProfile.formatGreeting(rawGreeting);
+    return _userProfile.formatGreeting(rawGreeting, langCode: langCode);
   }
 
   Widget _buildZodiacQuickBar() {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       padding: const EdgeInsets.all(14),
@@ -452,9 +453,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '♈ Гороскоп по знакам зодиака',
-                style: TextStyle(
+              Text(
+                '♈ ${l10n.zodiacScreenTitle}',
+                style: const TextStyle(
                   fontSize: 14.5,
                   fontWeight: FontWeight.bold,
                   color: CosmicTheme.textPrimary,
@@ -465,13 +466,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   context,
                   MaterialPageRoute(builder: (context) => const ZodiacScreen()),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     Text(
-                      'Все 12',
-                      style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 12.5, fontWeight: FontWeight.w600),
+                      l10n.elementAll,
+                      style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 12.5, fontWeight: FontWeight.w600),
                     ),
-                    Icon(Icons.chevron_right, color: CosmicTheme.goldSoft, size: 16),
+                    const Icon(Icons.chevron_right, color: CosmicTheme.goldSoft, size: 16),
                   ],
                 ),
               ),
@@ -533,6 +534,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildPersonalProfileBanner() {
+    final l10n = AppLocalizations.of(context);
+    final code = l10n.langCode;
+
+    final fillSubtitle = switch (code) {
+      'fr' => 'Complétez votre profil (date, heure, lieu) pour un calcul natal personnel',
+      'en' => 'Complete your profile (date, time, place) for a personal natal forecast',
+      'es' => 'Complete su perfil (fecha, hora, lugar) para su cálculo natal personal',
+      'de' => 'Füllen Sie Ihr Profil (Datum, Uhrzeit, Ort) für Ihr persönliches Horoskop aus',
+      _ => 'Заполните анкету (дата, время, место) для личного расчета',
+    };
+    final natalPrefix = switch (code) {
+      'fr' => '✨ Natal :',
+      'en' => '✨ Natal:',
+      'es' => '✨ Natal:',
+      'de' => '✨ Natal:',
+      _ => '✨ Натал:',
+    };
+    final cosmogramLabel = switch (code) {
+      'fr' => 'cosmogramme',
+      'en' => 'solar chart',
+      'es' => 'cosmograma',
+      'de' => 'Kosmogramm',
+      _ => 'космограмма',
+    };
+
     if (!_userProfile.isRegistered) {
       return Container(
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 8),
@@ -546,18 +572,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           children: [
             const Icon(Icons.person_add_alt_1_rounded, color: CosmicTheme.goldAccent, size: 22),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Натальный профиль',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                    l10n.profileSectionTitle,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'Заполните анкету (дата, время, место) для личного расчета',
-                    style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
+                    fillSubtitle,
+                    style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
                   ),
                 ],
               ),
@@ -572,9 +598,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   await _fetchLatestHoroscope(forceRefresh: true);
                 }
               },
-              child: const Text(
-                'Анкета',
-                style: TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold),
+              child: Text(
+                l10n.editProfileButton,
+                style: const TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -617,17 +643,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '✨ Натал: ${_userProfile.name}',
+                  '$natalPrefix ${_userProfile.name}',
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_userProfile.zodiacSign} • ${_userProfile.formattedBirthDate} (${_userProfile.isTimeExact ? _userProfile.birthTime : "космограмма"}) • ${_userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity}',
+                  '${_userProfile.localizedZodiacSign(code)} • ${_userProfile.formattedBirthDate} (${_userProfile.isTimeExact ? _userProfile.birthTime : cosmogramLabel}) • ${_userProfile.birthPlace.isNotEmpty ? _userProfile.birthPlace : _userProfile.currentCity}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
                 ),
-                if (_userProfile.focus.isNotEmpty) ...[
+                if (_userProfile.focus.isNotEmpty &&
+                    (code == 'ru' || !RegExp(r'[а-яА-ЯёЁ]{2,}').hasMatch(_userProfile.focus))) ...[
                   const SizedBox(height: 2),
                   Text(
                     '🎯 ${_userProfile.focus}',

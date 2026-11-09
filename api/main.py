@@ -12,7 +12,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-from ai_service import generate_horoscope_text, normalize_user_profile
+from ai_service import generate_horoscope_text, has_unwanted_cyrillic, normalize_user_profile
 from archive_service import parse_horoscope_structure
 from telegram_service import send_text_message
 from timezone_scheduler import (
@@ -65,6 +65,7 @@ class HoroscopeRequest(BaseModel):
     delivery_time: Optional[str] = None
     notifications_enabled: Optional[bool] = None
     force_refresh: bool = False
+    profile: Optional[dict] = None
 
 
 class HoroscopeResponse(BaseModel):
@@ -127,11 +128,15 @@ def get_personal_horoscope(
     db = get_db()
     user_ref = db.collection("users").document(user_id)
     user_doc = user_ref.get()
-    if not user_doc.exists:
+    if not user_doc.exists and not req.profile:
         raise HTTPException(status_code=404, detail="User profile not found")
 
-    raw_profile = user_doc.to_dict() or {}
+    raw_profile = (user_doc.to_dict() if user_doc.exists else {}) or {}
     merged_profile = dict(raw_profile)
+    if isinstance(req.profile, dict):
+        for k, v in req.profile.items():
+            if v is not None and v != "":
+                merged_profile[k] = v
 
     # Синхронизируем переданные клиентом настройки часового пояса, времени доставки и языка
     metadata_updates = {}
@@ -187,9 +192,14 @@ def get_personal_horoscope(
             cached_doc = cache_ref.get()
             if cached_doc.exists:
                 c_data = cached_doc.to_dict() or {}
-                if c_data.get("profile_hash") == profile_hash and c_data.get("raw_text"):
+                raw_cached = c_data.get("raw_text", "")
+                if (
+                    c_data.get("profile_hash") == profile_hash
+                    and raw_cached
+                    and not has_unwanted_cyrillic(raw_cached, lang_clean)
+                ):
                     return HoroscopeResponse(
-                        horoscope=c_data["raw_text"],
+                        horoscope=raw_cached,
                         date=c_data.get("date", target_dmy),
                         iso_date=c_data.get("iso_date", target_iso),
                         greeting=c_data.get("greeting", ""),
@@ -299,8 +309,13 @@ def scheduler_tick(_authorized: bool = Depends(verify_scheduler_secret)):
             cached_snap = cache_ref.get()
             if cached_snap.exists:
                 c_data = cached_snap.to_dict() or {}
-                if c_data.get("profile_hash") == profile_hash and c_data.get("raw_text"):
-                    raw_text = c_data["raw_text"]
+                cand_text = c_data.get("raw_text", "")
+                if (
+                    c_data.get("profile_hash") == profile_hash
+                    and cand_text
+                    and not has_unwanted_cyrillic(cand_text, lang_clean)
+                ):
+                    raw_text = cand_text
 
             if not raw_text:
                 raw_text = generate_horoscope_text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../l10n/app_localizations.dart';
 import '../theme/cosmic_theme.dart';
 
 class GreetingHeader extends StatelessWidget {
@@ -24,6 +25,22 @@ class GreetingHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final freshBadgeText = switch (l10n.langCode) {
+      'fr' => 'AUJOURD\'HUI',
+      'en' => 'FRESH',
+      'es' => 'HOY',
+      'de' => 'AKTUELL',
+      _ => 'СВЕЖИЙ',
+    };
+    final archiveBadgeText = switch (l10n.langCode) {
+      'fr' => 'ARCHIVES',
+      'en' => 'ARCHIVE',
+      'es' => 'ARCHIVO',
+      'de' => 'ARCHIV',
+      _ => 'АРХИВ',
+    };
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       padding: const EdgeInsets.all(20),
@@ -100,9 +117,9 @@ class GreetingHeader extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 5),
-                          const Text(
-                            'СВЕЖИЙ',
-                            style: TextStyle(
+                          Text(
+                            freshBadgeText,
+                            style: const TextStyle(
                               color: Color(0xFF2EC4B6),
                               fontWeight: FontWeight.bold,
                               fontSize: 10.5,
@@ -120,9 +137,9 @@ class GreetingHeader extends StatelessWidget {
                         color: Colors.white.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'АРХИВ',
-                        style: TextStyle(
+                      child: Text(
+                        archiveBadgeText,
+                        style: const TextStyle(
                           color: CosmicTheme.textSecondary,
                           fontWeight: FontWeight.w600,
                           fontSize: 10.5,
@@ -140,7 +157,7 @@ class GreetingHeader extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2, color: CosmicTheme.goldAccent),
                       )
                     : const Icon(Icons.refresh_rounded, color: CosmicTheme.cyanAccent),
-                tooltip: 'Обновить прогноз',
+                tooltip: l10n.refreshTooltip,
               ),
             ],
           ),

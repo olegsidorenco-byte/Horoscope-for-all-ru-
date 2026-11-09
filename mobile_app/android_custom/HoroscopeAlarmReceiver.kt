@@ -61,10 +61,12 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
             val rawAll = prefs.all
             val hour = (rawAll["flutter.cosmic_notif_hour"] as? Number)?.toInt()?.coerceIn(0, 23) ?: 6
             val minute = (rawAll["flutter.cosmic_notif_minute"] as? Number)?.toInt()?.coerceIn(0, 59) ?: 45
-            val lang = (prefs.getString("flutter.cosmic_selected_language", "ru") ?: "ru")
+            val sysLang = Locale.getDefault().language.lowercase(Locale.ROOT)
+            val fallbackLang = if (sysLang in setOf("ru", "en", "es", "de", "fr")) sysLang else "en"
+            val lang = (prefs.getString("flutter.cosmic_selected_language", fallbackLang) ?: fallbackLang)
                 .trim()
                 .lowercase(Locale.ROOT)
-                .ifEmpty { "ru" }
+                .ifEmpty { fallbackLang }
             return UserScheduleConfig(serviceEnabled, notifEnabled, hour, minute, lang)
         }
 
@@ -379,7 +381,11 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
                     } catch (_: Exception) {}
                 }
 
-                if (matchedJsonStr != null && resolvedDate.isNotEmpty()) {
+                val hasCorruptedCyrillic = cfg.lang != "ru" &&
+                    matchedJsonStr != null &&
+                    Regex("[а-яА-ЯёЁ]{3,}").containsMatchIn(matchedJsonStr)
+
+                if (matchedJsonStr != null && resolvedDate.isNotEmpty() && !hasCorruptedCyrillic) {
                     // Бесшумно обновляем локальный кэш Flutter для мгновенного открытия оффлайн
                     val editor = flutterPrefs.edit()
                     editor.putString("flutter.cosmic_cache_latest_json_${cfg.lang}", matchedJsonStr)
@@ -411,7 +417,7 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
                         val lastNotified = flutterPrefs.getString("flutter.cosmic_last_notified_date", "")
                         val lastRead = flutterPrefs.getString("flutter.cosmic_last_read_date", "")
                         if (resolvedDate != lastNotified && resolvedDate != lastRead) {
-                            showMorningAlert(context, resolvedDate)
+                            showMorningAlert(context, resolvedDate, cfg.lang)
                             flutterPrefs.edit()
                                 .putString("flutter.cosmic_last_notified_date", resolvedDate)
                                 .apply()
@@ -428,7 +434,7 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
             }
         }
 
-        private fun showMorningAlert(context: Context, dateStr: String) {
+        private fun showMorningAlert(context: Context, dateStr: String, lang: String = "ru") {
             val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
             val pendingIntent = PendingIntent.getActivity(
                 context,
@@ -437,12 +443,38 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
             )
 
-            val alertNotification = NotificationCompat.Builder(context, ALERTS_CHANNEL_ID)
-                .setContentTitle("✨ Свежий гороскоп на сегодня готов!")
-                .setContentText("Новый астрологический прогноз ($dateStr) уже доступен в приложении ✨")
-                .setStyle(NotificationCompat.BigTextStyle().bigText(
+            val (titleText, shortBody, bigBody) = when (lang) {
+                "fr" -> Triple(
+                    "✨ Votre horoscope du jour est prêt !",
+                    "Le nouveau calcul astrologique ($dateStr) est disponible ✨",
+                    "Votre horoscope détaillé du jour ($dateStr) est publié ! Découvrez les heures favorables, l'influence des planètes et votre conseil personnel ✨"
+                )
+                "en" -> Triple(
+                    "✨ Your daily horoscope is ready!",
+                    "Fresh astrological forecast ($dateStr) is now available ✨",
+                    "Your detailed astrological forecast for today ($dateStr) is published! Discover your lucky hours, planetary influences, and personal advice ✨"
+                )
+                "es" -> Triple(
+                    "✨ ¡Su horóscopo de hoy está listo!",
+                    "El nuevo pronóstico astrológico ($dateStr) ya está disponible ✨",
+                    "¡Se ha publicado el pronóstico astrológico detallado del día ($dateStr)! Descubra sus horas favorables, la influencia planetaria y el consejo personal ✨"
+                )
+                "de" -> Triple(
+                    "✨ Ihr Tageshoroskop ist bereit!",
+                    "Die neue astrologische Prognose ($dateStr) ist verfügbar ✨",
+                    "Ihr ausführliches Tageshoroskop ($dateStr) ist veröffentlicht! Entdecken Sie Ihre Glücksstunden, Planeteneinflüsse und Ihren persönlichen Rat ✨"
+                )
+                else -> Triple(
+                    "✨ Свежий гороскоп на сегодня готов!",
+                    "Новый астрологический прогноз ($dateStr) уже доступен в приложении ✨",
                     "Опубликован подробный астрологический прогноз дня ($dateStr)! Узнайте ключевые часы активности, влияние планет и персональный совет ✨"
-                ))
+                )
+            }
+
+            val alertNotification = NotificationCompat.Builder(context, ALERTS_CHANNEL_ID)
+                .setContentTitle(titleText)
+                .setContentText(shortBody)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(bigBody))
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
