@@ -1,0 +1,151 @@
+{
+  "date": "12.11.2026",
+  "raw_text": "Good morning, dear friends! May your Thursday be filled with the warmth of a fresh cup of coffee, clear intentions, and the gentle strength to pursue your biggest dreams. Trust the flow of this beautiful day. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope for November 12 (Thursday)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. November 12.</b>\nYour fire is fueled by the Moon in Sagittarius today, pushing you toward bold new ventures. Embrace your natural leadership and take that leap of faith you have been contemplating.\n<b>TIP OF THE DAY ☝️</b> Initiate a project that requires your immediate courage.\n\n<b>♉️ Taurus. November 12.</b>\nFocus on grounding your energy while the world accelerates around you. Stability is your superpower today, allowing you to build lasting foundations for your long-term financial security.\n<b>TIP OF THE DAY ☝️</b> Review your budget and invest in quality assets.\n\n<b>♊️ Gemini. November 12.</b>\nCommunication is your bridge to new opportunities. Engage in deep, intellectual conversations that spark your curiosity and lead to unexpected, delightful breakthroughs in your social circle.\n<b>TIP OF THE DAY ☝️</b> Reach out to an old mentor for advice.\n\n<b>♋️ Cancer. November 12.</b>\nYour intuition is heightened, guiding you to protect what matters most. Create a cozy sanctuary at home where you can recharge and nurture your emotional well-being effectively.\n<b>TIP OF THE DAY ☝️</b> Spend time organizing your personal living space today.\n\n<b>♌️ Leo. November 12.</b>\nRadiate confidence as your creative spirit takes center stage. The universe invites you to express your unique talents; don't shy away from being the light in the room.\n<b>TIP OF THE DAY ☝️</b> Showcase your work to a supportive peer group.\n\n<b>♍️ Virgo. November 12.</b>\nPrecision is your ally as you navigate complex tasks today. Trust your analytical mind to solve lingering problems, but remember to be kind to yourself during the process.\n<b>TIP OF THE DAY ☝️</b> Create a detailed plan for your next goal.\n\n<b>♎️ Libra. November 12.</b>\nHarmony is within reach if you choose your battles wisely. Seek balance in your partnerships and let diplomatic grace resolve any lingering tension in your professional life.\n<b>TIP OF THE DAY ☝️</b> Practice active listening during all your meetings.\n\n<b>♏️ Scorpio. November 12.</b>\nThe Sun in your sign grants you immense personal power today. Use this intensity to transform an old habit into a source of strength and renewed self-assurance.\n<b>TIP OF THE DAY ☝️</b> Let go of one outdated personal grudge.\n\n<b>♐️ Sagittarius. November 12.</b>\nWith the Moon in your sign, your adventurous spirit is unstoppable. Expand your horizons by learning something new or planning an exciting journey to broaden your perspective.\n<b>TIP OF THE DAY ☝️</b> Sign up for a challenging new workshop.\n\n<b>♑️ Capricorn. November 12.</b>\nPatience serves you well as you climb toward your objectives. Your disciplined approach is being noticed by those in authority, so stay focused on your long-term mission.\n<b>TIP OF THE DAY ☝️</b> Write down three specific long-term career goals.\n\n<b>♒️ Aquarius. November 12.</b>\nYour visionary ideas are needed now more than ever. Connect with like-minded communities to amplify your impact and bring your innovative concepts into the physical world.\n<b>TIP OF THE DAY ☝️</b> Collaborate with a friend on a project.\n\n<b>♓️ Pisces. November 12.</b>\nTrust the gentle currents of your emotions to lead you toward creative fulfillment. Your empathy is a healing force that can mend bridges and inspire others today.\n<b>TIP OF THE DAY ☝️</b> Dedicate time to a peaceful, artistic hobby.\n\n✨✨✨ <i>The stars do not force; they guide. Like the moon rising in the sky, trust that your own growth is unfolding exactly as it should, one steady step at a time.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Tip: Initiate a project that requires your immediate courage.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your fire is fueled by the Moon in Sagittarius today, pushing you toward bold new ventures. Embrace your natural leadership and take that leap of faith you have been contemplating.\n\nTIP OF THE DAY ☝️ Initiate a project that requires your immediate courage."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Tip: Review your budget and invest in quality assets.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Focus on grounding your energy while the world accelerates around you. Stability is your superpower today, allowing you to build lasting foundations for your long-term financial security.\n\nTIP OF THE DAY ☝️ Review your budget and invest in quality assets."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Tip: Reach out to an old mentor for advice.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Communication is your bridge to new opportunities. Engage in deep, intellectual conversations that spark your curiosity and lead to unexpected, delightful breakthroughs in your social circle.\n\nTIP OF THE DAY ☝️ Reach out to an old mentor for advice."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Tip: Spend time organizing your personal living space today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your intuition is heightened, guiding you to protect what matters most. Create a cozy sanctuary at home where you can recharge and nurture your emotional well-being effectively.\n\nTIP OF THE DAY ☝️ Spend time organizing your personal living space today."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Tip: Showcase your work to a supportive peer group.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Radiate confidence as your creative spirit takes center stage. The universe invites you to express your unique talents; don't shy away from being the light in the room.\n\nTIP OF THE DAY ☝️ Showcase your work to a supportive peer group."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Earth",
+      "color": "0xFF588157",
+      "focus": "Tip: Create a detailed plan for your next goal.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Precision is your ally as you navigate complex tasks today. Trust your analytical mind to solve lingering problems, but remember to be kind to yourself during the process.\n\nTIP OF THE DAY ☝️ Create a detailed plan for your next goal."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Tip: Practice active listening during all your meetings.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Harmony is within reach if you choose your battles wisely. Seek balance in your partnerships and let diplomatic grace resolve any lingering tension in your professional life.\n\nTIP OF THE DAY ☝️ Practice active listening during all your meetings."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Water",
+      "color": "0xFF9D0208",
+      "focus": "Tip: Let go of one outdated personal grudge.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Sun in your sign grants you immense personal power today. Use this intensity to transform an old habit into a source of strength and renewed self-assurance.\n\nTIP OF THE DAY ☝️ Let go of one outdated personal grudge."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Tip: Sign up for a challenging new workshop.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "With the Moon in your sign, your adventurous spirit is unstoppable. Expand your horizons by learning something new or planning an exciting journey to broaden your perspective.\n\nTIP OF THE DAY ☝️ Sign up for a challenging new workshop."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Earth",
+      "color": "0xFF3A5A40",
+      "focus": "Tip: Write down three specific long-term career goals.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Patience serves you well as you climb toward your objectives. Your disciplined approach is being noticed by those in authority, so stay focused on your long-term mission.\n\nTIP OF THE DAY ☝️ Write down three specific long-term career goals."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Tip: Collaborate with a friend on a project.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your visionary ideas are needed now more than ever. Connect with like-minded communities to amplify your impact and bring your innovative concepts into the physical world.\n\nTIP OF THE DAY ☝️ Collaborate with a friend on a project."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Water",
+      "color": "0xFF7209B7",
+      "focus": "Tip: Dedicate time to a peaceful, artistic hobby.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Trust the gentle currents of your emotions to lead you toward creative fulfillment. Your empathy is a healing force that can mend bridges and inspire others today.\n\nTIP OF THE DAY ☝️ Dedicate time to a peaceful, artistic hobby."
+    }
+  ],
+  "updated_at": "2026-11-12T04:30:40.559279Z"
+}
