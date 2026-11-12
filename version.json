@@ -1,0 +1,14 @@
+{
+  "version": "1.0.31",
+  "build_number": 31,
+  "tag": "app-v1.0.31",
+  "download_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/download/app-v1.0.31/Horoscope-for-all-ru.apk",
+  "release_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/tag/app-v1.0.31",
+  "release_notes": {
+    "fr": "✨ Version 1.0.31 :\n• Traduction intégrale à 100% de l'interface en français (profil natal, paramètres, authentification, cartes du jour).\n• Système intégré de détection et téléchargement des mises à jour.\n• Correction du message de bienvenue et affichage correct du prénom et de l'Ascendant.\n• Localisation automatique des domaines de focus astrologique.",
+    "en": "✨ Version 1.0.31:\n• 100% complete interface translation (natal profile, settings, authentication, daily cards).\n• In-app update checker and one-tap APK download.\n• Fixed personalized greeting and proper Ascendant display.\n• Automatic localization of astrological focus areas.",
+    "es": "✨ Versión 1.0.31:\n• Traducción completa al 100% de la interfaz (perfil natal, ajustes, autenticación).\n• Comprobador integrado de actualizaciones y descarga directa.\n• Corrección del saludo personalizado y signo natal.\n• Localización automática de las áreas de enfoque.",
+    "de": "✨ Version 1.0.31:\n• Vollständige Übersetzung der Benutzeroberfläche (Natalprofil, Einstellungen, Authentifizierung).\n• Integrierte Update-Prüfung und APK-Download.\n• Korrigierte persönliche Begrüßung und Anzeige des Aszendenten.\n• Automatische Lokalisierung der Schwerpunkte.",
+    "ru": "✨ Версия 1.0.31:\n• Полный 100% перевод интерфейса (натальный профиль, настройки, авторизация, карточки дня).\n• Встроенное отслеживание релизов с предложением обновить APK в один клик.\n• Исправление обращения по имени и натального знака при смене языка.\n• Автоматический перевод сфер фокуса в анкете."
+  }
+}

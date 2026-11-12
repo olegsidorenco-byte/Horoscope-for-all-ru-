@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../models/user_profile.dart';
 import '../theme/cosmic_theme.dart';
@@ -72,11 +73,12 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
       );
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             backgroundColor: const Color(0xFF1E2235),
             content: Text(
-              '✨ Добро пожаловать, ${profile.name.isNotEmpty ? profile.name : "пользователь"}!',
+              '${l10n.authSuccess} ${profile.name.isNotEmpty ? profile.name : ""}',
               style: const TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold),
             ),
           ),
@@ -94,11 +96,12 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
   }
 
   Future<void> _handleRegister() async {
+    final l10n = AppLocalizations.of(context);
     if (!_regFormKey.currentState!.validate()) return;
 
     if (_regPasswordController.text != _regConfirmPasswordController.text) {
       setState(() {
-        _errorMessage = 'Пароли не совпадают. Пожалуйста, проверьте ввод.';
+        _errorMessage = l10n.passwordsDoNotMatch;
       });
       return;
     }
@@ -117,11 +120,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF1E2235),
+          SnackBar(
+            backgroundColor: const Color(0xFF1E2235),
             content: Text(
-              '🎉 Аккаунт успешно создан! Заполните натальную анкету для персонального расчета.',
-              style: TextStyle(color: CosmicTheme.goldAccent),
+              l10n.authSuccess,
+              style: const TextStyle(color: CosmicTheme.goldAccent),
             ),
           ),
         );
@@ -144,7 +147,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     }
   }
 
-  void _showForgotPasswordDialog() {
+  Future<void> _showForgotPasswordDialog() async {
+    final l10n = AppLocalizations.of(context);
     final emailCtrl = TextEditingController(text: _loginContactController.text.trim());
     String? localError;
     bool isSending = false;
@@ -160,14 +164,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 borderRadius: BorderRadius.circular(20),
                 side: const BorderSide(color: CosmicTheme.goldAccent, width: 1.2),
               ),
-              title: const Row(
+              title: Row(
                 children: [
-                  Icon(Icons.lock_reset_rounded, color: CosmicTheme.goldAccent, size: 24),
-                  SizedBox(width: 10),
+                  const Icon(Icons.lock_reset_rounded, color: CosmicTheme.goldAccent, size: 24),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Восстановление пароля',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      l10n.resetPasswordTitle,
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -177,9 +181,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Введите адрес электронной почты, указанный при регистрации. Firebase отправит вам защищенную ссылку для сброса пароля:',
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                    Text(
+                      l10n.resetPasswordDesc,
+                      style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
                     ),
                     const SizedBox(height: 14),
                     if (localError != null)
@@ -197,7 +201,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       keyboardType: TextInputType.emailAddress,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: 'Email',
+                        labelText: l10n.emailLabel,
                         prefixIcon: const Icon(Icons.email_outlined, color: CosmicTheme.goldAccent),
                         filled: true,
                         fillColor: Colors.black26,
@@ -210,7 +214,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               actions: [
                 TextButton(
                   onPressed: isSending ? null : () => Navigator.pop(ctx),
-                  child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+                  child: Text(l10n.cancel, style: const TextStyle(color: Colors.white60)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -223,7 +227,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       : () async {
                           final email = emailCtrl.text.trim();
                           if (email.isEmpty || !AuthService.isEmail(email)) {
-                            setDialogState(() => localError = 'Введите корректный адрес электронной почты');
+                            setDialogState(() => localError = l10n.emailFormatError);
                             return;
                           }
 
@@ -233,15 +237,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                           });
 
                           try {
-                            await AuthService.sendPasswordReset(email);
-                            if (context.mounted) {
+                            await AuthService.sendPasswordResetEmail(email);
+                            if (ctx.mounted) {
                               Navigator.pop(ctx);
-                              _loginContactController.text = email;
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   backgroundColor: const Color(0xFF1E2235),
                                   content: Text(
-                                    '📩 Письмо для сброса пароля отправлено на $email!',
+                                    l10n.resetPasswordSent,
                                     style: const TextStyle(color: CosmicTheme.goldAccent),
                                   ),
                                 ),
@@ -254,10 +257,16 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                             });
                           }
                         },
-                  child: Text(
-                    isSending ? 'Отправка...' : 'Отправить письмо',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  child: isSending
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
+                        )
+                      : Text(
+                          l10n.sendResetLink,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                 ),
               ],
             );
@@ -267,7 +276,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  void _showGoogleLoginDialog() {
+  Future<void> _showGoogleLoginDialog() async {
+    final l10n = AppLocalizations.of(context);
     final emailController = TextEditingController();
     final nameController = TextEditingController();
     String? localError;
@@ -294,10 +304,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 28),
                   ),
                   const SizedBox(width: 10),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Вход через Google',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      l10n.signInGoogle,
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -307,11 +317,6 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Опциональный быстрый вход для устройств с аккаунтом Google. Данные профиля синхронизируются локально:',
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
-                    ),
-                    const SizedBox(height: 16),
                     if (localError != null)
                       Container(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -327,7 +332,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       keyboardType: TextInputType.emailAddress,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: 'Email Google аккаунта',
+                        labelText: l10n.emailLabel,
                         hintText: 'user@gmail.com',
                         hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
                         prefixIcon: const Icon(Icons.alternate_email, color: Color(0xFF4285F4)),
@@ -341,7 +346,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       controller: nameController,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: 'Ваше имя в профиле',
+                        labelText: l10n.nameLabel,
                         prefixIcon: const Icon(Icons.person_outline, color: CosmicTheme.goldAccent),
                         filled: true,
                         fillColor: Colors.black26,
@@ -354,7 +359,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+                  child: Text(l10n.cancel, style: const TextStyle(color: Colors.white60)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -367,7 +372,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     final name = nameController.text.trim();
 
                     if (email.isEmpty || !AuthService.isEmail(email)) {
-                      setDialogState(() => localError = 'Введите корректный адрес Google почты (@gmail.com)');
+                      setDialogState(() => localError = l10n.emailFormatError);
                       return;
                     }
 
@@ -384,7 +389,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             backgroundColor: const Color(0xFF1E2235),
-                            content: Text('✨ Вы успешно вошли через Google (${profile.email})!'),
+                            content: Text('${l10n.authSuccess} (${profile.email})'),
                           ),
                         );
                         Navigator.pop(context, profile);
@@ -398,7 +403,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       }
                     }
                   },
-                  child: const Text('Войти', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(l10n.tabSignIn, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -408,7 +413,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  void _showTelegramLoginDialog() {
+  Future<void> _showTelegramLoginDialog() async {
+    final l10n = AppLocalizations.of(context);
     final tgController = TextEditingController();
     final nameController = TextEditingController();
 
@@ -422,12 +428,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             side: const BorderSide(color: CosmicTheme.cyanAccent, width: 1.2),
           ),
           title: Row(
-            children: const [
-              Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 24),
-              SizedBox(width: 10),
-              Text(
-                'Вход через Telegram',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            children: [
+              const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 24),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.signInTelegram,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
@@ -435,16 +443,17 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Укажите ваш логин в Telegram или номер телефона для привязки аккаунта к боту:',
-                style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+              Text(
+                l10n.telegramDesc,
+                style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: tgController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: '@username или номер телефона',
+                  labelText: l10n.telegramLabel,
+                  hintText: l10n.telegramHint,
                   prefixIcon: const Icon(Icons.alternate_email, color: CosmicTheme.cyanAccent),
                   filled: true,
                   fillColor: Colors.black26,
@@ -456,7 +465,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 controller: nameController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Ваше имя',
+                  labelText: l10n.nameLabel,
+                  hintText: l10n.nameHint,
                   prefixIcon: const Icon(Icons.person_outline, color: CosmicTheme.goldAccent),
                   filled: true,
                   fillColor: Colors.black26,
@@ -468,7 +478,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+              child: Text(l10n.cancel, style: const TextStyle(color: Colors.white60)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -494,7 +504,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         backgroundColor: const Color(0xFF1E2235),
-                        content: Text('✨ Авторизация через Telegram успешна (@${p.telegramUsername})!'),
+                        content: Text('${l10n.authSuccess} (@${p.telegramUsername})'),
                       ),
                     );
                     Navigator.pop(context, p);
@@ -508,7 +518,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   }
                 }
               },
-              child: const Text('Подтвердить', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.selectButton, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -518,14 +528,16 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Личный профиль'),
+        title: Text(l10n.authScreenTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.shield_outlined, color: CosmicTheme.goldAccent),
-            tooltip: 'Политика конфиденциальности',
+            tooltip: l10n.privacyPolicyButton,
             onPressed: () => showPrivacyPolicyDialog(context),
           ),
         ],
@@ -534,11 +546,11 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           indicatorColor: CosmicTheme.goldAccent,
           indicatorWeight: 3,
           labelColor: CosmicTheme.goldAccent,
-          unselectedLabelColor: CosmicTheme.textSecondary,
+          unselectedLabelColor: Colors.white60,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          tabs: const [
-            Tab(text: 'Вход', icon: Icon(Icons.login_rounded, size: 20)),
-            Tab(text: 'Регистрация', icon: Icon(Icons.person_add_alt_1_rounded, size: 20)),
+          tabs: [
+            Tab(text: l10n.tabSignIn, icon: const Icon(Icons.login_rounded, size: 20)),
+            Tab(text: l10n.tabSignUp, icon: const Icon(Icons.person_add_rounded, size: 20)),
           ],
         ),
       ),
@@ -551,13 +563,13 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.18),
-                    border: Border.all(color: Colors.redAccent.withOpacity(0.5)),
+                    color: Colors.red.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.redAccent.withOpacity(0.5)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+                      const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -579,8 +591,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildLoginTab(),
-                    _buildRegisterTab(),
+                    _buildLoginTab(l10n),
+                    _buildRegisterTab(l10n),
                   ],
                 ),
               ),
@@ -591,7 +603,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildLoginTab() {
+  Widget _buildLoginTab(AppLocalizations l10n) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(20),
@@ -622,16 +634,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               ),
             ),
             const SizedBox(height: 14),
-            const Text(
-              'Вход по Email',
+            Text(
+              l10n.tabSignIn,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Основной независимый вход по электронной почте или телефону',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5, color: CosmicTheme.textSecondary),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 20),
 
@@ -641,8 +647,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               keyboardType: TextInputType.emailAddress,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Email (или номер телефона)',
-                hintText: 'user@example.com или +79991234567',
+                labelText: l10n.emailLabel,
+                hintText: l10n.emailHint,
                 hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
                 prefixIcon: const Icon(Icons.alternate_email, color: CosmicTheme.goldAccent),
                 filled: true,
@@ -650,7 +656,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Введите ваш Email или телефон';
+                if (v == null || v.trim().isEmpty) return l10n.emailValidator;
                 return null;
               },
             ),
@@ -662,7 +668,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               obscureText: _loginObscurePassword,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Пароль',
+                labelText: l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline, color: CosmicTheme.cyanAccent),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -676,7 +682,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v == null || v.isEmpty) return 'Введите пароль';
+                if (v == null || v.isEmpty) return l10n.passwordTooShort;
                 return null;
               },
             ),
@@ -690,9 +696,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 ),
-                child: const Text(
-                  'Забыли пароль?',
-                  style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
+                child: Text(
+                  l10n.forgotPasswordButton,
+                  style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -714,22 +720,23 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.black),
                     )
-                  : const Text(
-                      'Войти в аккаунт',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  : Text(
+                      l10n.tabSignIn,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
             ),
             const SizedBox(height: 18),
 
             // Разделитель
             Row(
-              children: const [
-                Expanded(child: Divider(color: Colors.white12)),
+              children: [
+                const Expanded(child: Divider(color: Colors.white12)),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('ИЛИ ДРУГИЕ СПОСОБЫ', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(l10n.orOtherMethods,
+                      style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
-                Expanded(child: Divider(color: Colors.white12)),
+                const Expanded(child: Divider(color: Colors.white12)),
               ],
             ),
             const SizedBox(height: 16),
@@ -757,9 +764,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 24),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Войти через Google',
-                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF1F1F1F)),
+                  Text(
+                    l10n.signInGoogle,
+                    style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF1F1F1F)),
                   ),
                 ],
               ),
@@ -770,9 +777,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             OutlinedButton.icon(
               onPressed: _isLoading ? null : _showTelegramLoginDialog,
               icon: const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 19),
-              label: const Text(
-                'Войти через Telegram',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
+              label: Text(
+                l10n.signInTelegram,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFF29B6F6), width: 1.2),
@@ -787,9 +794,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               child: TextButton.icon(
                 onPressed: () => showPrivacyPolicyDialog(context),
                 icon: const Icon(Icons.shield_outlined, color: CosmicTheme.textSecondary, size: 16),
-                label: const Text(
-                  'Политика конфиденциальности',
-                  style: TextStyle(
+                label: Text(
+                  l10n.privacyPolicyButton,
+                  style: const TextStyle(
                     color: CosmicTheme.textSecondary,
                     fontSize: 12,
                     decoration: TextDecoration.underline,
@@ -803,7 +810,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildRegisterTab() {
+  Widget _buildRegisterTab(AppLocalizations l10n) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.all(20),
@@ -813,16 +820,10 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 6),
-            const Text(
-              'Регистрация по Email',
+            Text(
+              l10n.tabSignUp,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Один аккаунт надежно защищает вашу персональную натальную карту',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5, color: CosmicTheme.textSecondary),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 20),
 
@@ -832,13 +833,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               textCapitalization: TextCapitalization.words,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Ваше имя',
+                labelText: l10n.nameLabel,
+                hintText: l10n.nameHint,
                 prefixIcon: const Icon(Icons.person_outline, color: CosmicTheme.goldAccent),
                 filled: true,
                 fillColor: const Color(0xFF191D2E),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
-              validator: (v) => (v == null || v.trim().isEmpty) ? 'Укажите ваше имя' : null,
+              validator: (v) => (v == null || v.trim().isEmpty) ? l10n.nameValidator : null,
             ),
             const SizedBox(height: 14),
 
@@ -848,8 +850,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               keyboardType: TextInputType.emailAddress,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Email (или номер телефона)',
-                hintText: 'user@example.com или +79991234567',
+                labelText: l10n.emailLabel,
+                hintText: l10n.emailHint,
                 hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
                 prefixIcon: const Icon(Icons.email_outlined, color: CosmicTheme.cyanAccent),
                 filled: true,
@@ -857,9 +859,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Укажите email или телефон';
-                if (!AuthService.isEmail(v) && !AuthService.isPhone(v)) {
-                  return 'Укажите корректный email или номер телефона (+7...)';
+                if (v == null || v.trim().isEmpty) return l10n.emailValidator;
+                if (!AuthService.isEmail(v)) {
+                  return l10n.emailFormatError;
                 }
                 return null;
               },
@@ -872,7 +874,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               obscureText: _regObscurePassword,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Придумайте пароль (от 6 символов)',
+                labelText: l10n.passwordLabel,
                 prefixIcon: const Icon(Icons.lock_outline, color: CosmicTheme.goldAccent),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -886,7 +888,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v == null || v.length < 6) return 'Пароль должен содержать не менее 6 символов';
+                if (v == null || v.length < 6) return l10n.passwordTooShort;
                 return null;
               },
             ),
@@ -898,14 +900,14 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               obscureText: _regObscurePassword,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                labelText: 'Повторите пароль',
+                labelText: l10n.confirmPasswordLabel,
                 prefixIcon: const Icon(Icons.check_circle_outline, color: CosmicTheme.cyanAccent),
                 filled: true,
                 fillColor: const Color(0xFF191D2E),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
               ),
               validator: (v) {
-                if (v != _regPasswordController.text) return 'Пароли не совпадают';
+                if (v != _regPasswordController.text) return l10n.passwordsDoNotMatch;
                 return null;
               },
             ),
@@ -927,22 +929,23 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.black),
                     )
-                  : const Text(
-                      'Создать аккаунт и перейти к анкете →',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  : Text(
+                      l10n.tabSignUp,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
             ),
             const SizedBox(height: 18),
 
             // Разделитель
             Row(
-              children: const [
-                Expanded(child: Divider(color: Colors.white12)),
+              children: [
+                const Expanded(child: Divider(color: Colors.white12)),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('ИЛИ ДРУГИЕ СПОСОБЫ', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(l10n.orOtherMethods,
+                      style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
                 ),
-                Expanded(child: Divider(color: Colors.white12)),
+                const Expanded(child: Divider(color: Colors.white12)),
               ],
             ),
             const SizedBox(height: 16),
@@ -970,56 +973,27 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                     child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 24),
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Регистрация через Google',
-                    style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF1F1F1F)),
+                  Text(
+                    l10n.signInGoogle,
+                    style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.bold, color: Color(0xFF1F1F1F)),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 10),
 
-            // Быстрый вход через Telegram
+            // Быстрая регистрация через Telegram
             OutlinedButton.icon(
               onPressed: _isLoading ? null : _showTelegramLoginDialog,
               icon: const Icon(Icons.send_rounded, color: Color(0xFF29B6F6), size: 19),
-              label: const Text(
-                'Быстрая регистрация через Telegram',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
+              label: Text(
+                l10n.signInTelegram,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
               ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFF29B6F6), width: 1.2),
                 padding: const EdgeInsets.symmetric(vertical: 13),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Принятие Политики конфиденциальности
-            Center(
-              child: InkWell(
-                onTap: () => showPrivacyPolicyDialog(context),
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text.rich(
-                    TextSpan(
-                      text: 'Регистрируясь, вы принимаете ',
-                      style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5),
-                      children: const [
-                        TextSpan(
-                          text: 'Политику конфиденциальности',
-                          style: TextStyle(
-                            color: CosmicTheme.goldAccent,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
               ),
             ),
           ],

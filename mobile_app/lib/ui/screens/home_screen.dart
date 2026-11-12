@@ -9,6 +9,7 @@ import '../../models/user_profile.dart';
 import '../../services/horoscope_sync_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/update_service.dart';
 import '../theme/cosmic_theme.dart';
 import '../widgets/cosmic_background.dart';
 import '../widgets/greeting_header.dart';
@@ -132,6 +133,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         widget.onReadStateChanged?.call();
       } else {
         await NotificationService.clearBadge();
+      }
+
+      // Проверяем наличие новой версии приложения в фоновом режиме
+      if (mounted) {
+        UpdateService.checkSilentlyOnStartup(context);
       }
     } catch (e) {
       if (mounted) {
@@ -432,6 +438,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   String _getPersonalizedGreeting(String rawGreeting, String langCode) {
     if (_horoscope != null && _horoscope!.isPersonal && rawGreeting.trim().isNotEmpty) {
+      final isAuthorOleg = (_userProfile.name.trim().toLowerCase() == 'олег' ||
+          _userProfile.name.trim().toLowerCase() == 'oleg');
+      if (!isAuthorOleg &&
+          (rawGreeting.contains('Oleg') ||
+              rawGreeting.contains('Олег') ||
+              rawGreeting.contains('Verseau à 1°32') ||
+              rawGreeting.contains('1°32\' Водолея'))) {
+        return _userProfile.formatGreeting(rawGreeting, langCode: langCode);
+      }
       return rawGreeting;
     }
     return _userProfile.formatGreeting(rawGreeting, langCode: langCode);
@@ -653,11 +668,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11),
                 ),
-                if (_userProfile.focus.isNotEmpty &&
-                    (code == 'ru' || !RegExp(r'[а-яА-ЯёЁ]{2,}').hasMatch(_userProfile.focus))) ...[
+                if (_userProfile.localizedFocus(code).isNotEmpty) ...[
                   const SizedBox(height: 2),
                   Text(
-                    '🎯 ${_userProfile.focus}',
+                    '🎯 ${_userProfile.localizedFocus(code)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 10.5, fontWeight: FontWeight.w500),
@@ -670,14 +684,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             icon: const Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 18),
             padding: const EdgeInsets.only(right: 8),
             constraints: const BoxConstraints(),
-            tooltip: 'Telegram-бот',
+            tooltip: l10n.telegramBotTitle,
             onPressed: _showTelegramBotDialog,
           ),
           IconButton(
             icon: const Icon(Icons.tune_rounded, color: CosmicTheme.goldSoft, size: 18),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            tooltip: 'Настроить профиль',
+            tooltip: l10n.editProfileButton,
             onPressed: () async {
               final res = await Navigator.push(
                 context,
@@ -694,6 +708,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _showTelegramBotDialog() {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF131722),
@@ -717,20 +732,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
             const SizedBox(height: 16),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 22),
-                SizedBox(width: 10),
+                const Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 22),
+                const SizedBox(width: 10),
                 Text(
-                  'Доставка гороскопа в Telegram',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                  l10n.telegramBotTitle,
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Наш официальный Telegram-бот доставляет персональный прогноз строго в выбранное вами время по вашему часовому поясу (при раннем времени или смещении суток прогноз рассчитывается заранее под вашу дату).',
-              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+            Text(
+              l10n.telegramBotDesc,
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 14),
             Container(
@@ -740,9 +755,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white10),
               ),
-              child: const Text(
-                '1. Скопируйте имя бота: @Horoscope_SiDoReCo_bot\n2. Откройте Telegram и нажмите «Запустить» (/start)\n3. Укажите время и часовой пояс командой /delivery ЧЧ:ММ Город',
-                style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
+              child: Text(
+                l10n.telegramBotInstructions,
+                style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
               ),
             ),
             const SizedBox(height: 16),
@@ -754,17 +769,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   Clipboard.setData(const ClipboardData(text: '@Horoscope_SiDoReCo_bot'));
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('📋 Имя бота @Horoscope_SiDoReCo_bot скопировано!'),
-                      backgroundColor: Color(0xFF2AABEE),
+                    SnackBar(
+                      content: Text(l10n.botNameCopied),
+                      backgroundColor: const Color(0xFF2AABEE),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },
                 icon: const Icon(Icons.copy_rounded, size: 18, color: Colors.black),
-                label: const Text(
-                  'Скопировать @Horoscope_SiDoReCo_bot',
-                  style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                label: Text(
+                  l10n.copyBotNameButton,
+                  style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2AABEE),

@@ -65,24 +65,25 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Архив гороскопов по дням'),
+        title: Text(l10n.archiveScreenTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: CosmicTheme.cyanAccent),
-            tooltip: 'Обновить архив',
+            tooltip: l10n.refreshArchiveTooltip,
             onPressed: _loadArchive,
           ),
         ],
       ),
       body: CosmicBackground(
-        child: _buildBody(),
+        child: _buildBody(l10n),
       ),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations l10n) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(color: CosmicTheme.goldAccent),
@@ -106,7 +107,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _loadArchive,
-                child: const Text('Повторить'),
+                child: Text(l10n.retry),
               ),
             ],
           ),
@@ -115,15 +116,15 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     }
 
     if (_archiveList.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.inventory_2_outlined, color: CosmicTheme.goldSoft, size: 54),
-            SizedBox(height: 16),
+            const Icon(Icons.inventory_2_outlined, color: CosmicTheme.goldSoft, size: 54),
+            const SizedBox(height: 16),
             Text(
-              'В архиве пока нет сохраненных дней.',
-              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 15),
+              l10n.archiveEmpty,
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 15),
             ),
           ],
         ),
@@ -163,7 +164,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
               child: const Icon(Icons.calendar_today_rounded, color: CosmicTheme.goldAccent, size: 22),
             ),
             title: Text(
-              'Гороскоп на ${item.date}',
+              l10n.forecastForDate(item.date),
               style: const TextStyle(
                 color: CosmicTheme.textPrimary,
                 fontWeight: FontWeight.bold,
@@ -173,7 +174,7 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
-                _formatArchivePreview(item.preview, _userProfile),
+                _formatArchivePreview(item.preview, _userProfile, l10n.langCode),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 12.5),
@@ -187,35 +188,9 @@ class _ArchiveScreenState extends State<ArchiveScreen> {
     );
   }
 
-  String _formatArchivePreview(String rawPreview, UserProfile profile) {
-    final trimmedName = profile.name.trim();
-    final isAuthorOleg = profile.isRegistered &&
-        trimmedName.toLowerCase() == 'олег' &&
-        profile.birthDate.year == 1978 &&
-        profile.birthDate.month == 5 &&
-        profile.birthDate.day == 23;
-
-    if (isAuthorOleg) {
-      return rawPreview;
-    }
-
-    var clean = rawPreview;
-    clean = clean.replaceAll(RegExp(r'^(☀️|🌿|🕊️|☕|🌤️|🍀|🌅|✨|🍃|\s)*(Приветствую( Вас)?|Здравствуйте|Доброе утро|Добрый день|Доброго утра),?\s*(уважаемый|уважаемая)?\s*Олег[а-яА-Я]*[!.]?\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'\bОлег[а-яА-Я]*\b', caseSensitive: false), profile.isRegistered && trimmedName.isNotEmpty ? trimmedName : 'Пользователь');
-    clean = clean.replaceAll(RegExp(r'(В этот [^.]*персональный астрологический паспорт[^.]*:\s*|Ваш персональный астрологический[^.]*подтверждает[^,.]*,\s*)', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'Ваш восходящий знак[^,.]*,\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'восходящий знак Асцендента[^,.]*,\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'\(1°32\x27 Водолея\),?\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'при этом транзитная Луна[^.]*\.\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'а текущая транзитная Луна[^.]*\.\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'При (Вашем рождении|расчете Вашей натальной карты)[^.]*\.\s*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'23\.05\.1978|00:05|00:50|Кишинев[а-яА-Я]*|Кишинёв[а-яА-Я]*', caseSensitive: false), '');
-    clean = clean.replaceAll(RegExp(r'\s+'), ' ').trim();
-
-    if (clean.isEmpty || clean.length < 20) {
-      return '✨ Астрологический прогноз: ключевые аспекты планет, лунный день и рекомендации для всех знаков зодиака.';
-    }
-    return clean;
+  String _formatArchivePreview(String rawPreview, UserProfile profile, String langCode) {
+    if (!profile.isRegistered) return rawPreview;
+    return profile.formatGreeting(rawPreview, langCode: langCode);
   }
 }
 
@@ -263,6 +238,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
       minChildSize: 0.5,
@@ -290,7 +266,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Архив: ${widget.item.date}',
+                      l10n.archiveForDate(widget.item.date),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -306,7 +282,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
               ),
               const Divider(color: Colors.white10, height: 1),
               Expanded(
-                child: _buildContent(scrollController),
+                child: _buildContent(scrollController, l10n),
               ),
             ],
           ),
@@ -315,7 +291,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
     );
   }
 
-  Widget _buildContent(ScrollController controller) {
+  Widget _buildContent(ScrollController controller, AppLocalizations l10n) {
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(color: CosmicTheme.goldAccent),
@@ -327,7 +303,7 @@ class _ArchiveDayViewerState extends State<_ArchiveDayViewer> {
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            _error ?? 'Ошибка загрузки архивного дня',
+            _error ?? l10n.archiveError,
             textAlign: TextAlign.center,
             style: const TextStyle(color: CosmicTheme.roseGlow),
           ),

@@ -112,6 +112,24 @@ def read_root():
     }
 
 
+@app.get("/app/latest-version")
+def get_app_latest_version():
+    return {
+        "version": "1.0.31",
+        "build_number": 31,
+        "tag": "app-v1.0.31",
+        "download_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/download/app-v1.0.31/Horoscope-for-all-ru.apk",
+        "release_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/tag/app-v1.0.31",
+        "release_notes": {
+            "fr": "✨ Version 1.0.31 :\n• Traduction intégrale de l'interface en français (profil natal, paramètres, authentification).\n• Vérification automatique des mises à jour avec téléchargement direct de l'APK.\n• Correction du message de bienvenue et du calcul natal.\n• Localisation automatique des sphères de priorité.",
+            "en": "✨ Version 1.0.31:\n• 100% full interface localization (natal profile, settings, auth).\n• Built-in update checker with direct APK download.\n• Personalized greeting and natal chart display fixes.\n• Automatic localization of astrological focus areas.",
+            "es": "✨ Versión 1.0.31:\n• Traducción completa de la interfaz (perfil natal, ajustes, autenticación).\n• Comprobador de actualizaciones con descarga directa del APK.\n• Saludo personalizado y corrección de signo natal.\n• Localización automática del enfoque astrológico.",
+            "de": "✨ Version 1.0.31:\n• Vollständige Übersetzung der Benutzeroberfläche (Natalprofil, Einstellungen, Authentifizierung).\n• Automatische Update-Prüfung und APK-Download.\n• Korrektur der persönlichen Begrüßung und des Aszendenten.\n• Automatische Lokalisierung der Schwerpunkte.",
+            "ru": "✨ Версия 1.0.31:\n• Полный перевод интерфейса (натальный профиль, настройки, авторизация).\n• Встроенное отслеживание релизов с загрузкой APK в один клик.\n• Исправление персонального приветствия и натального знака.\n• Автоматический перевод сфер фокуса в анкете."
+        }
+    }
+
+
 @app.post("/horoscope/personal", response_model=HoroscopeResponse)
 def get_personal_horoscope(
     req: HoroscopeRequest,

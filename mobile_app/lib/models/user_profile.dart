@@ -175,6 +175,83 @@ class UserProfile {
     }
   }
 
+  String localizedElement([String? langCode]) {
+    final code = _resolveLang(langCode);
+    switch (zodiacSignId) {
+      case "aries":
+      case "leo":
+      case "sagittarius":
+        switch (code) {
+          case 'en': return 'Fire';
+          case 'es': return 'Fuego';
+          case 'de': return 'Feuer';
+          case 'fr': return 'Feu';
+          default: return 'Огонь';
+        }
+      case "taurus":
+      case "virgo":
+      case "capricorn":
+        switch (code) {
+          case 'en': return 'Earth';
+          case 'es': return 'Tierra';
+          case 'de': return 'Erde';
+          case 'fr': return 'Terre';
+          default: return 'Земля';
+        }
+      case "gemini":
+      case "libra":
+      case "aquarius":
+        switch (code) {
+          case 'en': return 'Air';
+          case 'es': return 'Aire';
+          case 'de': return 'Luft';
+          case 'fr': return 'Air';
+          default: return 'Воздух';
+        }
+      case "cancer":
+      case "scorpio":
+      case "pisces":
+        switch (code) {
+          case 'en': return 'Water';
+          case 'es': return 'Agua';
+          case 'de': return 'Wasser';
+          case 'fr': return 'Eau';
+          default: return 'Вода';
+        }
+      default:
+        switch (code) {
+          case 'en': return 'Cosmos';
+          case 'es': return 'Cosmos';
+          case 'de': return 'Kosmos';
+          case 'fr': return 'Cosmos';
+          default: return 'Космос';
+        }
+    }
+  }
+
+  /// Возвращает сферу фокуса внимания, локализованную под выбранный язык,
+  /// если в профиле сохранен стандартный текст по умолчанию.
+  String localizedFocus([String? langCode]) {
+    final code = _resolveLang(langCode);
+    final tr = focus.trim();
+    final isDefault = tr.isEmpty ||
+        tr == "бизнес, деловые переговоры, финансы и здоровье" ||
+        tr == "бизнес, деловые переговоры" ||
+        tr.toLowerCase().contains("бизнес, деловые переговоры") ||
+        tr.toLowerCase().contains("деловые переговоры");
+
+    if (isDefault) {
+      switch (code) {
+        case 'fr': return 'affaires, négociations, finances et santé';
+        case 'en': return 'business, negotiations, finance and health';
+        case 'es': return 'negocios, negociaciones, finanzas y salud';
+        case 'de': return 'Geschäft, Verhandlungen, Finanzen und Gesundheit';
+        default: return 'бизнес, деловые переговоры, финансы и здоровье';
+      }
+    }
+    return tr;
+  }
+
   String localizedZodiacSign([String? langCode]) {
     final code = _resolveLang(langCode);
     switch (zodiacSignId) {

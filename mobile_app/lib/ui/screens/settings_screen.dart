@@ -6,6 +6,7 @@ import '../../services/storage_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/background_sync_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/update_service.dart';
 import '../../models/user_profile.dart';
 import 'profile_screen.dart';
 import 'auth_screen.dart';
@@ -24,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   int _cachedDays = 0;
   bool _notificationsEnabled = true;
   bool _backgroundServiceActive = true;
+  bool _isCheckingUpdate = false;
   int _notifHour = 6;
   int _notifMinute = 45;
   UserProfile _profile = UserProfile.defaultProfile();
@@ -63,12 +65,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
     await BackgroundSyncService.toggleService(value);
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            value
-                ? '🪐 Фоновый планировщик включен: предзагрузка и доставка по вашему часовому поясу!'
-                : '⏸ Фоновый планировщик отключен',
+            value ? l10n.backgroundServiceSubtitle : l10n.cancel,
           ),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
@@ -155,10 +156,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '⏰ Время доставки установлено на $formattedTime ($tzName, $utcOffsetStr)',
+              l10n.reminderTimeSetSnackbar(formattedTime, tzName, utcOffsetStr),
             ),
             backgroundColor: CosmicTheme.backgroundCard,
           ),
@@ -171,9 +173,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await NotificationService.sendInstantTestNotification();
     await NotificationService.updateBadge(1);
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('🔔 Тестовое уведомление отправлено в шторку Android и на иконку приложения!'),
+        SnackBar(
+          content: Text(l10n.testNotifSent),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
       );
@@ -184,9 +187,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await StorageService.clearAllCache();
     await _loadSettings();
     if (mounted) {
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('✨ Локальный кэш успешно очищен'),
+        SnackBar(
+          content: Text(l10n.cacheCleared),
+          backgroundColor: CosmicTheme.backgroundCard,
+        ),
+      );
+    }
+  }
+
+  Future<void> _checkAppUpdatesManually() async {
+    if (_isCheckingUpdate) return;
+    setState(() => _isCheckingUpdate = true);
+
+    final l10n = AppLocalizations.of(context);
+    try {
+      final update = await UpdateService.checkForUpdate(force: true, lang: l10n.langCode);
+      if (!mounted) return;
+      setState(() => _isCheckingUpdate = false);
+
+      if (update != null) {
+        await UpdateService.showUpdateDialog(context, update, isManual: true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.latestVersionInstalled),
+            backgroundColor: CosmicTheme.backgroundCard,
+          ),
+        );
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isCheckingUpdate = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.updateCheckFailed),
           backgroundColor: CosmicTheme.backgroundCard,
         ),
       );
@@ -209,7 +245,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Карточка логотипа
+              // Карточка версии приложения и проверка обновлений
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -217,42 +253,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white10),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/icon/app_icon.png',
-                        width: 64,
-                        height: 64,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 64,
-                          height: 64,
-                          color: CosmicTheme.goldAccent.withOpacity(0.1),
-                          child: const Icon(Icons.stars, color: CosmicTheme.goldAccent, size: 36),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Астро Гороскоп',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: CosmicTheme.textPrimary,
+                    Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.asset(
+                            'assets/icon/app_icon.png',
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              width: 60,
+                              height: 60,
+                              color: CosmicTheme.goldAccent.withOpacity(0.1),
+                              child: const Icon(Icons.stars, color: CosmicTheme.goldAccent, size: 36),
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Версия 1.0.30 (Release)',
-                            style: TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.appTitle,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: CosmicTheme.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                l10n.checkForUpdatesSubtitle(UpdateService.currentVersion),
+                                style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 13),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _isCheckingUpdate ? null : _checkAppUpdatesManually,
+                        icon: _isCheckingUpdate
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: CosmicTheme.goldAccent),
+                              )
+                            : const Icon(Icons.system_update_alt_rounded, size: 18, color: CosmicTheme.goldAccent),
+                        label: Text(
+                          _isCheckingUpdate ? l10n.checkingForUpdates : l10n.checkForUpdatesTitle,
+                          style: const TextStyle(
+                            color: CosmicTheme.goldAccent,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: CosmicTheme.goldAccent.withOpacity(0.5)),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
                       ),
                     ),
                   ],
@@ -265,11 +332,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 20),
 
               // Блок Личного Профиля пользователя
-              _buildProfileSection(),
-              const SizedBox(height: 20),
-
-              // Блок фоновой службы («Висеть в фоне»)
-              // _buildBackgroundServiceSection(), // Устаревшая функция фонового мониторинга
+              _buildProfileSection(l10n),
               const SizedBox(height: 20),
 
               // Блок утренних уведомлений
@@ -287,10 +350,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         const Icon(Icons.notifications_active_outlined, color: CosmicTheme.goldAccent),
                         const SizedBox(width: 10),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            'Утренние напоминания',
-                            style: TextStyle(
+                            l10n.morningRemindersTitle,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: CosmicTheme.textPrimary,
@@ -305,9 +368,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Время рассчитывается строго по вашему часовому поясу. Если вы находитесь в других сутках относительно сервера или выбрали раннее время (до 06:30), прогноз формируется заранее специально под вашу дату.',
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+                    Text(
+                      l10n.morningRemindersDesc,
+                      style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
                     ),
                     const SizedBox(height: 10),
                     Container(
@@ -323,7 +386,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Часовой пояс: ${NotificationService.getDetectedTimezoneName()} (${NotificationService.getFormattedUtcOffset()})',
+                              l10n.detectedTimezoneLabel(
+                                NotificationService.getDetectedTimezoneName(),
+                                NotificationService.getFormattedUtcOffset(),
+                              ),
                               style: const TextStyle(
                                 color: CosmicTheme.cyanAccent,
                                 fontSize: 12,
@@ -349,13 +415,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Row(
+                              Row(
                                 children: [
-                                  Icon(Icons.access_time_rounded, color: CosmicTheme.goldSoft, size: 20),
-                                  SizedBox(width: 10),
+                                  const Icon(Icons.access_time_rounded, color: CosmicTheme.goldSoft, size: 20),
+                                  const SizedBox(width: 10),
                                   Text(
-                                    'Время напоминания',
-                                    style: TextStyle(color: CosmicTheme.textPrimary, fontSize: 14),
+                                    l10n.reminderTimeLabel,
+                                    style: const TextStyle(color: CosmicTheme.textPrimary, fontSize: 14),
                                   ),
                                 ],
                               ),
@@ -375,7 +441,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ElevatedButton.icon(
                         onPressed: _testNotification,
                         icon: const Icon(Icons.send_rounded, size: 18),
-                        label: const Text('Проверить уведомление сейчас'),
+                        label: Text(l10n.testNotifButton),
                       ),
                       const SizedBox(height: 12),
                       Container(
@@ -388,20 +454,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Row(
+                            Row(
                               children: [
-                                Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
-                                SizedBox(width: 6),
+                                const Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
+                                const SizedBox(width: 6),
                                 Text(
-                                  'Рекомендации по питанию и работе в фоновом режиме:',
-                                  style: TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                  l10n.batteryAdviceTitle,
+                                  style: const TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 6),
-                            const Text(
-                              '1. В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите «Без ограничений».\n2. На смартфонах Xiaomi/Huawei/Samsung включите «Автозапуск» в фоне.\n3. Включите разрешения на будильники и работу в фоновом режиме.',
-                              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
+                            Text(
+                              l10n.batteryAdviceDesc,
+                              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
                             ),
                           ],
                         ),
@@ -411,118 +477,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              /*
-              // Карточка Telegram-бота
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF1B2A44).withOpacity(0.95),
-                      const Color(0xFF131722).withOpacity(0.95),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFF2AABEE).withOpacity(0.4), width: 1.2),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2AABEE).withOpacity(0.2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.send_rounded, color: Color(0xFF2AABEE), size: 22),
-                        ),
-                        const SizedBox(width: 12),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Доставка в Telegram-бот',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                'Мгновенные утренние пуш-сообщения',
-                                style: TextStyle(color: Color(0xFF2AABEE), fontSize: 12, fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      'В Telegram сообщения доставляются со 100% гарантией прямо на экран блокировки в 06:30 утра, даже если смартфон находится в глубоком сне.',
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
-                    ),
-                    const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF0F141F),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white10),
-                      ),
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Инструкция по подключению:',
-                            style: TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold, fontSize: 12.5),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            '1. Скопируйте имя бота: @Horoscope_SiDoReCo_bot\n2. Откройте Telegram и нажмите «Запустить» (/start)\n3. Укажите логин Telegram в профиле приложения\n4. Бот присылает персональный прогноз каждое утро в 06:30',
-                            style: TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(const ClipboardData(text: '@Horoscope_SiDoReCo_bot'));
-                          HapticFeedback.lightImpact();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('📋 Имя бота @Horoscope_SiDoReCo_bot скопировано!'),
-                              backgroundColor: Color(0xFF2AABEE),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFF2AABEE)),
-                        label: const Text(
-                          'Скопировать @Horoscope_SiDoReCo_bot',
-                          style: TextStyle(color: Color(0xFF2AABEE), fontWeight: FontWeight.bold),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF2AABEE)),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-              */
 
               // Карточка синхронизации и кэша
               Container(
@@ -535,13 +489,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.cloud_sync_rounded, color: CosmicTheme.cyanAccent),
-                        SizedBox(width: 10),
+                        const Icon(Icons.cloud_sync_rounded, color: CosmicTheme.cyanAccent),
+                        const SizedBox(width: 10),
                         Text(
-                          'Облачная доставка прогнозов',
-                          style: TextStyle(
+                          l10n.cloudDeliveryTitle,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: CosmicTheme.textPrimary,
@@ -550,11 +504,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    const Text(
-                      'Прогнозы рассчитываются автономной астрологической системой и публикуются каждое утро.'
-                      // ' Приложение работает автономно без API-ключей.',
-                      ,
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.45),
+                    Text(
+                      l10n.cloudDeliveryDesc,
+                      style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.45),
                     ),
                     const SizedBox(height: 14),
                     Container(
@@ -569,7 +521,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Сохранено в офлайн-памяти: $_cachedDays дн.',
+                              l10n.offlineStorageCount(_cachedDays),
                               style: const TextStyle(color: CosmicTheme.textPrimary, fontSize: 13),
                             ),
                           ),
@@ -580,7 +532,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     OutlinedButton.icon(
                       onPressed: _clearCache,
                       icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                      label: const Text('Очистить кэш'),
+                      label: Text(l10n.clearCacheButton),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: CosmicTheme.textSecondary,
                         side: const BorderSide(color: Colors.white24),
@@ -600,23 +552,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white10),
                 ),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'О проекте',
-                      style: TextStyle(
+                      l10n.aboutProjectTitle,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: CosmicTheme.textPrimary,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
-                      '🌌 Автономный астрологический комплекс\nРасчет планетарных транзитов, аспектов и домов на базе фундаментальной классической астрологии.'
-                      // ' и современных нейросетевых моделей искусственного интеллекта.',
-                      ,
-                      style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.5),
+                      l10n.aboutProjectDesc,
+                      style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.5),
                     ),
                   ],
                 ),
@@ -629,21 +579,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showLogoutDialog() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: const Color(0xFF1E2235),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          title: const Text('Выход из аккаунта', style: TextStyle(color: Colors.white)),
-          content: const Text(
-            'Вы действительно хотите выйти из текущего профиля?',
-            style: TextStyle(color: CosmicTheme.textSecondary),
+          title: Text(l10n.logoutConfirmTitle, style: const TextStyle(color: Colors.white)),
+          content: Text(
+            l10n.logoutConfirmMessage,
+            style: const TextStyle(color: CosmicTheme.textSecondary),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+              child: Text(l10n.cancel, style: const TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -651,7 +602,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 foregroundColor: Colors.black,
               ),
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Выйти', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.logoutButton, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -663,9 +614,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await _loadSettings();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF1E2235),
-            content: Text('✨ Вы вышли из профиля'),
+          SnackBar(
+            backgroundColor: const Color(0xFF1E2235),
+            content: Text(l10n.logoutButton),
           ),
         );
       }
@@ -673,6 +624,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _showDeleteAccountDialog() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) {
@@ -683,28 +635,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             side: const BorderSide(color: Colors.redAccent, width: 1.2),
           ),
           title: Row(
-            children: const [
-              Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 26),
-              SizedBox(width: 10),
-              Text(
-                'Удаление аккаунта',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            children: [
+              const Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 26),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  l10n.deleteAccountConfirmTitle,
+                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
-          content: const Text(
-            'Вы уверены, что хотите удалить свой аккаунт?\n\n'
-            'Согласно требованиям Google Play Policy и Политике конфиденциальности, будут безвозвратно удалены:\n'
-            '• Ваш аккаунт и персональные данные;\n'
-            '• Натальная карта и индивидуальные расчеты;\n'
-            '• Локальный кэш прогнозов.\n\n'
-            'Это действие необратимо.',
-            style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+          content: Text(
+            l10n.deleteAccountConfirmDesc,
+            style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Отмена', style: TextStyle(color: Colors.white70)),
+              child: Text(l10n.cancel, style: const TextStyle(color: Colors.white70)),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -713,7 +662,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Удалить навсегда', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.deleteAccountButton, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -728,7 +677,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SnackBar(
             backgroundColor: Color(0xFF1E2235),
             content: Text(
-              '🗑️ Аккаунт и персональные данные безвозвратно удалены.',
+              '🗑️ Account deleted.',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -939,10 +888,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildProfileSection() {
+  Widget _buildProfileSection(AppLocalizations l10n) {
     final isRegistered = _profile.isRegistered;
+    final code = l10n.langCode;
 
-    // Бейдж способа входа
     Widget authBadge() {
       IconData icon;
       Color color;
@@ -961,7 +910,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         case 'phone':
           icon = Icons.phone_android_rounded;
           color = CosmicTheme.cyanAccent;
-          label = 'Телефон';
+          label = 'Phone';
           break;
         case 'email':
         default:
@@ -1014,9 +963,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     size: 24,
                   ),
                   const SizedBox(width: 10),
-                  const Text(
-                    'Мой натальный профиль',
-                    style: TextStyle(
+                  Text(
+                    l10n.natalProfileTitle,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: CosmicTheme.textPrimary,
@@ -1032,7 +981,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${_profile.zodiacSymbol} ${_profile.zodiacSign}',
+                    '${_profile.zodiacSymbol} ${_profile.localizedZodiacSign(code)}',
                     style: const TextStyle(
                       color: CosmicTheme.goldAccent,
                       fontSize: 12,
@@ -1049,7 +998,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    '👤 Имя: ${_profile.name}',
+                    '👤 ${l10n.nameLabel}: ${_profile.name}',
                     style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),
                   ),
                 ),
@@ -1058,24 +1007,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              '📱/📧 Контакт: ${_profile.primaryContact}',
+              '📧 ${_profile.primaryContact}',
               style: const TextStyle(color: CosmicTheme.goldSoft, fontSize: 13, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 4),
             Text(
-              '📅 Дата и время: ${_profile.formattedBirthDate}, ${_profile.birthTime}',
+              '📅 ${_profile.formattedBirthDate}, ${_profile.birthTime}',
               style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
             ),
-            const SizedBox(height: 4),
-            Text(
-              '📍 Рождение: ${_profile.birthPlace.isNotEmpty ? _profile.birthPlace : "Не указано"}',
-              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '🏠 Проживание: ${_profile.currentCity.isNotEmpty ? _profile.currentCity : "Не указано"}',
-              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
-            ),
+            if (_profile.birthPlace.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                '📍 ${_profile.birthPlace}',
+                style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+              ),
+            ],
+            if (_profile.currentCity.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                '🏠 ${_profile.currentCity}',
+                style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+              ),
+            ],
             const SizedBox(height: 16),
             Row(
               children: [
@@ -1093,7 +1046,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       }
                     },
                     icon: const Icon(Icons.edit, size: 16, color: CosmicTheme.goldAccent),
-                    label: const Text('Анкета', style: TextStyle(color: CosmicTheme.goldAccent)),
+                    label: Text(l10n.editProfileButton, style: const TextStyle(color: CosmicTheme.goldAccent)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: CosmicTheme.goldAccent),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1111,7 +1064,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       _loadSettings();
                     },
                     icon: const Icon(Icons.switch_account_outlined, size: 16, color: CosmicTheme.cyanAccent),
-                    label: const Text('Сменить', style: TextStyle(color: CosmicTheme.cyanAccent)),
+                    label: Text(l10n.tabSignIn, style: const TextStyle(color: CosmicTheme.cyanAccent)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: CosmicTheme.cyanAccent),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1127,7 +1080,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () => showPrivacyPolicyDialog(context),
                     icon: const Icon(Icons.shield_outlined, size: 16, color: Colors.white70),
-                    label: const Text('Политика', style: TextStyle(color: Colors.white70, fontSize: 12.5)),
+                    label: Text(l10n.privacyPolicyButton,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white70, fontSize: 12.5)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.white24),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1139,7 +1095,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: OutlinedButton.icon(
                     onPressed: _showLogoutDialog,
                     icon: const Icon(Icons.logout_rounded, size: 16, color: Colors.white70),
-                    label: const Text('Выйти', style: TextStyle(color: Colors.white70, fontSize: 12.5)),
+                    label: Text(l10n.logoutButton, style: const TextStyle(color: Colors.white70, fontSize: 12.5)),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Colors.white24),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1154,9 +1110,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: OutlinedButton.icon(
                 onPressed: _showDeleteAccountDialog,
                 icon: const Icon(Icons.delete_outline_rounded, size: 17, color: Colors.redAccent),
-                label: const Text(
-                  'Удалить аккаунт (Google Play Policy)',
-                  style: TextStyle(color: Colors.redAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
+                label: Text(
+                  l10n.deleteAccountButton,
+                  style: const TextStyle(color: Colors.redAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(color: Colors.redAccent.withOpacity(0.5), width: 1.1),
@@ -1166,9 +1122,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ] else ...[
-            const Text(
-              'Авторизуйтесь по email, номеру телефона или через Google/Telegram, чтобы закрепить за собой персональную натальную анкету.',
-              style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
+            Text(
+              l10n.profileSectionTitle,
+              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -1184,9 +1140,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _loadSettings();
                 },
                 icon: const Icon(Icons.lock_person_rounded, size: 18, color: Colors.black),
-                label: const Text(
-                  'Войти или Зарегистрироваться',
-                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
+                label: Text(
+                  l10n.tabSignIn,
+                  style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 14),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: CosmicTheme.goldAccent,
@@ -1200,189 +1156,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: TextButton.icon(
                 onPressed: () => showPrivacyPolicyDialog(context),
                 icon: const Icon(Icons.shield_outlined, size: 15, color: CosmicTheme.textSecondary),
-                label: const Text(
-                  'Политика конфиденциальности',
-                  style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 12, decoration: TextDecoration.underline),
+                label: Text(
+                  l10n.privacyPolicyButton,
+                  style: const TextStyle(
+                      color: CosmicTheme.textSecondary, fontSize: 12, decoration: TextDecoration.underline),
                 ),
               ),
             ),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBackgroundServiceSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: CosmicTheme.backgroundCard,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: _backgroundServiceActive ? CosmicTheme.cyanAccent.withOpacity(0.4) : Colors.white10,
-          width: 1.2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: CosmicTheme.cyanAccent.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.all_inclusive_rounded, color: CosmicTheme.cyanAccent, size: 22),
-              ),
-              const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Фоновый мониторинг прогнозов',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: CosmicTheme.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Системный планировщик (AlarmManager)',
-                      style: TextStyle(color: CosmicTheme.cyanAccent, fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ),
-              Switch(
-                value: _backgroundServiceActive,
-                activeColor: CosmicTheme.cyanAccent,
-                onChanged: _toggleBackgroundService,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            'Приложение автоматически проверяет появление свежего утреннего прогноза в фоновом режиме каждые 15 минут.'
-            // ' Шторка смартфона остается абсолютно чистой — уведомление появляется ТОЛЬКО когда готов новый гороскоп дня!',
-            ,
-            style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: CosmicTheme.backgroundDeep,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white10),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  _backgroundServiceActive ? Icons.check_circle_rounded : Icons.pause_circle_outline_rounded,
-                  color: _backgroundServiceActive ? Colors.greenAccent : Colors.grey,
-                  size: 20,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    _backgroundServiceActive
-                        ? 'Статус: Активно в фоне' // (без лишних значков в шторке)
-                        : 'Статус: Отключено', // (проверка только при открытии)
-                    style: TextStyle(
-                      color: _backgroundServiceActive ? Colors.greenAccent : CosmicTheme.textSecondary,
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    final ok = await BackgroundSyncService.triggerImmediateCheck();
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            ok
-                                ? '📡 Проверка сервера запущена: если есть новый прогноз, он появится!'
-                                : '⚠️ Не удалось запустить фоновую проверку',
-                          ),
-                          backgroundColor: CosmicTheme.backgroundCard,
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.refresh_rounded, size: 16, color: CosmicTheme.cyanAccent),
-                  label: const Text(
-                    'Проверить сейчас',
-                    style: TextStyle(color: CosmicTheme.cyanAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: CosmicTheme.cyanAccent.withOpacity(0.5)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    await BackgroundSyncService.openBatterySettings();
-                  },
-                  icon: const Icon(Icons.battery_charging_full_rounded, size: 16, color: Colors.amberAccent),
-                  label: const Text(
-                    'Режим батареи',
-                    style: TextStyle(color: Colors.amberAccent, fontSize: 12.5, fontWeight: FontWeight.bold),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.amberAccent.withOpacity(0.5)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF161C2C),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.amberAccent.withOpacity(0.25)),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
-                    SizedBox(width: 6),
-                    Text(
-                      'Рекомендации по питанию и работе в фоновом режиме:',
-                      style: TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 6),
-                Text(
-                  '• В настройках телефона: Приложения → Астро Гороскоп → Батарея → выберите режим «Без ограничений».\n• На смартфонах Xiaomi, Huawei, Samsung включите «Автозапуск» и фоновую работу.\n• Смахивание уведомления о новом гороскопе не отключает фоновый цикл проверки.\n• Для быстрого перехода используйте кнопку «Режим батареи» выше.',
-                  style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

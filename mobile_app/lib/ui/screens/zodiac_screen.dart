@@ -187,7 +187,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
           const SizedBox(height: 16),
 
           // Большая карточка активного знака
-          if (active != null) _buildActiveHeroCard(active),
+          if (active != null) _buildActiveHeroCard(active, l10n),
           const SizedBox(height: 20),
 
           // Список всех остальных знаков
@@ -202,7 +202,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
               ),
             ),
           ),
-          ..._filteredSigns.map((sign) => _buildSignCompactTile(sign)),
+          ..._filteredSigns.map((sign) => _buildSignCompactTile(sign, l10n)),
           const SizedBox(height: 32),
         ],
       ),
@@ -442,8 +442,12 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     );
   }
 
-  Widget _buildActiveHeroCard(ZodiacSign sign) {
-    final l10n = AppLocalizations.of(context);
+  Widget _buildActiveHeroCard(ZodiacSign sign, [AppLocalizations? l10nParam]) {
+    final l10n = l10nParam ?? AppLocalizations.of(context);
+    final localizedSignName = l10n.zodiacSignName(sign.id);
+    final signName = localizedSignName.isNotEmpty ? localizedSignName : sign.name;
+    final localizedElementName = l10n.elementName(sign.elementCategory);
+    final elementName = localizedElementName.isNotEmpty ? localizedElementName : sign.element;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -495,7 +499,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
                     Row(
                       children: [
                         Text(
-                          sign.name,
+                          signName,
                           style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
@@ -516,7 +520,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
                               Icon(sign.elementIcon, color: sign.elementColor, size: 12),
                               const SizedBox(width: 4),
                               Text(
-                                sign.element,
+                                elementName,
                                 style: TextStyle(
                                   color: sign.elementColor,
                                   fontWeight: FontWeight.bold,
@@ -595,8 +599,13 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
     );
   }
 
-  Widget _buildSignCompactTile(ZodiacSign sign) {
+  Widget _buildSignCompactTile(ZodiacSign sign, [AppLocalizations? l10nParam]) {
+    final l10n = l10nParam ?? AppLocalizations.of(context);
     final isSelected = sign.id == _activeSignId;
+    final localizedSignName = l10n.zodiacSignName(sign.id);
+    final signName = localizedSignName.isNotEmpty ? localizedSignName : sign.name;
+    final localizedElementName = l10n.elementName(sign.elementCategory);
+    final elementName = localizedElementName.isNotEmpty ? localizedElementName : sign.element;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -627,7 +636,7 @@ class _ZodiacScreenState extends State<ZodiacScreen> {
         title: Row(
           children: [
             Text(
-              sign.name,
+              signName,
               style: const TextStyle(
                 color: CosmicTheme.textPrimary,
                 fontWeight: FontWeight.bold,

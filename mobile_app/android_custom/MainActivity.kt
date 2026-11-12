@@ -102,6 +102,22 @@ class MainActivity: FlutterActivity() {
                         }
                     }
                 }
+                "openUrl" -> {
+                    try {
+                        val url = call.argument<String>("url")
+                        if (!url.isNullOrBlank()) {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            }
+                            startActivity(intent)
+                            result.success(true)
+                        } else {
+                            result.error("INVALID_URL", "URL is empty", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("OPEN_URL_FAILED", e.message, null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }

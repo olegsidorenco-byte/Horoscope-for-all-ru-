@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/user_profile.dart';
 import '../../services/storage_service.dart';
 import '../../services/auth_service.dart';
@@ -44,9 +45,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _currentCityController = TextEditingController(text: p.currentCity);
     _focusController = TextEditingController(text: p.focus);
 
-    _selectedDate = p.birthDate; // по умолчанию 01.01.2000
-    
-    // Парсим время по умолчанию 12:00
+    _selectedDate = p.birthDate;
+
     int hour = 12;
     int minute = 0;
     try {
@@ -75,7 +75,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   UserProfile _buildCurrentProfile() {
     final p = widget.initialProfile ?? UserProfile.defaultProfile();
-    final timeStr = "${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}";
+    final timeStr =
+        "${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}";
     return UserProfile(
       id: p.id.isNotEmpty && p.id != 'default_user' && p.id != 'guest_user'
           ? p.id
@@ -104,25 +105,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _confirmLogout() async {
+    final l10n = AppLocalizations.of(context);
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E2235),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Выйти из аккаунта?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Данные вашей анкеты останутся надежно сохранены в учетной записи. Вы сможете войти в нее снова в любой момент.',
-          style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
+        title: Text(l10n.logoutConfirmTitle, style: const TextStyle(color: Colors.white)),
+        content: Text(
+          l10n.logoutConfirmMessage,
+          style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Отмена', style: TextStyle(color: Colors.white60)),
+            child: Text(l10n.cancel, style: const TextStyle(color: Colors.white60)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Выйти', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(l10n.logoutButton, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -137,15 +139,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickDate() async {
+    final l10n = AppLocalizations.of(context);
     final picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
       firstDate: DateTime(1920),
       lastDate: DateTime.now(),
-      locale: const Locale('ru', 'RU'),
-      helpText: 'Выберите дату рождения',
-      cancelText: 'Отмена',
-      confirmText: 'Выбрать',
+      locale: Locale(l10n.langCode),
+      helpText: l10n.pickBirthDateTitle,
+      cancelText: l10n.cancel,
+      confirmText: l10n.selectButton,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -169,12 +172,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickTime() async {
+    final l10n = AppLocalizations.of(context);
     final picked = await showTimePicker(
       context: context,
       initialTime: _selectedTime,
-      helpText: 'Выберите время рождения',
-      cancelText: 'Отмена',
-      confirmText: 'Выбрать',
+      helpText: l10n.pickBirthTimeTitle,
+      cancelText: l10n.cancel,
+      confirmText: l10n.selectButton,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -206,6 +210,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _isSaving = true;
     });
 
+    final l10n = AppLocalizations.of(context);
     final profile = _buildCurrentProfile();
     if (widget.initialProfile?.natalConfigSignature != profile.natalConfigSignature) {
       await StorageService.clearPersonalHoroscopeCache();
@@ -221,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✨ Натальный профиль ${profile.name} успешно сохранен!'),
+          content: Text(l10n.profileSavedSuccess(profile.name)),
           backgroundColor: CosmicTheme.goldAccent,
           behavior: SnackBarBehavior.floating,
         ),
@@ -232,7 +237,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final previewProfile = _buildCurrentProfile();
+    final lang = l10n.langCode;
 
     return Scaffold(
       backgroundColor: CosmicTheme.backgroundDeep,
@@ -240,9 +247,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          'Натальный профиль',
-          style: TextStyle(
+        title: Text(
+          l10n.natalProfileTitle,
+          style: const TextStyle(
             color: CosmicTheme.textPrimary,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -280,9 +287,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'АККАУНТ ПРИВЯЗАН',
-                                style: TextStyle(
+                              Text(
+                                l10n.accountLinkedBadge,
+                                style: const TextStyle(
                                   color: CosmicTheme.cyanAccent,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 10,
@@ -302,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20),
-                          tooltip: 'Выйти из аккаунта',
+                          tooltip: l10n.logoutButton,
                           onPressed: _confirmLogout,
                         ),
                       ],
@@ -343,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              previewProfile.zodiacSign,
+                              previewProfile.localizedZodiacSign(lang),
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -352,7 +359,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Стихия: ${previewProfile.element} • ${DateFormat('dd.MM.yyyy').format(_selectedDate)}',
+                              '${l10n.elementLabel}: ${previewProfile.localizedElement(lang)} • ${DateFormat('dd.MM.yyyy').format(_selectedDate)}',
                               style: const TextStyle(
                                 fontSize: 12.5,
                                 color: CosmicTheme.textSecondary,
@@ -367,16 +374,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 24),
 
                 // 1. Имя
-                const Text(
-                  'Имя / Псевдоним',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.nameLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _nameController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Как к вам обращаться в прогнозе',
+                    hintText: l10n.nameHint,
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.person_rounded, color: CosmicTheme.goldAccent),
                     filled: true,
@@ -384,16 +391,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Пожалуйста, введите ваше имя';
+                    if (val == null || val.trim().isEmpty) return l10n.nameValidator;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
 
                 // 2. Email
-                const Text(
-                  'Адрес эл. почты (Email)',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.emailLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
@@ -401,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   keyboardType: TextInputType.emailAddress,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'user@example.com',
+                    hintText: l10n.emailHint,
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.email_rounded, color: CosmicTheme.goldAccent),
                     filled: true,
@@ -409,29 +416,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Пожалуйста, укажите email для регистрации';
-                    if (!val.contains('@') || !val.contains('.')) return 'Введите корректный email';
+                    if (val == null || val.trim().isEmpty) return l10n.emailValidator;
+                    if (!val.contains('@') || !val.contains('.')) return l10n.emailFormatError;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
 
                 // 2.1 Telegram @username
-                const Text(
-                  'Ваш Telegram (для доставки в бот)',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.telegramLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Укажите ваш логин Telegram для синхронизации и персональной доставки',
-                  style: TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
+                Text(
+                  l10n.telegramDesc,
+                  style: const TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _telegramController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'например: oleg_sidorenco',
+                    hintText: l10n.telegramHint,
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.send_rounded, color: Color(0xFF2AABEE)),
                     filled: true,
@@ -449,9 +456,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Дата рождения',
-                            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                          Text(
+                            l10n.birthDateLabel,
+                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(height: 6),
                           GestureDetector(
@@ -485,9 +492,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Время рождения',
-                            style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                          Text(
+                            l10n.birthTimeLabel,
+                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                           const SizedBox(height: 6),
                           GestureDetector(
@@ -533,29 +540,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     });
                   },
-                  title: const Text(
-                    'Не знаю точное время (расчет на полдень 12:00)',
-                    style: TextStyle(color: CosmicTheme.textSecondary, fontSize: 12.5),
+                  title: Text(
+                    l10n.unknownTimeCheckbox,
+                    style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 12.5),
                   ),
                 ),
                 const SizedBox(height: 12),
 
                 // 4. Место рождения
-                const Text(
-                  'Место рождения (Город)',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.birthPlaceLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Необходимо для вычисления координат Асцендента и натальных домов',
-                  style: TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
+                Text(
+                  l10n.birthPlaceDesc,
+                  style: const TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _birthPlaceController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Например: Лондон, Великобритания',
+                    hintText: l10n.birthPlaceHint,
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.location_city_rounded, color: CosmicTheme.goldAccent),
                     filled: true,
@@ -563,28 +570,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Пожалуйста, укажите город рождения';
+                    if (val == null || val.trim().isEmpty) return l10n.birthPlaceValidator;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
 
                 // 5. Место пребывания
-                const Text(
-                  'Место текущего пребывания (Город проживания)',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.currentCityLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Необходимо для расчета локальных транзитов планет по вашему текущему часовому поясу',
-                  style: TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
+                Text(
+                  l10n.currentCityDesc,
+                  style: const TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
                 ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _currentCityController,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Например: Берлин, Германия',
+                    hintText: l10n.currentCityHint,
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.explore_rounded, color: CosmicTheme.goldAccent),
                     filled: true,
@@ -592,16 +599,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
                   ),
                   validator: (val) {
-                    if (val == null || val.trim().isEmpty) return 'Пожалуйста, укажите где вы находитесь сейчас';
+                    if (val == null || val.trim().isEmpty) return l10n.currentCityValidator;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
 
                 // 6. Пол
-                const Text(
-                  'Пол (для правильной грамматики прогноза)',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.genderLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -624,7 +631,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           alignment: Alignment.center,
                           child: Text(
-                            '👩 Женский',
+                            l10n.genderFemale,
                             style: TextStyle(
                               color: _selectedGender == "female" ? CosmicTheme.goldAccent : Colors.white70,
                               fontWeight: _selectedGender == "female" ? FontWeight.bold : FontWeight.normal,
@@ -652,7 +659,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           alignment: Alignment.center,
                           child: Text(
-                            '👨 Мужской',
+                            l10n.genderMale,
                             style: TextStyle(
                               color: _selectedGender == "male" ? CosmicTheme.goldAccent : Colors.white70,
                               fontWeight: _selectedGender == "male" ? FontWeight.bold : FontWeight.normal,
@@ -666,26 +673,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 20),
 
                 // 7. Приоритетные сферы внимания (фокус натального расчета)
-                const Text(
-                  'Приоритетные сферы внимания (фокус расчета)',
-                  style: TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+                Text(
+                  l10n.focusLabel,
+                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 2),
-                const Text(
-                  'Персональный акцент в деловой стратегии, переговорах и часах активности',
-                  style: TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
+                Text(
+                  l10n.focusDesc,
+                  style: const TextStyle(fontSize: 11.5, color: CosmicTheme.textSecondary),
                 ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    '💼 Бизнес и финансы',
-                    '🤝 Переговоры и сделки',
-                    '📈 Карьера и статус',
-                    '❤️ Отношения и семья',
-                    '🌿 Здоровье и тонус',
-                    '🧘 Духовный рост',
+                    l10n.focusBusiness,
+                    l10n.focusNegotiations,
+                    l10n.focusCareer,
+                    l10n.focusRelationships,
+                    l10n.focusHealth,
+                    l10n.focusSpiritual,
                   ].map((preset) {
                     final cleanName = preset.substring(preset.indexOf(' ') + 1).toLowerCase();
                     final isSelected = _focusController.text.toLowerCase().contains(cleanName);
@@ -730,7 +737,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   maxLines: 2,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Например: бизнес, деловые переговоры, финансы и здоровье',
+                    hintText: l10n.focusHint,
                     hintStyle: const TextStyle(color: Colors.white38),
                     prefixIcon: const Icon(Icons.stars_rounded, color: CosmicTheme.goldAccent),
                     filled: true,
@@ -741,7 +748,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
 
                 // Блок Telegram-бота
-                _buildTelegramBotCard(),
+                _buildTelegramBotCard(l10n),
 
                 const SizedBox(height: 24),
 
@@ -763,14 +770,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             height: 24,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black),
                           )
-                        : const Row(
+                        : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.auto_awesome, color: Colors.black, size: 20),
-                              SizedBox(width: 10),
+                              const Icon(Icons.auto_awesome, color: Colors.black, size: 20),
+                              const SizedBox(width: 10),
                               Text(
-                                'Сохранить натальный профиль',
-                                style: TextStyle(
+                                l10n.saveProfileButton,
+                                style: const TextStyle(
                                   fontSize: 15.5,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
@@ -789,7 +796,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildTelegramBotCard() {
+  Widget _buildTelegramBotCard(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -832,21 +839,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Персональный Telegram-бот',
-                      style: TextStyle(
+                      l10n.telegramBotTitle,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
                     ),
-                    SizedBox(height: 2),
-                    Text(
-                      '100% надежная утренняя доставка в 06:30',
+                    const SizedBox(height: 2),
+                    const Text(
+                      '@Horoscope_SiDoReCo_bot',
                       style: TextStyle(
                         color: Color(0xFF2AABEE),
                         fontSize: 11.5,
@@ -859,9 +866,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Если на смартфоне блокируются уведомления из-за спящего режима или ограничений батареи, подключите Telegram-бота. Сообщения приходят точно в 06:30 утра со звуком и всплывающим окном.',
-            style: TextStyle(
+          Text(
+            l10n.telegramBotDesc,
+            style: const TextStyle(
               color: CosmicTheme.textSecondary,
               fontSize: 12.5,
               height: 1.45,
@@ -878,19 +885,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  '📋 Как подключить за 1 минуту:',
-                  style: TextStyle(
+                Text(
+                  l10n.telegramBotInstructionsTitle,
+                  style: const TextStyle(
                     color: CosmicTheme.goldAccent,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildInstructionStep('1', 'Скопируйте имя бота: @Horoscope_SiDoReCo_bot'),
-                _buildInstructionStep('2', 'Откройте Telegram, найдите бота и нажмите «Запустить» (/start)'),
-                _buildInstructionStep('3', 'Укажите ваш логин Telegram в поле выше и нажмите «Сохранить»'),
-                _buildInstructionStep('4', 'В боте можно быстро менять время рождения командой /set_time'),
+                Text(
+                  l10n.telegramBotInstructions,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.4),
+                ),
               ],
             ),
           ),
@@ -903,17 +910,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Clipboard.setData(const ClipboardData(text: '@Horoscope_SiDoReCo_bot'));
                 HapticFeedback.lightImpact();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('📋 Имя бота @Horoscope_SiDoReCo_bot скопировано в буфер!'),
-                    backgroundColor: Color(0xFF2AABEE),
+                  SnackBar(
+                    content: Text(l10n.botNameCopied),
+                    backgroundColor: const Color(0xFF2AABEE),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
               },
               icon: const Icon(Icons.copy_rounded, size: 18, color: Color(0xFF2AABEE)),
-              label: const Text(
-                'Скопировать @Horoscope_SiDoReCo_bot',
-                style: TextStyle(
+              label: Text(
+                l10n.copyBotNameButton,
+                style: const TextStyle(
                   color: Color(0xFF2AABEE),
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
@@ -923,37 +930,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 side: const BorderSide(color: Color(0xFF2AABEE)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInstructionStep(String number, String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 18,
-            height: 18,
-            decoration: const BoxDecoration(
-              color: Color(0xFF2AABEE),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              number,
-              style: const TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.3),
             ),
           ),
         ],
