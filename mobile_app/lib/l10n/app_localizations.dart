@@ -1677,6 +1677,57 @@ class AppLocalizations {
       default: return 'Ошибка загрузки архивного дня';
     }
   }
+
+  // ====================== PWA / WEB УСТАНОВКА НА ЭКРАН ДОМОЙ ======================
+  String get pwaInstallTitle {
+    switch (langCode) {
+      case 'en': return 'Install on Home Screen';
+      case 'es': return 'Instalar en pantalla de inicio';
+      case 'de': return 'Zum Home-Bildschirm hinzufügen';
+      case 'fr': return 'Installer sur l\'écran d\'accueil';
+      default: return 'Добавить на экран «Домой»';
+    }
+  }
+
+  String get pwaInstallDesc {
+    switch (langCode) {
+      case 'en': return 'Open full-screen without browser frames and access your daily horoscope in 1 tap.';
+      case 'es': return 'Ábrelo a pantalla completa sin marco de navegador y accede en 1 toque.';
+      case 'de': return 'Als Vollbild-App ohne Browser-Leiste öffnen und mit 1 Tippen zugreifen.';
+      case 'fr': return 'Ouvrez en plein écran sans les barres du navigateur et accédez en 1 clic.';
+      default: return 'Работайте на весь экран без рамок браузера и открывайте гороскоп в 1 касание.';
+    }
+  }
+
+  String get pwaInstallIosStep1 {
+    switch (langCode) {
+      case 'en': return 'Tap the Share icon';
+      case 'es': return 'Toca el botón Compartir';
+      case 'de': return 'Tippe auf das Teilen-Symbol';
+      case 'fr': return 'Appuyez sur Partager';
+      default: return 'Нажмите значок «Поделиться»';
+    }
+  }
+
+  String get pwaInstallIosStep2 {
+    switch (langCode) {
+      case 'en': return 'Select «Add to Home Screen»';
+      case 'es': return 'Elige «Añadir a pantalla de inicio»';
+      case 'de': return 'Wähle «Zum Home-Bildschirm»';
+      case 'fr': return 'Choisissez « Sur l\'écran d\'accueil »';
+      default: return 'Выберите «На экран "Домой"»';
+    }
+  }
+
+  String get pwaInstallGotIt {
+    switch (langCode) {
+      case 'en': return 'Got it';
+      case 'es': return 'Entendido';
+      case 'de': return 'Verstanden';
+      case 'fr': return 'Compris';
+      default: return 'Понятно';
+    }
+  }
 }
 
 class _AppLocalizationsDelegate

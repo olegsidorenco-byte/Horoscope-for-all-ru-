@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'services/storage_service.dart';
@@ -40,14 +41,16 @@ void main() async {
   } catch (_) {}
 
   // Инициализация сервиса утренних напоминаний, бейджей и разрешений Android 13/14+
-  try {
-    await NotificationService.initialize();
-  } catch (_) {}
+  if (!kIsWeb) {
+    try {
+      await NotificationService.initialize();
+    } catch (_) {}
 
-  // Запуск службы фонового мониторинга для гарантированной доставки утреннего прогноза
-  try {
-    await BackgroundSyncService.initService();
-  } catch (_) {}
+    // Запуск службы фонового мониторинга для гарантированной доставки утреннего прогноза
+    try {
+      await BackgroundSyncService.initService();
+    } catch (_) {}
+  }
 
   runApp(const CosmicHoroscopeApp());
 }

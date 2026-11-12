@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Премиальный ежедневный персонализированный астрологический гороскоп">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Астро Гороскоп">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>Астро Гороскоп</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      background-color: #0B0E1B;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #FFFFFF;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      background: radial-gradient(circle at center, #1B2032 0%, #0B0E1B 100%);
+      transition: opacity 0.5s ease-out;
+    }
+
+    .cosmic-logo {
+      width: 96px;
+      height: 96px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(246, 194, 91, 0.25);
+      margin-bottom: 24px;
+      animation: pulse 2.5s infinite ease-in-out;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(246, 194, 91, 0.2);
+      border-top-color: #F6C25B;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      margin-top: 16px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50% { transform: scale(1.05); opacity: 1; filter: drop-shadow(0 0 15px rgba(246, 194, 91, 0.5)); }
+    }
+
+    /* PWA Install Banner for iOS Safari & Android */
+    #pwa-install-banner {
+      display: none;
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: 24px;
+      background: rgba(27, 32, 50, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1.5px solid rgba(246, 194, 91, 0.4);
+      border-radius: 20px;
+      padding: 18px 20px;
+      z-index: 999999;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(246, 194, 91, 0.2);
+      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(120%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .pwa-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .pwa-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #F6C25B;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pwa-close {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+
+    .pwa-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.4;
+    }
+
+    .pwa-step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pwa-step-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(246, 194, 91, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #F6C25B;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .pwa-footer {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pwa-btn {
+      background: #F6C25B;
+      color: #0B0E1B;
+      border: none;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .pwa-btn:active {
+      transform: scale(0.98);
+    }
+
+    .ios-pointer {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid #1B2032;
+      animation: bouncePointer 1.5s infinite;
+    }
+
+    @keyframes bouncePointer {
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, 6px); }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading-container">
+    <img src="icons/Icon-192.png" alt="Logo" class="cosmic-logo">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loading-text">Загрузка Астро Гороскопа...</div>
+  </div>
+
+  <!-- PWA Install Popup for Safari & Mobile -->
+  <div id="pwa-install-banner">
+    <div class="pwa-header">
+      <div class="pwa-title" id="pwa-title">📲 Установить приложение</div>
+      <button class="pwa-close" onclick="dismissPwaBanner()">✕</button>
+    </div>
+    <div class="pwa-steps" id="pwa-steps">
+      <!-- Steps injected by JS based on OS (iOS / Android) and Language -->
+    </div>
+    <div class="pwa-footer" id="pwa-footer">
+      <button class="pwa-btn" id="pwa-action-btn" onclick="dismissPwaBanner()">Понятно</button>
+    </div>
+    <div class="ios-pointer" id="ios-pointer" style="display: none;"></div>
+  </div>
+
+  <script>
+    // 1. Language detection
+    const userLang = (navigator.language || navigator.userLanguage || 'ru').toLowerCase().slice(0, 2);
+    const i18n = {
+      ru: {
+        loading: 'Загрузка Астро Гороскопа...',
+        title: '📲 Установить на экран «Домой»',
+        iosStep1: 'Нажмите «Поделиться» <span style="font-size:16px;">⎋</span> внизу экрана Safari',
+        iosStep2: 'Выберите пункт <b>«На экран "Домой"»</b> ➕',
+        iosDesc: 'Работает на весь экран без рамок браузера и сохраняет сессию',
+        androidTitle: '📲 Установить приложение',
+        androidBtn: 'Установить на смартфон',
+        gotIt: 'Понятно, открыть гороскоп'
+      },
+      fr: {
+        loading: 'Chargement de l\'Horoscope...',
+        title: '📲 Installer sur l\'écran d\'accueil',
+        iosStep1: 'Appuyez sur Partager <span style="font-size:16px;">⎋</span> en bas dans Safari',
+        iosStep2: 'Sélectionnez <b>« Sur l\'écran d\'accueil »</b> ➕',
+        iosDesc: 'Application plein écran sans barres de navigateur',
+        androidTitle: '📲 Installer l\'application',
+        androidBtn: 'Installer sur le téléphone',
+        gotIt: 'Compris, ouvrir l\'horoscope'
+      },
+      en: {
+        loading: 'Loading Cosmic Horoscope...',
+        title: '📲 Add to Home Screen',
+        iosStep1: 'Tap the Share icon <span style="font-size:16px;">⎋</span> at the bottom in Safari',
+        iosStep2: 'Choose <b>«Add to Home Screen»</b> ➕',
+        iosDesc: 'Runs full-screen with no browser borders and instant access',
+        androidTitle: '📲 Install Cosmic App',
+        androidBtn: 'Install App',
+        gotIt: 'Got it, open horoscope'
+      },
+      es: {
+        loading: 'Cargando Horóscopo Cósmico...',
+        title: '📲 Añadir a pantalla de inicio',
+        iosStep1: 'Toca Compartir <span style="font-size:16px;">⎋</span> en la barra inferior de Safari',
+        iosStep2: 'Selecciona <b>«Añadir a pantalla de inicio»</b> ➕',
+        iosDesc: 'Aplicación a pantalla completa con acceso instantáneo',
+        androidTitle: '📲 Instalar aplicación',
+        androidBtn: 'Instalar en teléfono',
+        gotIt: 'Entendido'
+      },
+      de: {
+        loading: 'Cosmic Horoskop wird geladen...',
+        title: '📲 Zum Home-Bildschirm hinzufügen',
+        iosStep1: 'Tippe auf Teilen <span style="font-size:16px;">⎋</span> unten im Safari-Menü',
+        iosStep2: 'Wähle <b>«Zum Home-Bildschirm»</b> ➕',
+        iosDesc: 'Vollbild-App ohne Browserleiste mit Sofortzugriff',
+        androidTitle: '📲 App installieren',
+        androidBtn: 'Auf dem Smartphone installieren',
+        gotIt: 'Verstanden'
+      }
+    };
+
+    const strings = i18n[userLang] || i18n['ru'];
+    document.getElementById('loading-text').innerText = strings.loading;
+
+    // 2. Check if already installed / running in standalone mode
+    const isStandalone = window.navigator.standalone === true || 
+                         window.matchMedia('(display-mode: standalone)').matches;
+
+    // Detect iOS
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!isStandalone) {
+        showAndroidInstallBanner();
+      }
+    });
+
+    function showIosInstallBanner() {
+      const banner = document.getElementById('pwa-install-banner');
+      document.getElementById('pwa-title').innerText = strings.title;
+      document.getElementById('pwa-steps').innerHTML = `
+        <div class="pwa-step-item">
+          <div class="pwa-step-icon">1</div>
+          <div>${strings.iosStep1}</div>
+        </div>
+        <div class="pwa-step-item">
+          <div class="pwa-step-icon">2</div>
+          <div>${strings.iosStep2}</div>
+        </div>
+        <div style="font-size: 11px; color: rgba(246, 194, 91, 0.85); margin-top: 4px;">
+          ✨ ${strings.iosDesc}
+        </div>
+      `;
+      document.getElementById('pwa-action-btn').innerText = strings.gotIt;
+      document.getElementById('ios-pointer').style.display = 'block';
+      banner.style.display = 'block';
+    }
+
+    function showAndroidInstallBanner() {
+      const banner = document.getElementById('pwa-install-banner');
+      document.getElementById('pwa-title').innerText = strings.androidTitle;
+      document.getElementById('pwa-steps').innerHTML = `
+        <div style="font-size: 13px; color: rgba(255, 255, 255, 0.85);">
+          ${strings.iosDesc}
+        </div>
+      `;
+      const btn = document.getElementById('pwa-action-btn');
+      btn.innerText = strings.androidBtn;
+      btn.onclick = async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+        }
+        dismissPwaBanner();
+      };
+      banner.style.display = 'block';
+    }
+
+    function dismissPwaBanner() {
+      const banner = document.getElementById('pwa-install-banner');
+      banner.style.display = 'none';
+      try {
+        sessionStorage.setItem('pwa_dismissed', 'true');
+      } catch (_) {}
+    }
+
+    // Auto-prompt on page open if not in standalone and not dismissed this session
+    window.addEventListener('load', () => {
+      const dismissed = sessionStorage.getItem('pwa_dismissed');
+      if (!isStandalone && !dismissed) {
+        if (isIOS) {
+          // Show iOS installation guide
+          setTimeout(showIosInstallBanner, 1200);
+        }
+      }
+    });
+  </script>
+
+  <script src="flutter.js" defer></script>
+  <script>
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: {{flutter_service_worker_version}},
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp().then(function() {
+              const loader = document.getElementById('loading-container');
+              if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.remove(), 500);
+              }
+            });
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

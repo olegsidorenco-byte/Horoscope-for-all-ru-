@@ -1,0 +1,63 @@
+name: Build & Deploy Flutter Web (PWA)
+
+on:
+  push:
+    paths:
+      - 'mobile_app/**'
+      - 'data/**'
+      - '.github/workflows/deploy_web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy-web:
+    name: Build & Deploy Flutter Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Prepare assets and data
+        run: |
+          mkdir -p mobile_app/assets/data/archive
+          cp -r data/* mobile_app/assets/data/ || true
+
+      - name: Build Flutter Web (PWA)
+        run: |
+          cd mobile_app
+          flutter pub get
+          flutter build web --release --no-tree-shake-icons
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cosmic-horoscope-pwa-web
+          path: mobile_app/build/web
+          if-no-files-found: error
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU != '' }}
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU }}
+          channelId: live
+          projectId: cosmic-horoscope-ru
+        env:
+          FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU }}

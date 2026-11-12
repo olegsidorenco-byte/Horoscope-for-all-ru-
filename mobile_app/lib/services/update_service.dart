@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
@@ -36,6 +37,7 @@ class UpdateService {
     bool force = false,
     String lang = 'ru',
   }) async {
+    if (kIsWeb) return null; // Веб-версия обновляется мгновенно на сервере
     // 1. Попытка через наш Cloud Run API
     try {
       final res = await http
