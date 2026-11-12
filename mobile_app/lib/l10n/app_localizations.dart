@@ -381,6 +381,21 @@ class AppLocalizations {
     }
   }
 
+  String elementName(String category) {
+    switch (category.toLowerCase().trim()) {
+      case 'fire':
+        return elementFire;
+      case 'earth':
+        return elementEarth;
+      case 'air':
+        return elementAir;
+      case 'water':
+        return elementWater;
+      default:
+        return category;
+    }
+  }
+
   String get luckyHoursLabel {
     switch (langCode) {
       case 'en': return 'Lucky Hours';

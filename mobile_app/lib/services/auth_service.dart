@@ -414,6 +414,9 @@ class AuthService {
     }
   }
 
+  /// Псевдоним для совместимости с интерфейсом сброса пароля
+  static Future<void> sendPasswordResetEmail(String email) => sendPasswordReset(email);
+
   /// Восстановление / сброс пароля по электронной почте (совместимость с оффлайн-реестром + Firebase)
   static Future<void> resetPassword({
     required String email,
