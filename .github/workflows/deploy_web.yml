@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-and-deploy-web:
@@ -43,6 +43,20 @@ jobs:
           cd mobile_app
           flutter pub get
           flutter build web --release --no-tree-shake-icons
+
+      - name: Package Web Release Zip
+        run: |
+          cd mobile_app/build/web
+          zip -r ../../../cosmic-horoscope-web.zip .
+
+      - name: Attach Web Zip to GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/heads/main')
+        with:
+          tag_name: app-v1.0.31
+          files: cosmic-horoscope-web.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4
