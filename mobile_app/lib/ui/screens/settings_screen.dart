@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/web_push/web_push_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../main.dart';
 import '../../services/storage_service.dart';
@@ -84,14 +87,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await StorageService.setNotificationsEnabled(value);
 
     if (value) {
-      await NotificationService.requestPermission();
-      await NotificationService.scheduleDailyNotification(
-        hour: _notifHour,
-        minute: _notifMinute,
-      );
+      if (!kIsWeb) {
+        await NotificationService.requestPermission();
+        await NotificationService.scheduleDailyNotification(
+          hour: _notifHour,
+          minute: _notifMinute,
+        );
+      } else {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await WebPushService.subscribe(user.uid);
+        }
+      }
     } else {
-      await NotificationService.cancelDailyNotification();
-      await BackgroundSyncService.rescheduleAlarms();
+      if (!kIsWeb) {
+        await NotificationService.cancelDailyNotification();
+        await BackgroundSyncService.rescheduleAlarms();
+      }
     }
 
     final updated = _profile.copyWith(
@@ -170,8 +182,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _testNotification() async {
-    await NotificationService.sendInstantTestNotification();
-    await NotificationService.updateBadge(1);
+    if (!kIsWeb) {
+      await NotificationService.sendInstantTestNotification();
+      await NotificationService.updateBadge(1);
+    } else {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await WebPushService.sendTest(user.uid);
+      }
+    }
     if (mounted) {
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -443,35 +462,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: const Icon(Icons.send_rounded, size: 18),
                         label: Text(l10n.testNotifButton),
                       ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF161C2C),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                      if (!kIsWeb) ...[
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF161C2C),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    l10n.batteryAdviceTitle,
+                                    style: const TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                l10n.batteryAdviceDesc,
+                                style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                const Icon(Icons.battery_charging_full_rounded, color: Colors.amberAccent, size: 16),
-                                const SizedBox(width: 6),
-                                Text(
-                                  l10n.batteryAdviceTitle,
-                                  style: const TextStyle(color: Colors.amberAccent, fontSize: 12, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              l10n.batteryAdviceDesc,
-                              style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 11.5, height: 1.35),
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ],
                   ],
                 ),

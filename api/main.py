@@ -1,6 +1,7 @@
 import os
 import sys
 import hmac
+import json
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -49,6 +50,54 @@ def get_db():
 
 
 app = FastAPI(title="Cosmic Horoscope API", version="1.2.0")
+
+# ==============================================================================
+# Web Push (VAPID) для Apple iPhone (iOS 16.4+) и браузеров
+# ==============================================================================
+VAPID_PUBLIC_KEY = os.getenv(
+    "VAPID_PUBLIC_KEY",
+    "BFsxlA77SduX7b8r6PDUqefbVXSOBBqCmI1kzzLtUnX5FZKw6mT1Ew92Nq747FyF9xc9eBLYv5zpOKJhXJ3K9Xg",
+)
+VAPID_PRIVATE_KEY = os.getenv(
+    "VAPID_PRIVATE_KEY",
+    "0iaV2c3yyuIc-Fqr5sgZ8ofpUL1PbGozk6L1aefFe80",
+)
+VAPID_CLAIMS = {"sub": os.getenv("VAPID_SUB", "mailto:oleg.sidorenco@gmail.com")}
+
+
+def send_web_push(subscription_info: dict, title: str, body: str, url: str = "https://cosmic-horoscope-ru.web.app") -> bool:
+    """Отправка системного Web Push уведомления на Apple iPhone (iOS 16.4+) или в браузер."""
+    if not subscription_info or not isinstance(subscription_info, dict):
+        return False
+    try:
+        from pywebpush import webpush
+        payload = json.dumps({
+            "title": title,
+            "body": body,
+            "url": url,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        webpush(
+            subscription_info=subscription_info,
+            data=payload,
+            vapid_private_key=VAPID_PRIVATE_KEY,
+            vapid_claims=VAPID_CLAIMS,
+            timeout=10,
+        )
+        return True
+    except Exception as e:
+        print(f"Ошибка отправки Web Push: {e}")
+        return False
+
+
+class WebPushSubscribeRequest(BaseModel):
+    user_id: str
+    subscription: dict
+    user_agent: Optional[str] = None
+
+
+class WebPushTestRequest(BaseModel):
+    user_id: str
 
 
 class HoroscopeTopicItem(BaseModel):
@@ -292,6 +341,7 @@ def scheduler_tick(_authorized: bool = Depends(verify_scheduler_secret)):
     checked = 0
     pregenerated = 0
     delivered_tg = 0
+    delivered_web = 0
     errors = []
 
     for doc in db.collection("users").stream():
@@ -368,6 +418,18 @@ def scheduler_tick(_authorized: bool = Depends(verify_scheduler_secret)):
                         merge=True,
                     )
                     delivered_tg += 1
+
+            # Доставка Web Push на iPhone (iOS 16.4+) / Web PWA
+            web_sub = raw_profile.get("web_push_subscription")
+            if plan["should_deliver_now"] and web_sub and raw_text:
+                greeting_line = (parsed.get("greeting") or "").strip().split("\n")[0]
+                if len(greeting_line) > 120:
+                    greeting_line = greeting_line[:117] + "..."
+                if not greeting_line:
+                    greeting_line = "Твой персональный астрологический прогноз уже готов! Открой приложение."
+                push_title = f"✨ Гороскоп на {target_dmy}"
+                if send_web_push(web_sub, title=push_title, body=greeting_line):
+                    delivered_web += 1
         except Exception as usr_err:
             errors.append(f"{uid}: {usr_err}")
 
@@ -377,8 +439,71 @@ def scheduler_tick(_authorized: bool = Depends(verify_scheduler_secret)):
         "checked_users": checked,
         "pregenerated_forecasts": pregenerated,
         "delivered_telegram": delivered_tg,
+        "delivered_web_push": delivered_web,
         "errors": errors[:20],
     }
+
+
+# ==============================================================================
+# Web Push эндпоинты для Apple iPhone (iOS 16.4+) и браузеров
+# ==============================================================================
+@app.get("/api/notifications/vapid-public-key")
+def get_vapid_public_key():
+    """Возвращает публичный VAPID ключ для оформления Web Push подписки в PWA."""
+    return {"public_key": VAPID_PUBLIC_KEY}
+
+
+@app.post("/api/notifications/web-subscribe")
+def subscribe_web_push(req: WebPushSubscribeRequest):
+    """Сохранение Web Push подписки iPhone/браузера в профиль пользователя в Firestore."""
+    if not req.user_id or not req.subscription:
+        raise HTTPException(status_code=400, detail="Missing user_id or subscription")
+    db = get_db()
+    db.collection("users").document(req.user_id).set({
+        "web_push_subscription": req.subscription,
+        "web_notifications_enabled": True,
+        "web_push_updated_at": datetime.now(timezone.utc).isoformat(),
+        "web_push_user_agent": req.user_agent or "",
+    }, merge=True)
+    return {"status": "subscribed", "user_id": req.user_id}
+
+
+@app.post("/api/notifications/send-test")
+def send_test_web_push(req: WebPushTestRequest):
+    """Тестовая отправка push-уведомления на iPhone/устройство пользователя."""
+    if not req.user_id:
+        raise HTTPException(status_code=400, detail="Missing user_id")
+    db = get_db()
+    user_doc = db.collection("users").document(req.user_id).get()
+    if not user_doc.exists:
+        raise HTTPException(status_code=404, detail="User not found")
+    data = user_doc.to_dict() or {}
+    sub = data.get("web_push_subscription")
+    if not sub:
+        raise HTTPException(status_code=400, detail="User has no web_push_subscription")
+    name = data.get("name") or "друг"
+    lang = (data.get("language") or data.get("lang") or "ru").lower()
+
+    if lang == "fr":
+        title = "✨ Test d'alerte : Astro Horoscope"
+        body = f"Bonjour {name} ! Les notifications Web Push fonctionnent parfaitement sur votre iPhone 📲"
+    elif lang == "en":
+        title = "✨ Test Alert: Astro Horoscope"
+        body = f"Hello {name}! Web Push notifications are working perfectly on your iPhone 📲"
+    elif lang == "es":
+        title = "✨ Notificación de prueba: Astro Horóscopo"
+        body = f"¡Hola {name}! Las notificaciones Web Push funcionan en tu iPhone 📲"
+    elif lang == "de":
+        title = "✨ Test-Benachrichtigung: Astro Horoskop"
+        body = f"Hallo {name}! Web Push Benachrichtigungen funktionieren auf deinem iPhone 📲"
+    else:
+        title = "✨ Тестовое оповещение: Астро Гороскоп"
+        body = f"Привет, {name}! Уведомления Web Push успешно подключены и работают на твоем iPhone 📲"
+
+    ok = send_web_push(sub, title=title, body=body)
+    if not ok:
+        raise HTTPException(status_code=500, detail="Failed to deliver Web Push to endpoint")
+    return {"status": "sent", "user_id": req.user_id}
 
 
 @app.delete("/user/account")

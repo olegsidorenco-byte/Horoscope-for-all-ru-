@@ -61,3 +61,4 @@ jobs:
           projectId: cosmic-horoscope-ru
         env:
           FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU }}
+

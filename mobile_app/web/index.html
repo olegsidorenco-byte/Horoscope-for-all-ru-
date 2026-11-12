@@ -364,6 +364,97 @@
         }
       }
     });
+
+    // =========================================================================
+    // Web Push Notifications for iOS Safari (16.4+) & Web Browsers
+    // =========================================================================
+    const COSMIC_VAPID_PUBLIC_KEY = 'BFsxlA77SduX7b8r6PDUqefbVXSOBBqCmI1kzzLtUnX5FZKw6mT1Ew92Nq747FyF9xc9eBLYv5zpOKJhXJ3K9Xg';
+    const COSMIC_API_URL = 'https://cosmic-horoscope-api-688107707932.europe-west1.run.app';
+
+    function urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(function(err) {
+        console.log('SW register failed: ', err);
+      });
+    }
+
+    window.cosmicGetPushPermission = function() {
+      if (!('Notification' in window)) return 'unsupported';
+      return Notification.permission;
+    };
+
+    window.cosmicSubscribeWebPush = async function(userId) {
+      try {
+        if (!('Notification' in window)) {
+          return { success: false, error: 'Notifications not supported' };
+        }
+        
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          return { success: false, error: 'Permission not granted: ' + perm };
+        }
+
+        if (!('serviceWorker' in navigator)) {
+          return { success: false, error: 'ServiceWorker not supported' };
+        }
+
+        let reg = await navigator.serviceWorker.getRegistration('sw.js');
+        if (!reg) {
+          reg = await navigator.serviceWorker.register('sw.js');
+        }
+        await navigator.serviceWorker.ready;
+
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlB64ToUint8Array(COSMIC_VAPID_PUBLIC_KEY)
+        });
+
+        const subJson = sub.toJSON();
+
+        const res = await fetch(COSMIC_API_URL + '/api/notifications/web-subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: userId,
+            subscription: subJson,
+            user_agent: navigator.userAgent
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error('API returned status ' + res.status);
+        }
+
+        return { success: true };
+      } catch (e) {
+        console.error('Error subscribing to web push:', e);
+        return { success: false, error: e.message || String(e) };
+      }
+    };
+
+    window.cosmicSendTestWebPush = async function(userId) {
+      try {
+        const res = await fetch(COSMIC_API_URL + '/api/notifications/send-test', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: userId })
+        });
+        return res.ok;
+      } catch (e) {
+        console.error('Error sending test push:', e);
+        return false;
+      }
+    };
   </script>
 
   <script src="flutter.js" defer></script>
@@ -389,3 +480,4 @@
   </script>
 </body>
 </html>
+
