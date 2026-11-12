@@ -23,3 +23,8 @@ env/
 data/user_forecasts/
 data/users/delivery_state.json
 data/users/telegram_offset.json
+
+# Firebase & Flutter Build artifacts
+.firebase/
+mobile_app/build/
+
