@@ -1,0 +1,151 @@
+{
+  "date": "14.11.2026",
+  "raw_text": "Good morning, beautiful souls! May your Saturday begin with the soothing warmth of your favorite tea and a quiet heart. Embrace the day with gentle confidence, knowing that the universe supports your steady progress toward your dreams. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope for November 14 (Saturday)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. November 14.</b>\nYour natural drive meets a grounding influence today, helping you channel passion into tangible results. Focus on completion rather than starting new ventures.\n<b>TIP OF THE DAY ☝️</b> Finish one lingering task before starting anything new.\n\n<b>♉️ Taurus. November 14.</b>\nThe Moon in Capricorn brings a sense of security to your long-term plans. Trust your intuition regarding financial or personal commitments today.\n<b>TIP OF THE DAY ☝️</b> Review your budget and organize your immediate workspace.\n\n<b>♊️ Gemini. November 14.</b>\nCommunication flows with surprising depth as you find clarity in complex conversations. Use this energy to strengthen bonds with trusted friends.\n<b>TIP OF THE DAY ☝️</b> Listen more than you speak during important discussions.\n\n<b>♋️ Cancer. November 14.</b>\nYour inner world feels stable and protected today, allowing you to mend emotional fences. Focus on nurturing your closest relationships with kindness.\n<b>TIP OF THE DAY ☝️</b> Prepare a comforting meal for a loved one.\n\n<b>♌️ Leo. November 14.</b>\nSteady effort is your greatest asset today as you build a foundation for future success. Your charisma shines brightest when you remain humble.\n<b>TIP OF THE DAY ☝️</b> Focus on consistent habits that support your vitality.\n\n<b>♍️ Virgo. November 14.</b>\nAnalytical thinking is heightened, making this the perfect time to organize your surroundings. Your eye for detail ensures everything falls into place.\n<b>TIP OF THE DAY ☝️</b> Create a practical plan for your upcoming week.\n\n<b>♎️ Libra. November 14.</b>\nHarmony is within reach if you stay grounded in your own values. Seek balance by prioritizing your personal needs alongside social obligations.\n<b>TIP OF THE DAY ☝️</b> Spend time in nature to restore your balance.\n\n<b>♏️ Scorpio. November 14.</b>\nThe Sun illuminates your path, giving you the focus to transform a challenging situation into a victory. Trust your inner strength today.\n<b>TIP OF THE DAY ☝️</b> Write down your deepest goal for this month.\n\n<b>♐️ Sagittarius. November 14.</b>\nWhile your spirit yearns for adventure, grounding your energy in practical matters brings peace. Enjoy the quiet satisfaction of a job done.\n<b>TIP OF THE DAY ☝️</b> Practice mindfulness to calm your restless energy.\n\n<b>♑️ Capricorn. November 14.</b>\nThe Moon in your sign empowers your natural leadership and discipline. You are capable of turning ambitious visions into concrete reality today.\n<b>TIP OF THE DAY ☝️</b> Set a bold goal for your professional growth.\n\n<b>♒️ Aquarius. November 14.</b>\nA moment of reflection helps you align your innovative ideas with practical possibilities. Trust the slow but sure progress you are making.\n<b>TIP OF THE DAY ☝️</b> Meditate on how to simplify your daily routine.\n\n<b>♓️ Pisces. November 14.</b>\nYour empathy connects you to others in profound and helpful ways. Use your gentle influence to support those who truly need it.\n<b>TIP OF THE DAY ☝️</b> Offer a sincere compliment to a struggling colleague.\n\n✨✨✨ <i>The tallest trees grow from the deepest roots; patience is the silent strength that allows your dreams to reach the sky while staying anchored to the earth.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Tip: Finish one lingering task before starting anything new.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your natural drive meets a grounding influence today, helping you channel passion into tangible results. Focus on completion rather than starting new ventures.\n\nTIP OF THE DAY ☝️ Finish one lingering task before starting anything new."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Tip: Review your budget and organize your immediate workspace.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Moon in Capricorn brings a sense of security to your long-term plans. Trust your intuition regarding financial or personal commitments today.\n\nTIP OF THE DAY ☝️ Review your budget and organize your immediate workspace."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Tip: Listen more than you speak during important discussions.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Communication flows with surprising depth as you find clarity in complex conversations. Use this energy to strengthen bonds with trusted friends.\n\nTIP OF THE DAY ☝️ Listen more than you speak during important discussions."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Tip: Prepare a comforting meal for a loved one.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your inner world feels stable and protected today, allowing you to mend emotional fences. Focus on nurturing your closest relationships with kindness.\n\nTIP OF THE DAY ☝️ Prepare a comforting meal for a loved one."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Tip: Focus on consistent habits that support your vitality.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Steady effort is your greatest asset today as you build a foundation for future success. Your charisma shines brightest when you remain humble.\n\nTIP OF THE DAY ☝️ Focus on consistent habits that support your vitality."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Earth",
+      "color": "0xFF588157",
+      "focus": "Tip: Create a practical plan for your upcoming week.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Analytical thinking is heightened, making this the perfect time to organize your surroundings. Your eye for detail ensures everything falls into place.\n\nTIP OF THE DAY ☝️ Create a practical plan for your upcoming week."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Tip: Spend time in nature to restore your balance.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Harmony is within reach if you stay grounded in your own values. Seek balance by prioritizing your personal needs alongside social obligations.\n\nTIP OF THE DAY ☝️ Spend time in nature to restore your balance."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Water",
+      "color": "0xFF9D0208",
+      "focus": "Tip: Write down your deepest goal for this month.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Sun illuminates your path, giving you the focus to transform a challenging situation into a victory. Trust your inner strength today.\n\nTIP OF THE DAY ☝️ Write down your deepest goal for this month."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Tip: Practice mindfulness to calm your restless energy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "While your spirit yearns for adventure, grounding your energy in practical matters brings peace. Enjoy the quiet satisfaction of a job done.\n\nTIP OF THE DAY ☝️ Practice mindfulness to calm your restless energy."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Earth",
+      "color": "0xFF3A5A40",
+      "focus": "Tip: Set a bold goal for your professional growth.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Moon in your sign empowers your natural leadership and discipline. You are capable of turning ambitious visions into concrete reality today.\n\nTIP OF THE DAY ☝️ Set a bold goal for your professional growth."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Tip: Meditate on how to simplify your daily routine.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "A moment of reflection helps you align your innovative ideas with practical possibilities. Trust the slow but sure progress you are making.\n\nTIP OF THE DAY ☝️ Meditate on how to simplify your daily routine."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Water",
+      "color": "0xFF7209B7",
+      "focus": "Tip: Offer a sincere compliment to a struggling colleague.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your empathy connects you to others in profound and helpful ways. Use your gentle influence to support those who truly need it.\n\nTIP OF THE DAY ☝️ Offer a sincere compliment to a struggling colleague."
+    }
+  ],
+  "updated_at": "2026-11-14T04:31:34.052583Z"
+}
