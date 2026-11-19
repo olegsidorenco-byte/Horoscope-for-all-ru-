@@ -1,0 +1,151 @@
+{
+  "date": "19.11.2026",
+  "raw_text": "Good morning, dear friends! May your day begin with the comforting warmth of a fresh cup of tea and a heart full of gentle optimism. Trust in the flow of the universe today, as the soft energy of the Pisces Moon invites you to embrace peace and inner balance. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope for November 19 (Thursday)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. November 19.</b>\n✨ Your natural drive meets a softer, more intuitive rhythm today. Focus on your inner vision rather than just external competition to find true clarity.\nTIP OF THE DAY ☝️ Spend fifteen minutes in complete, meditative silence today.\n\n<b>♉️ Taurus. November 19.</b>\n✨ Stability is your greatest strength, but the Moon encourages you to explore a more flexible approach to your current long-term professional projects.\nTIP OF THE DAY ☝️ Be open to a new perspective from a colleague.\n\n<b>♊️ Gemini. November 19.</b>\n✨ Your curiosity is heightened, making this a wonderful time for creative brainstorming. Trust your instincts when choosing which ideas to pursue further now.\nTIP OF THE DAY ☝️ Write down your most unusual dreams and insights.\n\n<b>♋️ Cancer. November 19.</b>\n✨ Deep emotional currents are moving within you, offering a chance to heal past misunderstandings. Lean into your empathy to strengthen your closest bonds.\nTIP OF THE DAY ☝️ Reach out to a friend who needs support.\n\n<b>♌️ Leo. November 19.</b>\n✨ While you love the spotlight, today calls for quiet reflection and behind-the-scenes preparation. Your steady efforts will yield more results than loud actions.\nTIP OF THE DAY ☝️ Focus on finishing one neglected small personal task.\n\n<b>♍️ Virgo. November 19.</b>\n✨ Precision is your hallmark, yet the current atmosphere suggests that letting go of perfect control will bring you more joy and unexpected success.\nTIP OF THE DAY ☝️ Allow yourself to be spontaneous for an hour.\n\n<b>♎️ Libra. November 19.</b>\n✨ Harmony is within your reach if you prioritize your own needs alongside those of others. Balance requires you to be honest about your limits.\nTIP OF THE DAY ☝️ Set a firm boundary regarding your personal time.\n\n<b>♏️ Scorpio. November 19.</b>\n✨ The Sun illuminates your path, giving you the intensity needed to transform an old habit. Embrace this powerful energy for your personal evolution.\nTIP OF THE DAY ☝️ Let go of a grudge that burdens you.\n\n<b>♐️ Sagittarius. November 19.</b>\n✨ Your adventurous spirit finds a new outlet in philosophical study or spiritual growth. Seek meaning in the small, quiet moments of your daily life.\nTIP OF THE DAY ☝️ Read a book that challenges your current beliefs.\n\n<b>♑️ Capricorn. November 19.</b>\n✨ Discipline is excellent, but today invites you to soften your approach toward yourself. Success is found in balancing ambition with necessary mental rest.\nTIP OF THE DAY ☝️ Take a long walk to clear your head.\n\n<b>♒️ Aquarius. November 19.</b>\n✨ Your unique vision for the future is supported by the cosmos, provided you stay grounded. Connect with your community to share your brilliant ideas.\nTIP OF THE DAY ☝️ Collaborate with someone who thinks differently than you.\n\n<b>♓️ Pisces. November 19.</b>\n✨ With the Moon in your sign, your intuition is at its peak. Trust the subtle signals you receive and let your creativity flow without restraint.\nTIP OF THE DAY ☝️ Trust your gut feeling on a major decision.\n\n✨✨✨ <i>True strength is not found in the rigidity of an oak that breaks in the storm, but in the willow that gracefully bends and survives to bloom again.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Tip: Spend fifteen minutes in complete, meditative silence today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your natural drive meets a softer, more intuitive rhythm today. Focus on your inner vision rather than just external competition to find true clarity.\n\nTIP OF THE DAY ☝️ Spend fifteen minutes in complete, meditative silence today."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Tip: Be open to a new perspective from a colleague.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Stability is your greatest strength, but the Moon encourages you to explore a more flexible approach to your current long-term professional projects.\n\nTIP OF THE DAY ☝️ Be open to a new perspective from a colleague."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Tip: Write down your most unusual dreams and insights.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your curiosity is heightened, making this a wonderful time for creative brainstorming. Trust your instincts when choosing which ideas to pursue further now.\n\nTIP OF THE DAY ☝️ Write down your most unusual dreams and insights."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Tip: Reach out to a friend who needs support.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Deep emotional currents are moving within you, offering a chance to heal past misunderstandings. Lean into your empathy to strengthen your closest bonds.\n\nTIP OF THE DAY ☝️ Reach out to a friend who needs support."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Tip: Focus on finishing one neglected small personal task.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ While you love the spotlight, today calls for quiet reflection and behind-the-scenes preparation. Your steady efforts will yield more results than loud actions.\n\nTIP OF THE DAY ☝️ Focus on finishing one neglected small personal task."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Earth",
+      "color": "0xFF588157",
+      "focus": "Tip: Allow yourself to be spontaneous for an hour.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Precision is your hallmark, yet the current atmosphere suggests that letting go of perfect control will bring you more joy and unexpected success.\n\nTIP OF THE DAY ☝️ Allow yourself to be spontaneous for an hour."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Tip: Set a firm boundary regarding your personal time.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Harmony is within your reach if you prioritize your own needs alongside those of others. Balance requires you to be honest about your limits.\n\nTIP OF THE DAY ☝️ Set a firm boundary regarding your personal time."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Water",
+      "color": "0xFF9D0208",
+      "focus": "Tip: Let go of a grudge that burdens you.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ The Sun illuminates your path, giving you the intensity needed to transform an old habit. Embrace this powerful energy for your personal evolution.\n\nTIP OF THE DAY ☝️ Let go of a grudge that burdens you."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Tip: Read a book that challenges your current beliefs.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your adventurous spirit finds a new outlet in philosophical study or spiritual growth. Seek meaning in the small, quiet moments of your daily life.\n\nTIP OF THE DAY ☝️ Read a book that challenges your current beliefs."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Earth",
+      "color": "0xFF3A5A40",
+      "focus": "Tip: Take a long walk to clear your head.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Discipline is excellent, but today invites you to soften your approach toward yourself. Success is found in balancing ambition with necessary mental rest.\n\nTIP OF THE DAY ☝️ Take a long walk to clear your head."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Tip: Collaborate with someone who thinks differently than you.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Your unique vision for the future is supported by the cosmos, provided you stay grounded. Connect with your community to share your brilliant ideas.\n\nTIP OF THE DAY ☝️ Collaborate with someone who thinks differently than you."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Water",
+      "color": "0xFF7209B7",
+      "focus": "Tip: Trust your gut feeling on a major decision.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ With the Moon in your sign, your intuition is at its peak. Trust the subtle signals you receive and let your creativity flow without restraint.\n\nTIP OF THE DAY ☝️ Trust your gut feeling on a major decision."
+    }
+  ],
+  "updated_at": "2026-11-19T04:31:23.174679Z"
+}
