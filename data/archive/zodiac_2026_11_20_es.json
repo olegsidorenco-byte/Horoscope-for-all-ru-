@@ -1,0 +1,151 @@
+{
+  "date": "20.11.2026",
+  "raw_text": "¡Buenos días, almas brillantes! Que el aroma de un café recién hecho y la luz suave de este viernes llenen su corazón de optimismo. La Luna en Aries nos regala una energía vibrante y decidida, perfecta para tomar las riendas de nuestros sueños con valentía y confianza. ¡Que la armonía de Venus guíe cada uno de sus pasos hoy! ☀️☕️🌿\n\n☀️🌿 <b>Horóscopo para el 20 de noviembre (Viernes)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. 20 de noviembre.</b>\n✨ La energía lunar en tu signo potencia tu audacia natural. Es el momento ideal para liderar proyectos y confiar ciegamente en tus instintos más profundos.\n<b>CONSEJO DEL DÍA ☝️</b> Toma la iniciativa en un asunto pendiente hoy.\n\n<b>♉️ Tauro. 20 de noviembre.</b>\n✨ Tu mundo interior busca estabilidad mientras la Luna te invita a reflexionar. Aprovecha este viernes para organizar tus metas financieras con total calma.\n<b>CONSEJO DEL DÍA ☝️</b> Prioriza tu paz mental sobre cualquier exigencia externa.\n\n<b>♊️ Géminis. 20 de noviembre.</b>\n✨ La comunicación fluye con destreza bajo este tránsito. Es un día excelente para conectar con amigos y compartir ideas que inspiren a otros.\n<b>CONSEJO DEL DÍA ☝️</b> Escucha más de lo que hablas durante hoy.\n\n<b>♋️ Cáncer. 20 de noviembre.</b>\n✨ Tu intuición está muy afilada hoy, permitiéndote ver verdades ocultas. Úsala para fortalecer tus vínculos afectivos y sentirte más seguro emocionalmente.\n<b>CONSEJO DEL DÍA ☝️</b> Confía plenamente en tu voz interior esta jornada.\n\n<b>♌️ Leo. 20 de noviembre.</b>\n✨ El fuego de Aries enciende tu creatividad y carisma. Brillarás intensamente en cualquier entorno social o profesional que decidas frecuentar hoy.\n<b>CONSEJO DEL DÍA ☝️</b> Expresa tu visión con total seguridad y estilo.\n\n<b>♍️ Virgo. 20 de noviembre.</b>\n✨ Enfócate en los detalles prácticos que requieren tu atención inmediata. Tu capacidad de análisis será tu mayor activo para resolver cualquier conflicto.\n<b>CONSEJO DEL DÍA ☝️</b> Organiza tu espacio de trabajo para mejorar productividad.\n\n<b>♎️ Libra. 20 de noviembre.</b>\n✨ La influencia de Venus suaviza tu entorno, facilitando acuerdos importantes. Aprovecha esta energía para limar asperezas y buscar la armonía necesaria.\n<b>CONSEJO DEL DÍA ☝️</b> Practica la diplomacia en todas tus conversaciones hoy.\n\n<b>♏️ Escorpio. 20 de noviembre.</b>\n✨ El Sol en tu signo te otorga una fuerza magnética poderosa. Es un día de transformación personal profunda y de mucha claridad mental.\n<b>CONSEJO DEL DÍA ☝️</b> Libérate de un peso emocional del pasado hoy.\n\n<b>♐️ Sagitario. 20 de noviembre.</b>\n✨ Sientes una renovada sed de aventura y conocimiento. La energía del viernes te empuja a explorar horizontes nuevos con mucho optimismo.\n<b>CONSEJO DEL DÍA ☝️</b> Planifica un viaje o un aprendizaje nuevo hoy.\n\n<b>♑️ Capricornio. 20 de noviembre.</b>\n✨ Tu determinación es admirable y hoy verás avances tangibles. Mantente enfocado en tus objetivos a largo plazo con paciencia y mucha disciplina.\n<b>CONSEJO DEL DÍA ☝️</b> Celebra cada pequeño logro que alcances este día.\n\n<b>♒️ Acuario. 20 de noviembre.</b>\n✨ Tu visión original te permite destacar entre la multitud hoy. Es un momento propicio para colaborar en causas que reflejen tus valores.\n<b>CONSEJO DEL DÍA ☝️</b> Comparte tus ideas innovadoras con total libertad.\n\n<b>♓️ Piscis. 20 de noviembre.</b>\n✨ La sensibilidad está a flor de piel, permitiéndote conectar profundamente. Utiliza esta empatía para sanar situaciones complejas en tu entorno cercano.\n<b>CONSEJO DEL DÍA ☝️</b> Dedica tiempo a meditar y renovar tu energía.\n\n✨✨✨ <i>La confianza es el puente que une nuestros deseos con la realidad; confía en el proceso y el camino se abrirá ante ti como un regalo del universo.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fuego",
+      "color": "0xFFE63946",
+      "focus": "Consejo: Toma la iniciativa en un asunto pendiente hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La energía lunar en tu signo potencia tu audacia natural. Es el momento ideal para liderar proyectos y confiar ciegamente en tus instintos más profundos.\n\nCONSEJO DEL DÍA ☝️ Toma la iniciativa en un asunto pendiente hoy."
+    },
+    {
+      "id": "taurus",
+      "name": "Tauro",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Prioriza tu paz mental sobre cualquier exigencia externa.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu mundo interior busca estabilidad mientras la Luna te invita a reflexionar. Aprovecha este viernes para organizar tus metas financieras con total calma.\n\nCONSEJO DEL DÍA ☝️ Prioriza tu paz mental sobre cualquier exigencia externa."
+    },
+    {
+      "id": "gemini",
+      "name": "Géminis",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Escucha más de lo que hablas durante hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La comunicación fluye con destreza bajo este tránsito. Es un día excelente para conectar con amigos y compartir ideas que inspiren a otros.\n\nCONSEJO DEL DÍA ☝️ Escucha más de lo que hablas durante hoy."
+    },
+    {
+      "id": "cancer",
+      "name": "Cáncer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Confía plenamente en tu voz interior esta jornada.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu intuición está muy afilada hoy, permitiéndote ver verdades ocultas. Úsala para fortalecer tus vínculos afectivos y sentirte más seguro emocionalmente.\n\nCONSEJO DEL DÍA ☝️ Confía plenamente en tu voz interior esta jornada."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fuego",
+      "color": "0xFFF4A261",
+      "focus": "Consejo: Expresa tu visión con total seguridad y estilo.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ El fuego de Aries enciende tu creatividad y carisma. Brillarás intensamente en cualquier entorno social o profesional que decidas frecuentar hoy.\n\nCONSEJO DEL DÍA ☝️ Expresa tu visión con total seguridad y estilo."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Tierra",
+      "color": "0xFF588157",
+      "focus": "Consejo: Organiza tu espacio de trabajo para mejorar productividad.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Enfócate en los detalles prácticos que requieren tu atención inmediata. Tu capacidad de análisis será tu mayor activo para resolver cualquier conflicto.\n\nCONSEJO DEL DÍA ☝️ Organiza tu espacio de trabajo para mejorar productividad."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Aire",
+      "color": "0xFFA8DADC",
+      "focus": "Consejo: Practica la diplomacia en todas tus conversaciones hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La influencia de Venus suaviza tu entorno, facilitando acuerdos importantes. Aprovecha esta energía para limar asperezas y buscar la armonía necesaria.\n\nCONSEJO DEL DÍA ☝️ Practica la diplomacia en todas tus conversaciones hoy."
+    },
+    {
+      "id": "scorpio",
+      "name": "Escorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Agua",
+      "color": "0xFF9D0208",
+      "focus": "Consejo: Libérate de un peso emocional del pasado hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ El Sol en tu signo te otorga una fuerza magnética poderosa. Es un día de transformación personal profunda y de mucha claridad mental.\n\nCONSEJO DEL DÍA ☝️ Libérate de un peso emocional del pasado hoy."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagitario",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fuego",
+      "color": "0xFFE76F51",
+      "focus": "Consejo: Planifica un viaje o un aprendizaje nuevo hoy.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Sientes una renovada sed de aventura y conocimiento. La energía del viernes te empuja a explorar horizontes nuevos con mucho optimismo.\n\nCONSEJO DEL DÍA ☝️ Planifica un viaje o un aprendizaje nuevo hoy."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricornio",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Tierra",
+      "color": "0xFF3A5A40",
+      "focus": "Consejo: Celebra cada pequeño logro que alcances este día.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu determinación es admirable y hoy verás avances tangibles. Mantente enfocado en tus objetivos a largo plazo con paciencia y mucha disciplina.\n\nCONSEJO DEL DÍA ☝️ Celebra cada pequeño logro que alcances este día."
+    },
+    {
+      "id": "aquarius",
+      "name": "Acuario",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Aire",
+      "color": "0xFF00B4D8",
+      "focus": "Consejo: Comparte tus ideas innovadoras con total libertad.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tu visión original te permite destacar entre la multitud hoy. Es un momento propicio para colaborar en causas que reflejen tus valores.\n\nCONSEJO DEL DÍA ☝️ Comparte tus ideas innovadoras con total libertad."
+    },
+    {
+      "id": "pisces",
+      "name": "Piscis",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Agua",
+      "color": "0xFF7209B7",
+      "focus": "Consejo: Dedica tiempo a meditar y renovar tu energía.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La sensibilidad está a flor de piel, permitiéndote conectar profundamente. Utiliza esta empatía para sanar situaciones complejas en tu entorno cercano.\n\nCONSEJO DEL DÍA ☝️ Dedica tiempo a meditar y renovar tu energía."
+    }
+  ],
+  "updated_at": "2026-11-20T04:31:28.266493Z"
+}
