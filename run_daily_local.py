@@ -100,9 +100,12 @@ def sync_git_pull():
         log("✅ Репозиторий успешно обновлен.")
     else:
         log(f"⚠️ Предупреждение при git pull: {res.stderr.strip() or res.stdout.strip()}")
+        run_cmd(["git", "rebase", "--abort"])
 
     if has_changes:
-        run_cmd(["git", "stash", "pop"])
+        pop_res = run_cmd(["git", "stash", "pop"])
+        if pop_res.returncode != 0:
+            log(f"⚠️ Конфликт при восстановлении stash: {pop_res.stderr.strip()}")
 
 
 def is_already_generated_for_date(date_dmy: str) -> bool:

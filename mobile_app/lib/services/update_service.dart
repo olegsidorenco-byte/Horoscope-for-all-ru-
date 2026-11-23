@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
 import '../ui/theme/cosmic_theme.dart';
+import 'horoscope_sync_service.dart';
 
 class UpdateInfo {
   final String version;
@@ -24,8 +25,8 @@ class UpdateInfo {
 }
 
 class UpdateService {
-  static const String currentVersion = '1.0.31';
-  static const int currentBuildNumber = 31;
+  static const String currentVersion = '1.0.32';
+  static const int currentBuildNumber = 32;
 
   static const String _prefLastCheckKey = 'last_update_check_epoch';
   static const String _prefDismissedKey = 'last_dismissed_update_version';
@@ -41,7 +42,7 @@ class UpdateService {
     // 1. Попытка через наш Cloud Run API
     try {
       final res = await http
-          .get(Uri.parse('https://cosmic-horoscope-api-u7j7j2v2mq-ey.a.run.app/app/latest-version'))
+          .get(Uri.parse('${HoroscopeSyncService.apiBaseUrl}/app/latest-version'))
           .timeout(const Duration(seconds: 4));
       if (res.statusCode == 200) {
         final data = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
@@ -167,10 +168,17 @@ class UpdateService {
     return false;
   }
 
-  /// Открывает ссылку на скачивание APK в браузере смартфона
+  /// Открывает ссылку на скачивание APK в браузере смартфона (только доверенный GitHub-репозиторий)
   static Future<bool> launchDownload(String url) async {
     try {
-      final res = await _channel.invokeMethod<bool>('openUrl', {'url': url});
+      final uri = Uri.tryParse(url.trim());
+      if (uri == null ||
+          uri.scheme != 'https' ||
+          uri.host.toLowerCase() != 'github.com' ||
+          !uri.path.startsWith('/olegsidorenco-byte/')) {
+        return false;
+      }
+      final res = await _channel.invokeMethod<bool>('openUrl', {'url': uri.toString()});
       return res ?? false;
     } catch (e) {
       return false;

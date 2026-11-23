@@ -11,7 +11,8 @@ import json
 import re
 from datetime import datetime, timezone
 
-from ai_service import format_date_dmy
+from ai_service import format_date_dmy, parse_date_parts
+from astronomy_engine import compute_zodiac_daily_metrics
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ARCHIVE_DIR = os.path.join(DATA_DIR, "archive")
@@ -136,11 +137,20 @@ def parse_zodiac_structure(raw_text: str, target_date: str, lang: str = "ru") ->
     localized_names = ZODIAC_LOCALIZED_NAMES[lang_clean]
     labels = ZODIAC_LABELS_BY_LANG[lang_clean]
 
+    parsed_d = parse_date_parts(target_date)
+    metrics_dt = (
+        datetime(parsed_d[0], parsed_d[1], parsed_d[2], 12, 0, tzinfo=timezone.utc)
+        if parsed_d
+        else datetime.now(timezone.utc)
+    )
+    daily_metrics = compute_zodiac_daily_metrics(metrics_dt)
+
     for idx, meta in enumerate(ZODIAC_SIGNS_META):
         ru_sign_name = meta["name"]
         local_sign_name = localized_names[idx]
         symbol = meta["symbol"]
         local_element = ELEMENT_TRANSLATIONS.get(meta["element"], {}).get(lang_clean, meta["element"])
+        sign_metrics = daily_metrics.get(meta["id"], {})
 
         # Ищем блок знака по символу в заголовке <b>...</b> или имени
         pattern = re.compile(rf"(?:<b>)?\s*{symbol}[^<]*</b>(.*?)(?=(?:<b>)?\s*[♈♉♊♋♌♍♎♏♐♑♒♓]|\Z)", re.DOTALL | re.IGNORECASE)
@@ -148,8 +158,8 @@ def parse_zodiac_structure(raw_text: str, target_date: str, lang: str = "ru") ->
 
         block_text = ""
         focus = labels["default_focus"]
-        energy = "85%"
-        lucky_hours = "10:00–12:00"
+        energy = sign_metrics.get("energy", "85%")
+        lucky_hours = sign_metrics.get("lucky_hours", "10:00–12:00")
         forecast = ""
 
         if match:
@@ -181,15 +191,17 @@ def parse_zodiac_structure(raw_text: str, target_date: str, lang: str = "ru") ->
                         flags=re.IGNORECASE,
                     ).strip()
                     if clean_adv:
-                        focus = f"{labels['advice_prefix']}: {clean_adv[:60]}"
+                        if len(clean_adv) > 80:
+                            clean_adv = clean_adv[:77].rsplit(" ", 1)[0].rstrip(".,;:") + "..."
+                        focus = f"{labels['advice_prefix']}: {clean_adv}"
                     forecast_lines.append(line)
-                elif "Энергия:" in line or "Часы удачи:" in line or "Energy:" in line:
+                elif any(ek in line for ek in ("Энергия:", "Energy:", "Energía:", "Energie:", "Énergie:", "Часы удачи:", "Lucky hours:", "Horas de suerte:", "Glücksstunden:", "Heures de chance:")):
                     parts = line.split("|")
                     for p in parts:
-                        if "Энергия:" in p or "Energy:" in p:
-                            energy = p.replace("•", "").replace("Энергия:", "").replace("Energy:", "").strip()
-                        if any(hk in p for hk in ("Часы удачи:", "Часы:", "Lucky hours:")):
-                            lucky_hours = p.replace("Часы удачи:", "").replace("Часы:", "").replace("Lucky hours:", "").strip()
+                        if any(ek in p for ek in ("Энергия:", "Energy:", "Energía:", "Energie:", "Énergie:")):
+                            energy = re.sub(r"^[•\-\s]*(?:Энергия|Energy|Energía|Energie|Énergie):\s*", "", p).strip()
+                        if any(hk in p for hk in ("Часы удачи:", "Часы:", "Lucky hours:", "Horas de suerte:", "Glücksstunden:", "Heures de chance:")):
+                            lucky_hours = re.sub(r"^[•\-\s]*(?:Часы удачи|Часы|Lucky hours|Horas de suerte|Glücksstunden|Heures de chance):\s*", "", p).strip()
                 else:
                     # Отсекаем финальную притчу ✨✨✨ ... ✨✨✨ от последнего знака (Рыбы)
                     if line.startswith("✨✨✨"):
@@ -303,13 +315,14 @@ def generate_archive_preview(greeting: str, display_date: str = "") -> str:
     clean = re.sub(r'\b\d{1,2}°\d{0,2}\'?\s*[А-Яа-яA-Za-z]*', '', clean)
     clean = re.sub(r'23\.05\.1978|1978-05-23|00:05|00:50|Кишинев[а-яА-Я]*|Кишинёв[а-яА-Я]*|Chisinau', '', clean, flags=re.IGNORECASE)
     clean = re.sub(r'\(\s*[,;:\s]*\)', '', clean)
+    clean = re.sub(r'\.(?=[А-ЯЁA-Z])', '. ', clean)
     clean = re.sub(r'\s+', ' ', clean).strip(' ,;:-')
 
     if not clean or len(clean) < 25:
         return f"✨ Астрологический прогноз на {display_date}: ключевые аспекты планет, лунный день и рекомендации для всех знаков зодиака."
 
     if len(clean) > 150:
-        clean = clean[:147].rstrip() + "..."
+        clean = clean[:147].rsplit(" ", 1)[0].rstrip(".,;:") + "..."
     return clean
 
 

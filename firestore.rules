@@ -2,13 +2,69 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Пользователи могут читать и записывать только свои собственные данные натального профиля
-    // и кэшированные/предгенерированные персональные прогнозы в подколлекции horoscopes
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function hasServerOnlyFields(keys) {
+      return keys.hasAny([
+        'lastDeliveredDate',
+        'lastDeliveredDateTg',
+        'lastDeliveredDateWeb',
+        'lastDeliveredAt',
+        'lastDeliveredWebAt',
+        'last_delivered_date',
+        'aiGenDate',
+        'aiGenCount',
+        'web_push_subscription',
+        'web_push_updated_at',
+        'web_push_user_agent',
+        'web_notifications_enabled'
+      ]);
+    }
+
+    function isOptionalStr(data, field, maxLen) {
+      return !(field in data) || (data[field] is string && data[field].size() <= maxLen);
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().size() <= 30
+        && isOptionalStr(data, 'id', 128)
+        && isOptionalStr(data, 'name', 100)
+        && isOptionalStr(data, 'email', 150)
+        && isOptionalStr(data, 'phone', 32)
+        && isOptionalStr(data, 'authType', 20)
+        && isOptionalStr(data, 'telegramUsername', 64)
+        && (!('passwordHash' in data) || (data.passwordHash is string && data.passwordHash.size() == 0))
+        && isOptionalStr(data, 'birthDate', 40)
+        && isOptionalStr(data, 'birthTime', 16)
+        && (!('isTimeExact' in data) || data.isTimeExact is bool)
+        && isOptionalStr(data, 'birthPlace', 120)
+        && isOptionalStr(data, 'currentCity', 120)
+        && isOptionalStr(data, 'gender', 20)
+        && isOptionalStr(data, 'focus', 300)
+        && isOptionalStr(data, 'timezone', 64)
+        && (!('utcOffsetMinutes' in data) || (data.utcOffsetMinutes is int && data.utcOffsetMinutes >= -840 && data.utcOffsetMinutes <= 840))
+        && isOptionalStr(data, 'deliveryTime', 16)
+        && (!('notificationsEnabled' in data) || data.notificationsEnabled is bool)
+        && isOptionalStr(data, 'lang', 10)
+        && isOptionalStr(data, 'updatedAt', 40)
+        && isOptionalStr(data, 'lastSeenAt', 40);
+    }
+
+    // Пользователи могут читать, удалять и обновлять только разрешенные поля своего профиля;
+    // серверные поля доставки/подписок и сгенерированные прогнозы изменяются только через Admin SDK.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && !hasServerOnlyFields(request.resource.data.keys())
+        && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId)
+        && !hasServerOnlyFields(request.resource.data.diff(resource.data).affectedKeys())
+        && isValidUserProfile(request.resource.data);
 
       match /horoscopes/{horoscopeId} {
-        allow read, delete: if request.auth != null && request.auth.uid == userId;
+        allow read, delete: if isOwner(userId);
         allow write: if false;
       }
     }

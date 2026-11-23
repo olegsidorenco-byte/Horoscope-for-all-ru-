@@ -41,7 +41,8 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           mkdir -p mobile_app/assets/data/archive
-          cp -r data/* mobile_app/assets/data/ || true
+          cp -r data/latest_*.json mobile_app/assets/data/ 2>/dev/null || true
+          cp -r data/archive/* mobile_app/assets/data/archive/ 2>/dev/null || true
           cd mobile_app
           rm -rf android
           flutter create --platforms=android --org com.cosmic .
@@ -71,16 +72,16 @@ jobs:
             echo 'dependencies { coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.0.4" }' >> android/app/build.gradle
           fi
 
-          # Копируем цифровой сертификат подписи (приоритет GitHub Secrets с безопасным откатом)
-          mkdir -p android/app
-          if [ -n "${RELEASE_KEYSTORE_BASE64:-}" ]; then
-            echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-          else
-            cp keystore/release.keystore android/app/release.keystore
+          # Настройка цифровой подписи строго из GitHub Secrets (без дефолтных паролей в коде)
+          if [ -z "${RELEASE_KEYSTORE_BASE64:-}" ] || [ -z "${KEY_ALIAS:-}" ] || [ -z "${KEYSTORE_PASSWORD:-}" ] || [ -z "${KEY_PASSWORD:-}" ]; then
+            echo "::error::Missing Android signing secrets (RELEASE_KEYSTORE_BASE64, KEY_ALIAS, KEYSTORE_PASSWORD, KEY_PASSWORD)."
+            exit 1
           fi
-          KS_ALIAS="${KEY_ALIAS:-cosmic_key}"
-          KS_PASS="${KEYSTORE_PASSWORD:-cosmic_pass_2026}"
-          K_PASS="${KEY_PASSWORD:-cosmic_pass_2026}"
+          mkdir -p android/app
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
+          KS_ALIAS="${KEY_ALIAS}"
+          KS_PASS="${KEYSTORE_PASSWORD}"
+          K_PASS="${KEY_PASSWORD}"
           
           # Настройка Firebase: Копируем google-services.json и внедряем плагины в Gradle (.gradle и .kts)
           if [ -f android_custom/google-services.json ]; then

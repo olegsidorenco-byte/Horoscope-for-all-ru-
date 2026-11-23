@@ -6,6 +6,7 @@
 а также обрабатывать входящие команды из Telegram-бота с сохранением offset (без повторного чтения старых апдейтов).
 """
 
+import html
 import re
 import json
 import sys
@@ -122,6 +123,27 @@ def update_registry(profile: dict, personal_chat_id: str = ""):
         f.write("\n")
 
 
+ALLOWED_TG_PROFILE_FIELDS = {
+    "name": 80,
+    "birth_date": 40,
+    "birth_time": 16,
+    "is_time_exact": None,
+    "birth_place": 100,
+    "birth_city": 100,
+    "current_city": 100,
+    "gender": 20,
+    "focus": 240,
+    "timezone": 64,
+    "delivery_time": 16,
+    "notifications_enabled": None,
+    "lang": 10,
+}
+
+
+def _safe_html(val) -> str:
+    return html.escape(str(val or ""), quote=False)
+
+
 def _send_tg_reply(token: str, chat_id: str, html_text: str):
     if not token or not chat_id:
         return
@@ -218,9 +240,9 @@ def sync_from_telegram_updates() -> bool:
 
             if text == "/start" or text.startswith("/start"):
                 welcome_text = (
-                    f"👋 Здравствуйте, {from_name}!\n\n"
+                    f"👋 Здравствуйте, {_safe_html(from_name)}!\n\n"
                     f"Добро пожаловать в официальный бот сервиса <b>«Астро Гороскоп»</b>! 🪐\n\n"
-                    f"Ваш Telegram Chat ID: <code>{from_id}</code>\n"
+                    f"Ваш Telegram Chat ID: <code>{_safe_html(from_id)}</code>\n"
                     f"Мы рассчитываем персональный натальный прогноз по дате и точному времени Вашего рождения "
                     f"и доставляем его строго в выбранное Вами время по <b>Вашему местному часовому поясу</b> "
                     f"(даже если у Вас другие сутки относительно сервера — прогноз готовится заранее под Вашу дату!).\n\n"
@@ -276,7 +298,7 @@ def sync_from_telegram_updates() -> bool:
                     token,
                     from_id,
                     f"⏰ <b>Время доставки обновлено!</b>\n\n"
-                    f"Ваш гороскоп будет приходить в <b>{d_time}</b> по Вашему местному времени (<b>{tz_lbl}</b>).\n"
+                    f"Ваш гороскоп будет приходить в <b>{_safe_html(d_time)}</b> по Вашему местному времени (<b>{_safe_html(tz_lbl)}</b>).\n"
                     f"При разнице часовых поясов или раннем утреннем времени прогноз рассчитывается заранее специально под Вашу дату.",
                 )
                 continue
@@ -346,11 +368,11 @@ def sync_from_telegram_updates() -> bool:
                     token,
                     from_id,
                     f"✨ <b>Натальные данные успешно сохранены!</b>\n\n"
-                    f"👤 Имя: {target_prof.get('name', from_name)}\n"
-                    f"📅 Дата рождения: <b>{iso_bdate}</b>\n"
+                    f"👤 Имя: {_safe_html(target_prof.get('name', from_name))}\n"
+                    f"📅 Дата рождения: <b>{_safe_html(iso_bdate)}</b>\n"
                     f"⏰ Время рождения: {time_desc}\n"
-                    f"📍 Место рождения: {b_city or target_prof.get('birth_place') or target_prof.get('birth_city') or 'Кишинев'}\n"
-                    f"🌍 Текущий часовой пояс: <b>{tz_lbl}</b>",
+                    f"📍 Место рождения: {_safe_html(b_city or target_prof.get('birth_place') or target_prof.get('birth_city') or 'Кишинев')}\n"
+                    f"🌍 Текущий часовой пояс: <b>{_safe_html(tz_lbl)}</b>",
                 )
                 continue
 
@@ -384,27 +406,37 @@ def sync_from_telegram_updates() -> bool:
                     )
                 continue
 
-            # 4. JSON-синхронизация (только для авторизованного автора или своего профиля)
-            if text.startswith("/update_natal_profile"):
+            # 4. JSON-синхронизация (строго по белому списку натальных полей)
+            if text.startswith("/update_natal_profile") and len(text) <= 2000:
                 payload_str = text.replace("/update_natal_profile", "", 1).strip()
                 try:
                     payload = json.loads(payload_str)
                     if isinstance(payload, dict):
-                        if is_author:
-                            for k, v in payload.items():
-                                if v is not None and v != "":
-                                    author_profile[k] = v
-                            author_updated = True
-                            any_updated = True
-                        else:
-                            existing = next((x for x in get_all_users() if str(x.get("telegram_chat_id", "")) == from_id), None) or {}
-                            merged = dict(existing)
-                            merged.update({k: v for k, v in payload.items() if k not in ("id",) and v is not None})
-                            merged["id"] = existing.get("id") or f"usr_tg_{from_id}"
-                            merged["telegram_chat_id"] = from_id
-                            register_or_update_user(merged)
-                            any_updated = True
-                        _send_tg_reply(token, from_id, "✅ Натальный профиль успешно синхронизирован!")
+                        sanitized_payload = {}
+                        for k, max_len in ALLOWED_TG_PROFILE_FIELDS.items():
+                            if k not in payload or payload[k] is None:
+                                continue
+                            if max_len is None:
+                                sanitized_payload[k] = bool(payload[k])
+                            else:
+                                val_str = re.sub(r"[\x00-\x1f\x7f<>`{}]", " ", str(payload[k])).strip()
+                                if val_str:
+                                    sanitized_payload[k] = val_str[:max_len]
+
+                        if sanitized_payload:
+                            if is_author:
+                                author_profile.update(sanitized_payload)
+                                author_updated = True
+                                any_updated = True
+                            else:
+                                existing = next((x for x in get_all_users() if str(x.get("telegram_chat_id", "")) == from_id), None) or {}
+                                merged = dict(existing)
+                                merged.update(sanitized_payload)
+                                merged["id"] = existing.get("id") or f"usr_tg_{from_id}"
+                                merged["telegram_chat_id"] = from_id
+                                register_or_update_user(merged)
+                                any_updated = True
+                            _send_tg_reply(token, from_id, "✅ Натальный профиль успешно синхронизирован!")
                 except Exception as e:
                     print(f"⚠️ Не удалось распарсить payload из Telegram: {e}")
 

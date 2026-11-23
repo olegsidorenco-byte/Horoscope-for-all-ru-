@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем исходный код API, астрологического ядра и планировщика часовых поясов
 COPY api/ /app/api/
-COPY ai_service.py archive_service.py timezone_scheduler.py telegram_service.py config_loader.py /app/
+COPY ai_service.py astronomy_engine.py archive_service.py timezone_scheduler.py telegram_service.py config_loader.py /app/
 
 # Задаем переменные среды для Cloud Run (порт передается автоматически)
 ENV PORT=8080

@@ -276,148 +276,36 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  Future<void> _showGoogleLoginDialog() async {
+  Future<void> _handleGoogleSignIn() async {
     final l10n = AppLocalizations.of(context);
-    final emailController = TextEditingController();
-    final nameController = TextEditingController();
-    String? localError;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFF1E2235),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: const BorderSide(color: Color(0xFF4285F4), width: 1.2),
-              ),
-              title: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 28),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      l10n.signInGoogle,
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (localError != null)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(localError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
-                      ),
-                    TextField(
-                      controller: emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: l10n.emailLabel,
-                        hintText: 'user@gmail.com',
-                        hintStyle: const TextStyle(color: Colors.white30, fontSize: 13),
-                        prefixIcon: const Icon(Icons.alternate_email, color: Color(0xFF4285F4)),
-                        filled: true,
-                        fillColor: Colors.black26,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: nameController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: l10n.nameLabel,
-                        prefixIcon: const Icon(Icons.person_outline, color: CosmicTheme.goldAccent),
-                        filled: true,
-                        fillColor: Colors.black26,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(l10n.cancel, style: const TextStyle(color: Colors.white60)),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF1F1F1F),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () async {
-                    final email = emailController.text.trim();
-                    final name = nameController.text.trim();
-
-                    if (email.isEmpty || !AuthService.isEmail(email)) {
-                      setDialogState(() => localError = l10n.emailFormatError);
-                      return;
-                    }
-
-                    Navigator.pop(ctx);
-                    setState(() => _isLoading = true);
-
-                    try {
-                      final profile = await AuthService.loginWithGoogle(
-                        email: email,
-                        name: name.isNotEmpty ? name : email.split('@')[0],
-                      );
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: const Color(0xFF1E2235),
-                            content: Text('${l10n.authSuccess} (${profile.email})'),
-                          ),
-                        );
-                        Navigator.pop(context, profile);
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        setState(() {
-                          _errorMessage = e.toString().replaceAll('Exception: ', '');
-                          _isLoading = false;
-                        });
-                      }
-                    }
-                  },
-                  child: Text(l10n.tabSignIn, style: const TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ],
-            );
-          },
+    try {
+      final UserProfile profile = await AuthService.signInWithGoogle();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            backgroundColor: const Color(0xFF1E2235),
+            content: Text('${l10n.authSuccess} (${profile.email})'),
+          ),
         );
-      },
-    );
+        Navigator.pop(context, profile);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception: ', '');
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _showTelegramLoginDialog() async {
     final l10n = AppLocalizations.of(context);
-    final tgController = TextEditingController();
-    final nameController = TextEditingController();
-
     showDialog(
       context: context,
       builder: (ctx) {
@@ -433,92 +321,20 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  l10n.signInTelegram,
+                  l10n.telegramBotTitle,
                   style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.telegramDesc,
-                style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.4),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: tgController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: l10n.telegramLabel,
-                  hintText: l10n.telegramHint,
-                  prefixIcon: const Icon(Icons.alternate_email, color: CosmicTheme.cyanAccent),
-                  filled: true,
-                  fillColor: Colors.black26,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: l10n.nameLabel,
-                  hintText: l10n.nameHint,
-                  prefixIcon: const Icon(Icons.person_outline, color: CosmicTheme.goldAccent),
-                  filled: true,
-                  fillColor: Colors.black26,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ],
+          content: Text(
+            l10n.telegramBotInstructions,
+            style: const TextStyle(color: CosmicTheme.textSecondary, fontSize: 13, height: 1.45),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text(l10n.cancel, style: const TextStyle(color: Colors.white60)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF29B6F6),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () async {
-                final tgVal = tgController.text.trim();
-                final nameVal = nameController.text.trim();
-                if (tgVal.isEmpty) return;
-
-                Navigator.pop(ctx);
-                setState(() => _isLoading = true);
-
-                try {
-                  final p = await AuthService.loginWithTelegram(
-                    telegramUsername: tgVal,
-                    name: nameVal.isNotEmpty ? nameVal : tgVal,
-                  );
-
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        backgroundColor: const Color(0xFF1E2235),
-                        content: Text('${l10n.authSuccess} (@${p.telegramUsername})'),
-                      ),
-                    );
-                    Navigator.pop(context, p);
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    setState(() {
-                      _errorMessage = e.toString().replaceAll('Exception: ', '');
-                      _isLoading = false;
-                    });
-                  }
-                }
-              },
-              child: Text(l10n.selectButton, style: const TextStyle(fontWeight: FontWeight.bold)),
+              child: Text(l10n.close, style: const TextStyle(color: CosmicTheme.goldAccent, fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -741,9 +557,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             ),
             const SizedBox(height: 16),
 
-            // Опциональный вход через Google
+            // Вход через Google (Firebase Federated Auth)
             ElevatedButton(
-              onPressed: _isLoading ? null : _showGoogleLoginDialog,
+              onPressed: _isLoading ? null : _handleGoogleSignIn,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF1F1F1F),
@@ -950,9 +766,9 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             ),
             const SizedBox(height: 16),
 
-            // Регистрация через Google
+            // Регистрация через Google (Firebase Federated Auth)
             ElevatedButton(
-              onPressed: _isLoading ? null : _showGoogleLoginDialog,
+              onPressed: _isLoading ? null : _handleGoogleSignIn,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF1F1F1F),

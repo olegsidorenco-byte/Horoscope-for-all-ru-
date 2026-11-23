@@ -33,10 +33,30 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Extract App Version
+        id: app_version
+        run: |
+          VERSION=$(grep '^version:' mobile_app/pubspec.yaml | sed 's/version: //' | cut -d'+' -f1 | tr -d ' "\r\n')
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Extracted App Version: ${VERSION}"
+
+      - name: Check Firebase deploy secret
+        id: check_firebase
+        env:
+          FIREBASE_SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU }}
+        run: |
+          if [ -n "$FIREBASE_SA" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU secret is not set; skipping Firebase Hosting deploy."
+          fi
+
       - name: Prepare assets and data
         run: |
           mkdir -p mobile_app/assets/data/archive
-          cp -r data/* mobile_app/assets/data/ || true
+          cp -r data/latest_*.json mobile_app/assets/data/ 2>/dev/null || true
+          cp -r data/archive/* mobile_app/assets/data/archive/ 2>/dev/null || true
 
       - name: Build Flutter Web (PWA)
         run: |
@@ -53,7 +73,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/heads/main')
         with:
-          tag_name: app-v1.0.31
+          tag_name: app-v${{ steps.app_version.outputs.version }}
           files: cosmic-horoscope-web.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -67,12 +87,9 @@ jobs:
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
-        if: ${{ env.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU != '' }}
+        if: steps.check_firebase.outputs.enabled == 'true'
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU }}
           channelId: live
           projectId: cosmic-horoscope-ru
-        env:
-          FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_COSMIC_HOROSCOPE_RU }}
-

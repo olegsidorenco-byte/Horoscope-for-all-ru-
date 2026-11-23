@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "688107707932-h66bjtuqklb6lthp98t42u58n2raibb5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cosmic.cosmic_horoscope",
+            "certificate_hash": "9eadad7314aea2da793fab8594c6cd719f86f416"
+          }
+        },
+        {
           "client_id": "688107707932-p0v1sa25msj04b8jpfsjpjl26vb6694k.apps.googleusercontent.com",
           "client_type": 3
         }

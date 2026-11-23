@@ -7,6 +7,8 @@
 - Генерацию космической картины дня
 """
 
+import copy
+import hashlib
 import json
 import re
 import time
@@ -15,26 +17,56 @@ import zoneinfo
 from datetime import datetime, date, timedelta, timezone
 import requests
 
+from astronomy_engine import (
+    ZODIAC_BY_LANG,
+    ZODIAC_SIGNS_RU,
+    compute_houses_cusps,
+    compute_planetary_hours,
+    compute_transit_aspects,
+    datetime_to_jd,
+    find_house_for_longitude,
+    format_lon_deg,
+    get_all_planet_positions,
+    get_lunar_phase_info,
+    get_true_sun_longitude,
+)
 
-# Резервный список моделей на случай сбоя автопоиска (приоритет легковесным и экономичным моделям Lite)
+
+# Приоритет моделей ИИ: сначала современные Gemini 4 Hydrogen / 3.8 Flash, затем стабильные Flash и экономный Lite-резерв
 DEFAULT_MODELS_PRIORITY = [
-    "gemini-3.1-flash-lite",
-    "gemini-flash-lite-latest",
-    "gemini-3.5-flash-lite",
+    "gemini-4-hydrogen",
+    "gemini-3.8-flash",
     "gemini-3.7-flash",
+    "gemini-3.6-flash",
     "gemini-2.5-flash",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
-    "gemini-2.5-pro"
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash-lite",
+    "gemini-flash-lite-latest",
+    "gemini-4-carbon",
+    "gemini-4-neon",
+    "gemini-3.1-pro",
+    "gemini-2.5-pro",
 ]
+
+_MODEL_DISCOVERY_CACHE: dict[str, tuple[float, list[str]]] = {}
+_MODEL_DISCOVERY_TTL_SEC = 21600  # 6 часов
 
 
 def discover_models(api_key: str) -> list:
     """
-    Опрашивает Google AI API и находит актуальные модели Gemini.
-    Сортирует их с приоритетом экономичных и быстрых моделей (Lite -> Flash -> Pro).
+    Опрашивает Google AI API (с кэшированием на 6 часов) и ранжирует модели Gemini
+    по качеству и скорости: Gemini 4 Hydrogen -> 3.8/3.7 Flash -> 2.5 Flash -> Lite -> Pro.
     """
+    preferred_env = __import__("os").getenv("GEMINI_PREFERRED_MODEL", "").strip()
+    cache_key = hashlib.sha256((api_key or "").encode("utf-8")).hexdigest()[:12]
+    now_ts = time.monotonic()
+    cached = _MODEL_DISCOVERY_CACHE.get(cache_key)
+    if cached and (now_ts - cached[0]) < _MODEL_DISCOVERY_TTL_SEC:
+        models_list = list(cached[1])
+        if preferred_env and preferred_env not in models_list:
+            models_list.insert(0, preferred_env)
+        return models_list
+
     url = "https://generativelanguage.googleapis.com/v1beta/models"
     headers = {"x-goog-api-key": api_key}
 
@@ -43,68 +75,75 @@ def discover_models(api_key: str) -> list:
         if response.status_code == 200:
             data = response.json()
             models = data.get("models", [])
-            
+
             valid_models = []
             for m in models:
                 name = m.get("name", "").replace("models/", "")
                 methods = m.get("supportedGenerationMethods", [])
-                
-                # Фильтруем только модели, поддерживающие генерацию текста
+
                 if "generateContent" not in methods:
                     continue
-                
-                # Исключаем устаревшие, экспериментальные без версий и специализированные модели
+
                 lower_name = name.lower()
-                if any(x in lower_name for x in ["embedding", "aqa", "bison", "tts", "imagen", "vision", "2.5-flash-lite"]):
+                if any(
+                    x in lower_name
+                    for x in [
+                        "embedding", "aqa", "bison", "tts", "imagen",
+                        "vision", "native-audio", "robotics", "computer-use", "live",
+                    ]
+                ):
                     continue
                 if "gemini" in lower_name:
                     valid_models.append(name)
-            
+
             if valid_models:
-                # Функция оценки приоритета модели
                 def model_score(m_name: str):
                     score = 0
                     m_lower = m_name.lower()
-                    
-                    # ПРИОРИТЕТ 1: Стабильные сверхбыстрые Lite-модели (экономия квот до 70%, ответ за 3-5 сек)
-                    if "3.1" in m_lower and "lite" in m_lower and "preview" not in m_lower:
+
+                    if "gemini-4-hydrogen" in m_lower:
+                        score += 2500
+                    elif "3.8" in m_lower and "flash" in m_lower and "lite" not in m_lower:
+                        score += 2200
+                    elif any(v in m_lower for v in ("3.7", "3.6", "3.5")) and "flash" in m_lower and "lite" not in m_lower:
+                        score += 1900
+                    elif "2.5" in m_lower and "flash" in m_lower and "lite" not in m_lower:
+                        score += 1600
+                    elif any(x in m_lower for x in ("gemini-4-carbon", "gemini-4-neon", "gemini-4-argon")):
+                        score += 1450
+                    elif "3.1-pro" in m_lower or "2.5-pro" in m_lower:
                         score += 1200
-                    elif "flash-lite-latest" in m_lower:
-                        score += 1100
                     elif "lite" in m_lower:
                         score += 1000
-                    
-                    if "3.8" in m_lower or "3.7" in m_lower:
-                        score += 50
-                    elif "3.5" in m_lower:
-                        score += 45
-                    elif "3.1" in m_lower:
-                        score += 40
-                    elif "2.5" in m_lower:
-                        score += 30
-                    elif "2.0" in m_lower:
-                        score += 20
-                    elif "1.5" in m_lower:
-                        score += 10
-                    
+                        if "3.5" in m_lower or "3.1" in m_lower or "latest" in m_lower:
+                            score += 150
+                    elif "flash" in m_lower:
+                        score += 1300
+
                     if "latest" in m_lower:
                         score += 25
-                    if "flash" in m_lower:
-                        score += 15
-                    if "pro" in m_lower:
-                        score += 5
                     if "exp" in m_lower or "preview" in m_lower:
-                        score -= 50
+                        score -= 150
                     if any(x in m_lower for x in ["tts", "image", "vision", "audio"]):
-                        score -= 2000
+                        score -= 3000
                     return score
 
                 valid_models.sort(key=model_score, reverse=True)
+                _MODEL_DISCOVERY_CACHE[cache_key] = (now_ts, list(valid_models))
+                if preferred_env:
+                    if preferred_env in valid_models:
+                        valid_models.remove(preferred_env)
+                    valid_models.insert(0, preferred_env)
                 return valid_models
     except Exception as e:
         print(f"⚠️ Ошибка при автопоиске моделей ({e}). Используем стандартный приоритетный список.")
 
-    return DEFAULT_MODELS_PRIORITY
+    fallback = list(DEFAULT_MODELS_PRIORITY)
+    if preferred_env:
+        if preferred_env in fallback:
+            fallback.remove(preferred_env)
+        fallback.insert(0, preferred_env)
+    return fallback
 
 
 def parse_date_parts(date_val) -> tuple[int, int, int] | None:
@@ -189,16 +228,17 @@ def normalize_time_hhmm(time_val) -> str:
 
 def get_astronomical_context(target_date_str: str) -> dict:
     """
-    Рассчитывает астрономический контекст для заданной даты:
+    Рассчитывает точный астрономический контекст для заданной даты (Жан Меес / JPL Standish):
     - День недели и планетарный управитель дня (Халдейский ряд)
-    - Приблизительный лунный день и фаза Луны (алгоритм Conway)
-    - Знак зодиака транзитной Луны и Солнца (на все 12 знаков года)
+    - Истинная элонгация, лунный день (1..30) и фаза Луны
+    - Истинные знаки транзитной Луны, Солнца и ключевых планет (Меркурий..Сатурн) с ретроградностью
     """
     parsed = parse_date_parts(target_date_str)
     if parsed:
-        dt = datetime(parsed[0], parsed[1], parsed[2])
+        dt = datetime(parsed[0], parsed[1], parsed[2], 12, 0, tzinfo=timezone.utc)
     else:
-        dt = datetime.now()
+        now = datetime.now(timezone.utc)
+        dt = datetime(now.year, now.month, now.day, 12, 0, tzinfo=timezone.utc)
 
     weekdays_data = [
         {"name": "Понедельник", "ruler": "Луна", "ruler_symbol": "🌙", "focus": "Эмоциональная сфера, интуиция, семейные вопросы, внутреннее равновесие"},
@@ -211,55 +251,32 @@ def get_astronomical_context(target_date_str: str) -> dict:
     ]
     day_info = weekdays_data[dt.weekday()]
 
-    # Вычисляем знак транзитного Солнца ДО модификации месяца для JD
-    sun_sign = get_sun_zodiac_sign(f"{dt.day:02d}.{dt.month:02d}.{dt.year:04d}") or "Овен"
+    jd = datetime_to_jd(dt)
+    lunar = get_lunar_phase_info(jd)
+    planets = get_all_planet_positions(jd, lang="ru")
 
-    year = dt.year
-    month = dt.month
-    day = dt.day
+    sun_sign = planets["Sun"]["sign_ru"]
+    moon_sign = planets["Moon"]["sign_ru"]
 
-    if month < 3:
-        year -= 1
-        month += 12
-    a = year // 100
-    b = a // 4
-    c = 2 - a + b
-    e = int(365.25 * (year + 4716))
-    f = int(30.6001 * (month + 1))
-    jd = c + day + e + f - 1524.5
-    days_since_new_moon = (jd - 2451549.5) % 29.53058867
-    lunar_day = int(days_since_new_moon) + 1
-
-    if days_since_new_moon < 1.84:
-        lunar_phase = "Новолуние"
-    elif days_since_new_moon < 7.38:
-        lunar_phase = "Растущая Луна (1-я четверть)"
-    elif days_since_new_moon < 14.77:
-        lunar_phase = "Растущая Луна (2-я четверть)"
-    elif days_since_new_moon < 16.61:
-        lunar_phase = "Полнолуние"
-    elif days_since_new_moon < 22.15:
-        lunar_phase = "Убывающая Луна (3-я четверть)"
-    else:
-        lunar_phase = "Убывающая Луна (4-я четверть)"
-
-    zodiac_signs = [
-        "Овен", "Телец", "Близнецы", "Рак", "Лев", "Дева",
-        "Весы", "Скорпион", "Стрелец", "Козерог", "Водолей", "Рыбы"
+    retrograde_list = [
+        p["name_ru"] for k, p in planets.items() if p.get("retrograde") and k in ("Mercury", "Venus", "Mars", "Jupiter", "Saturn")
     ]
-    moon_longitude = ((jd - 2451545.0) * 13.176396 + 218.316) % 360
-    moon_sign_idx = int(moon_longitude // 30) % 12
-    moon_sign = zodiac_signs[moon_sign_idx]
 
     return {
         "weekday": day_info["name"],
         "ruler": day_info["ruler"],
         "ruler_symbol": day_info["ruler_symbol"],
         "focus": day_info["focus"],
-        "lunar_day": lunar_day,
-        "lunar_phase": lunar_phase,
+        "lunar_day": lunar["lunar_day"],
+        "lunar_phase": lunar["lunar_phase"],
+        "elongation_deg": lunar["elongation_deg"],
         "moon_sign": moon_sign,
-        "sun_sign": sun_sign
+        "moon_deg": planets["Moon"]["deg_str"],
+        "sun_sign": sun_sign,
+        "sun_deg": planets["Sun"]["deg_str"],
+        "jd": jd,
+        "planets": planets,
+        "retrograde_planets": retrograde_list,
     }
 
 
@@ -486,21 +503,74 @@ CITY_COORDS = {
     'нью-йорк': (40.7128, -74.0060, 'America/New_York'),
     'new york': (40.7128, -74.0060, 'America/New_York'),
     'лос-анджелес': (34.0522, -118.2437, 'America/Los_Angeles'),
-    'чикаго': (41.8781, -87.6298, 'America/Chicago'),
-    'торонто': (43.6532, -79.3832, 'America/Toronto'),
-    'toronto': (43.6532, -79.3832, 'America/Toronto'),
-    'лос-анджелес': (34.0522, -118.2437, 'America/Los_Angeles'),
     'los angeles': (34.0522, -118.2437, 'America/Los_Angeles'),
     'чикаго': (41.8781, -87.6298, 'America/Chicago'),
     'chicago': (41.8781, -87.6298, 'America/Chicago'),
+    'майами': (25.7617, -80.1918, 'America/New_York'),
+    'miami': (25.7617, -80.1918, 'America/New_York'),
+    'сан-франциско': (37.7749, -122.4194, 'America/Los_Angeles'),
+    'san francisco': (37.7749, -122.4194, 'America/Los_Angeles'),
+    'бостон': (42.3601, -71.0589, 'America/New_York'),
+    'boston': (42.3601, -71.0589, 'America/New_York'),
+    'сиэтл': (47.6062, -122.3321, 'America/Los_Angeles'),
+    'seattle': (47.6062, -122.3321, 'America/Los_Angeles'),
+    'торонто': (43.6532, -79.3832, 'America/Toronto'),
+    'toronto': (43.6532, -79.3832, 'America/Toronto'),
+    'монреаль': (45.5017, -73.5673, 'America/Toronto'),
+    'montreal': (45.5017, -73.5673, 'America/Toronto'),
+    'ванкувер': (49.2827, -123.1207, 'America/Vancouver'),
+    'vancouver': (49.2827, -123.1207, 'America/Vancouver'),
     'сан-паулу': (-23.5505, -46.6333, 'America/Sao_Paulo'),
     'sao paulo': (-23.5505, -46.6333, 'America/Sao_Paulo'),
+    'буэнос-айрес': (-34.6037, -58.3816, 'America/Argentina/Buenos_Aires'),
+    'buenos aires': (-34.6037, -58.3816, 'America/Argentina/Buenos_Aires'),
+    'мехико': (19.4326, -99.1332, 'America/Mexico_City'),
+    'mexico city': (19.4326, -99.1332, 'America/Mexico_City'),
     'гонолулу': (21.3069, -157.8583, 'Pacific/Honolulu'),
     'honolulu': (21.3069, -157.8583, 'Pacific/Honolulu'),
     'лиссабон': (38.7223, -9.1393, 'Europe/Lisbon'),
     'lisbon': (38.7223, -9.1393, 'Europe/Lisbon'),
+    'барселона': (41.3874, 2.1686, 'Europe/Madrid'),
+    'barcelona': (41.3874, 2.1686, 'Europe/Madrid'),
+    'валенсия': (39.4699, -0.3763, 'Europe/Madrid'),
+    'valencia': (39.4699, -0.3763, 'Europe/Madrid'),
+    'лион': (45.7640, 4.8357, 'Europe/Paris'),
+    'lyon': (45.7640, 4.8357, 'Europe/Paris'),
+    'марсель': (43.2965, 5.3698, 'Europe/Paris'),
+    'marseille': (43.2965, 5.3698, 'Europe/Paris'),
+    'ницца': (43.7102, 7.2620, 'Europe/Paris'),
+    'nice': (43.7102, 7.2620, 'Europe/Paris'),
+    'мюнхен': (48.1351, 11.5820, 'Europe/Berlin'),
+    'munich': (48.1351, 11.5820, 'Europe/Berlin'),
+    'франкфурт': (50.1109, 8.6821, 'Europe/Berlin'),
+    'frankfurt': (50.1109, 8.6821, 'Europe/Berlin'),
+    'гамбург': (53.5511, 9.9937, 'Europe/Berlin'),
+    'hamburg': (53.5511, 9.9937, 'Europe/Berlin'),
+    'кёльн': (50.9375, 6.9603, 'Europe/Berlin'),
+    'кельн': (50.9375, 6.9603, 'Europe/Berlin'),
+    'cologne': (50.9375, 6.9603, 'Europe/Berlin'),
+    'цюрих': (47.3769, 8.5417, 'Europe/Zurich'),
+    'zurich': (47.3769, 8.5417, 'Europe/Zurich'),
+    'женева': (46.2044, 6.1432, 'Europe/Zurich'),
+    'geneva': (46.2044, 6.1432, 'Europe/Zurich'),
+    'милан': (45.4642, 9.1900, 'Europe/Rome'),
+    'milan': (45.4642, 9.1900, 'Europe/Rome'),
+    'неаполь': (40.8518, 14.2681, 'Europe/Rome'),
+    'naples': (40.8518, 14.2681, 'Europe/Rome'),
+    'краков': (50.0647, 19.9450, 'Europe/Warsaw'),
+    'krakow': (50.0647, 19.9450, 'Europe/Warsaw'),
+    'гданьск': (54.3520, 18.6466, 'Europe/Warsaw'),
+    'gdansk': (54.3520, 18.6466, 'Europe/Warsaw'),
+    'дублин': (53.3498, -6.2603, 'Europe/Dublin'),
+    'dublin': (53.3498, -6.2603, 'Europe/Dublin'),
+    'люксембург': (49.6116, 6.1319, 'Europe/Luxembourg'),
+    'luxembourg': (49.6116, 6.1319, 'Europe/Luxembourg'),
+    'братислава': (48.1486, 17.1077, 'Europe/Bratislava'),
+    'bratislava': (48.1486, 17.1077, 'Europe/Bratislava'),
     'пекин': (39.9042, 116.4074, 'Asia/Shanghai'),
     'beijing': (39.9042, 116.4074, 'Asia/Shanghai'),
+    'шанхай': (31.2304, 121.4737, 'Asia/Shanghai'),
+    'shanghai': (31.2304, 121.4737, 'Asia/Shanghai'),
     'токио': (35.6762, 139.6503, 'Asia/Tokyo'),
     'tokyo': (35.6762, 139.6503, 'Asia/Tokyo'),
     'сеул': (37.5665, 126.9780, 'Asia/Seoul'),
@@ -530,7 +600,7 @@ CITY_COORDS = {
 
 def resolve_city_coords_strict(city_raw: str) -> tuple | None:
     """
-    Ищет точное или частичное совпадение города в CITY_COORDS.
+    Ищет точное или пословное совпадение города в CITY_COORDS (без ложных подстрок вроде 'рим' в 'Приморск').
     Возвращает (lat, lon, tz_name) или None, если город не распознан.
     """
     if not city_raw:
@@ -542,7 +612,7 @@ def resolve_city_coords_strict(city_raw: str) -> tuple | None:
     if '(' in cleaned:
         cleaned = cleaned.split('(')[0].strip()
     for prefix in ['г.', 'город', 'гор.', 'с.', 'село', 'пос.', 'пгт']:
-        if cleaned.startswith(prefix + ' ') or cleaned.startswith(prefix):
+        if cleaned.startswith(prefix + ' ') or cleaned == prefix:
             cleaned = cleaned[len(prefix):].strip()
 
     if not cleaned:
@@ -551,8 +621,9 @@ def resolve_city_coords_strict(city_raw: str) -> tuple | None:
     if cleaned in CITY_COORDS:
         return CITY_COORDS[cleaned]
 
+    # Пословный поиск по границам слов/пробелов, чтобы избежать ложных совпадений внутри других слов
     for name, coords in CITY_COORDS.items():
-        if len(cleaned) >= 3 and (name == cleaned or name in cleaned or cleaned in name):
+        if len(cleaned) >= 3 and re.search(rf'(?:^|[\s,\-]){re.escape(name)}(?:$|[\s,\-])', cleaned):
             return coords
 
     return None
@@ -595,8 +666,9 @@ def get_sun_zodiac_sign(birth_date_str: str) -> str:
 
 def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city: str) -> dict:
     """
-    Вычисляет точный астрономический Асцендент (Asc) и Середину Неба (MC)
-    по формулам сферической тригонометрии с учетом географических координат и исторического часового пояса.
+    Вычисляет точный астрономический Асцендент (Asc), Середину Неба (MC),
+    куспиды 12 домов (Placidus) и позиции всех 10 натальных планет
+    по формулам сферической тригонометрии с учетом координат и исторического часового пояса.
     """
     try:
         parsed = parse_date_parts(birth_date_str)
@@ -660,6 +732,11 @@ def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city:
         mc_idx = (mc_total_arcmin // 1800) % 12
         mc_rem = mc_total_arcmin % 1800
 
+        houses = compute_houses_cusps(jd, lat, lon)
+        natal_planets = get_all_planet_positions(jd, lang="ru")
+        for p_info in natal_planets.values():
+            p_info["house"] = find_house_for_longitude(p_info["lon"], houses["cusps"])
+
         return {
             'asc_deg_total': asc_deg,
             'asc_sign': zodiac_nom[asc_idx],
@@ -669,6 +746,9 @@ def calculate_natal_asc_mc(birth_date_str: str, birth_time_str: str, birth_city:
             'mc_sign': zodiac_nom[mc_idx],
             'mc_sign_gen': zodiac_gen[mc_idx],
             'mc_degree': f"{mc_rem // 60}°{mc_rem % 60:02d}'",
+            'houses_cusps': houses["cusps"],
+            'natal_planets': natal_planets,
+            'jd_birth': jd,
         }
     except Exception:
         return None
@@ -977,6 +1057,33 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
 
     astro = get_astronomical_context(resolved_target_date)
 
+    # Координаты для локальных планетарных часов (город пребывания -> город рождения -> Кишинев)
+    city_geo = (
+        resolve_city_coords_strict(norm["current_city"])
+        or resolve_city_coords_strict(norm["birth_city"])
+        or (47.0105, 28.8638, tz_label)
+    )
+    parsed_tdate = parse_date_parts(resolved_target_date)
+    t_dt_local = (
+        datetime(parsed_tdate[0], parsed_tdate[1], parsed_tdate[2], 12, 0, tzinfo=user_tz)
+        if parsed_tdate
+        else datetime.now(user_tz)
+    )
+    planetary_hours = compute_planetary_hours(t_dt_local, city_geo[0], city_geo[1], user_tz)
+    favorable_windows_str = ", ".join(planetary_hours["favorable_windows"]) or "10:00–12:00, 14:30–16:00"
+
+    planets_t = astro["planets"]
+    transit_summary = (
+        f"Солнце в {planets_t['Sun']['sign_ru']} ({planets_t['Sun']['deg_str']}), "
+        f"Луна в {planets_t['Moon']['sign_ru']} ({planets_t['Moon']['deg_str']}), "
+        f"Меркурий в {planets_t['Mercury']['sign_ru']}{' (R)' if planets_t['Mercury']['retrograde'] else ''}, "
+        f"Венера в {planets_t['Venus']['sign_ru']}{' (R)' if planets_t['Venus']['retrograde'] else ''}, "
+        f"Марс в {planets_t['Mars']['sign_ru']}{' (R)' if planets_t['Mars']['retrograde'] else ''}, "
+        f"Юпитер в {planets_t['Jupiter']['sign_ru']}{' (R)' if planets_t['Jupiter']['retrograde'] else ''}, "
+        f"Сатурн в {planets_t['Saturn']['sign_ru']}{' (R)' if planets_t['Saturn']['retrograde'] else ''}"
+    )
+    retro_str = ", ".join(astro["retrograde_planets"]) if astro["retrograde_planets"] else "нет (все основные планеты директны)"
+
     natal = None
     if not is_general and birth_date and birth_time and is_time_exact:
         natal = calculate_natal_asc_mc(birth_date, birth_time, birth_city)
@@ -986,17 +1093,38 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
         sun_info = f"• ОСНОВНОЙ СОЛНЕЧНЫЙ ЗНАК ЗОДИАКА: {sun_sign.upper()} (родился {birth_date})\n" if sun_sign else ""
 
         if natal:
+            moon_house = find_house_for_longitude(planets_t["Moon"]["lon"], natal["houses_cusps"])
+            sun_house = find_house_for_longitude(planets_t["Sun"]["lon"], natal["houses_cusps"])
+            natal_pts = dict(natal["natal_planets"])
+            natal_pts["Ascendant"] = {"lon": natal["asc_deg_total"], "name_ru": "Асцендент"}
+            natal_pts["MC"] = {"lon": natal["mc_deg_total"], "name_ru": "Середина Неба (MC)"}
+            real_aspects = compute_transit_aspects(planets_t, natal_pts, max_aspects=6)
+            aspects_lines = "; ".join(
+                f"транзитный {a['transit_planet_ru']} ({a['transit_sign']}) {a['aspect_ru']} натальный {a['natal_point_ru']} (орбис {a['orb']}°)"
+                for a in real_aspects
+            ) or "гармоничный фоновый поток без жестких орбисных столкновений"
+
+            natal_pl = natal["natal_planets"]
+            natal_planets_summary = (
+                f"• Натальная Луна: {natal_pl['Moon']['sign_ru']} ({natal_pl['Moon']['house']}-й дом), "
+                f"Меркурий: {natal_pl['Mercury']['sign_ru']}, Венера: {natal_pl['Venus']['sign_ru']}, "
+                f"Марс: {natal_pl['Mars']['sign_ru']}, Юпитер: {natal_pl['Jupiter']['sign_ru']}, Сатурн: {natal_pl['Saturn']['sign_ru']}\n"
+                f"• АКТИВАЦИЯ ДОМОВ НАТАЛА СЕГОДНЯ: транзитная Луна проходит по {moon_house}-му дому, Солнце — по {sun_house}-му дому\n"
+                f"• ТОЧНЫЕ ТРАНЗИТНЫЕ АСПЕКТЫ К НАТАЛУ: {aspects_lines}\n"
+            )
+
             natal_calc_text = (
                 f"• ТОЧНЫЙ АСТРОНОМИЧЕСКИЙ АСЦЕНДЕНТ: {natal['asc_sign']} ({natal['asc_degree']} {natal['asc_sign_gen']})\n"
                 f"• ТОЧНАЯ СЕРЕДИНА НЕБА (МС, 10 ДОМ КАРЬЕРЫ): {natal['mc_sign']} ({natal['mc_degree']} {natal['mc_sign_gen']})\n"
-                f"• СТРОЖАЙШИЙ ЗАПРЕТ НА ГАЛЛЮЦИНАЦИИ: Восходящий знак натальной карты {name} — СТРОГО {natal['asc_sign'].upper()} ({natal['asc_degree']})! Середина Неба — в {natal['mc_sign_gen']}. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО называть любой другой знак (никаких Рыб, Овна, Тельца и т.д.)! Расчет зафиксирован астрономически.\n"
+                f"{natal_planets_summary}"
+                f"• СТРОЖАЙШИЙ ЗАПРЕТ НА ГАЛЛЮЦИНАЦИИ: Восходящий знак натальной карты {name} — СТРОГО {natal['asc_sign'].upper()} ({natal['asc_degree']})! Середина Неба — в {natal['mc_sign_gen']}. Используй ТОЛЬКО приведенные выше реальные положения планет, дома и аспекты — не выдумывай несуществующую ретроградность и не меняй дома/знаки!\n"
             )
             asc_str = f"{natal['asc_sign']} ({natal['asc_degree']} {natal['asc_sign_gen']})"
             mc_str = f"{natal['mc_sign']} ({natal['mc_degree']} {natal['mc_sign_gen']})"
             distinction_rule = (
                 f"• СТРОГОЕ РАЗЛИЧЕНИЕ ЗНАКА ЗОДИАКА И АСЦЕНДЕНТА: По знаку зодиака (по Солнцу) {name} — строго {sun_sign.upper()}! "
                 f"А {natal['asc_sign']} — это ИСКЛЮЧИТЕЛЬНО восходящий знак (Асцендент / куспид 1 дома)! "
-                f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО называть пользователя 'Водолеем' или 'натальным Водолеем' (или приписывать ему знак Асцендента как основной)! "
+                f"КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО приписывать пользователю знак Асцендента как его основной солнечный знак! "
                 f"Пользователь — представитель знака {sun_sign.upper()} с восходящим знаком {natal['asc_sign']}.\n"
             ) if sun_sign else ""
 
@@ -1010,13 +1138,14 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
                 f"{natal_calc_text}"
                 f"{distinction_rule}"
                 f"• Текущее местонахождение и часовой пояс пользователя (локальные транзиты): {current_city if current_city else 'Кишинев'} ({tz_label})\n"
+                f"• Рассчитанные благоприятные планетарные часы дня ({tz_label}): {favorable_windows_str}\n"
                 f"• Пол: {gender_display} ({gender_instruction})\n"
                 f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
                 "СТРОГИЕ АСТРОЛОГИЧЕСКИЕ ПРАВИЛА РАСЧЕТА:\n"
                 f"1. Восходящий знак Асцендента — строго {asc_str}! Учитывай Середину Неба (МС) — {mc_str}.\n"
-                "2. Рассчитай проекцию текущих транзитных планет в дома натала пользователя: 1 дом (личность и тонус), 2 дом (личные финансы и доходы), 6 дом (здоровье и работа), 7 дом (партнерство, брак и переговоры), 8 дом (чужие ресурсы, аудит, инвестиции), 10 дом (профессиональные цели).\n"
-                f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия ОБЯЗАТЕЛЬНО включи персональный натальный расчет: назови восходящий знак ({asc_str}) и активированный сегодня транзитный дом/аспект для натальной карты {name} ({birth_date}, {birth_time}). Пользователь должен сразу видеть неизменную астрономическую точность!\n"
-                f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике '{headings['work']}' (стратегия, переговоры, сделки) и '{headings['health']}'. Все часы благоприятной активности указывай строго по местному времени пользователя ({tz_label}) на дату {resolved_target_date}!\n"
+                "2. Проецируй реальные транзитные планеты в дома натала: 1 дом (личность и тонус), 2 дом (личные финансы и доходы), 6 дом (здоровье и работа), 7 дом (партнерство, брак и переговоры), 8 дом (чужие ресурсы, аудит, инвестиции), 10 дом (профессиональные цели).\n"
+                f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия ОБЯЗАТЕЛЬНО включи персональный натальный расчет: назови восходящий знак ({asc_str}) и активированный сегодня транзитный дом ({moon_house}-й дом Луны) / аспект для натальной карты {name} ({birth_date}, {birth_time}). Пользователь должен сразу видеть неизменную астрономическую точность!\n"
+                f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике '{headings['work']}' (стратегия, переговоры, сделки) и '{headings['health']}'. В качестве точных часов благоприятной активности укажи ИМЕННО рассчитанные планетарные окна ({favorable_windows_str}) по местному времени пользователя ({tz_label}) на дату {resolved_target_date}!\n"
             )
         else:
             # Точное время рождения неизвестно -> строгая Солнечная космограмма на полдень без выдуманного Асцендента
@@ -1028,17 +1157,18 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
                 f"• Время рождения: точное время не указано пользователем (используй классическую Солнечную космограмму на полдень 12:00 и равнодомную систему от Солнца)\n"
                 f"• Город рождения: {birth_city if birth_city else 'не указан'}\n"
                 f"• Текущее местонахождение и часовой пояс пользователя (локальные транзиты): {current_city if current_city else 'Кишинев'} ({tz_label})\n"
+                f"• Рассчитанные благоприятные планетарные часы дня ({tz_label}): {favorable_windows_str}\n"
                 f"• Пол: {gender_display} ({gender_instruction})\n"
                 f"• Приоритетные сферы внимания пользователя: '{focus}'\n\n"
                 "СТРОГИЕ АСТРОЛОГИЧЕСКИЕ ПРАВИЛА РАСЧЕТА:\n"
                 f"1. Поскольку точное время рождения не зафиксировано, КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать градус Асцендента! Выполняй расчет по Солнечной карте (1-й символический дом в знаке {sun_sign or 'Солнца'}).\n"
-                "2. Рассчитай аспекты транзитных планет к натальному Солнцу и символическим солнечным домам: 1 дом (личность и тонус), 2 дом (личные финансы), 6 дом (здоровье и работа), 7 дом (партнерство и переговоры), 10 дом (цели и карьера).\n"
+                "2. Рассчитай аспекты приведенных транзитных планет к натальному Солнцу и символическим солнечным домам: 1 дом (личность и тонус), 2 дом (личные финансы), 6 дом (здоровье и работа), 7 дом (партнерство и переговоры), 10 дом (цели и карьера).\n"
                 f"3. В САМОМ НАЧАЛЕ сообщения сразу после приветствия назови солнечный знак {name} ({sun_sign}, дата рождения {birth_date}) и ключевой транзитный аспект дня на {resolved_target_date}.\n"
-                f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике '{headings['work']}' и '{headings['health']}'. Все часы благоприятной активности указывай строго по местному времени пользователя ({tz_label}) на дату {resolved_target_date}!\n"
+                f"4. С учетом фокуса '{focus}' сделай прицельный практический акцент в рубрике '{headings['work']}' и '{headings['health']}'. Указывай конкретные благоприятные часы ({favorable_windows_str}) строго по местному времени пользователя ({tz_label}) на дату {resolved_target_date}!\n"
             )
     else:
         natal_precision_rules = (
-            f"Тип прогноза: Точный классический астрологический прогноз дня на {resolved_target_date} по реальным астрономическим транзитам (часовой пояс: {tz_label}).\n"
+            f"Тип прогноза: Точный классический астрологический прогноз дня на {resolved_target_date} по реальным астрономическим транзитам (часовой пояс: {tz_label}, благоприятные окна: {favorable_windows_str}).\n"
         )
 
     intro_natal_note = (
@@ -1095,9 +1225,12 @@ def build_horoscope_prompt(user_profile: dict, target_date: str = None, lang: st
 
 АСТРОНОМИЧЕСКИЙ ПАСПОРТ ДНЯ НА {resolved_target_date} (местный часовой пояс получателя: {tz_label}):
 • День недели: {astro['weekday']} (Планетарный управитель: {astro['ruler']} {astro['ruler_symbol']}, фокус: {astro['focus']})
-• Лунная динамика: {astro['lunar_day']}-й лунный день, фаза: {astro['lunar_phase']}
-• Положение Луны: транзитная Луна в знаке {astro['moon_sign']}
-• Положение Солнца: {astro['sun_sign']}
+• Лунная динамика: {astro['lunar_day']}-й лунный день, фаза: {astro['lunar_phase']} (элонгация {astro['elongation_deg']}°)
+• Положение Луны: транзитная Луна в знаке {astro['moon_sign']} ({astro['moon_deg']})
+• Положение Солнца: {astro['sun_sign']} ({astro['sun_deg']})
+• Реальные позиции планет: {transit_summary}
+• Ретроградные планеты сегодня: {retro_str}
+• Благоприятные планетарные часы дня ({tz_label}, восход {planetary_hours['sunrise']}, закат {planetary_hours['sunset']}): {favorable_windows_str}
 
 {natal_precision_rules}
 СТРОГИЕ ТРЕБОВАНИЯ К ОБЪЕМУ И СТИЛЮ:
@@ -1206,9 +1339,9 @@ def _enforce_target_language(text: str, lang: str, models: list[str], headers: d
             if resp.status_code == 200:
                 candidates = resp.json().get("candidates", [])
                 if candidates:
-                    parts = candidates[0].get("content", {}).get("parts", [])
-                    if parts:
-                        translated = clean_markdown_formatting(parts[0].get("text", "").strip())
+                    raw_trans = _extract_candidate_text(candidates[0])
+                    if raw_trans:
+                        translated = clean_markdown_formatting(raw_trans)
                         if translated and not has_unwanted_cyrillic(translated, lang_norm):
                             print(f"✅ [Language Guard] Текст успешно переведен на {target_lang_name} моделью {model}!")
                             return translated
@@ -1218,12 +1351,58 @@ def _enforce_target_language(text: str, lang: str, models: list[str], headers: d
     return text
 
 
+def _extract_candidate_text(candidate: dict) -> str:
+    """Извлекает итоговый ответ модели, исключая внутренние thought-блоки при включенном thinking."""
+    parts = candidate.get("content", {}).get("parts", [])
+    answer_chunks = [
+        p.get("text", "")
+        for p in parts
+        if isinstance(p, dict) and p.get("text") and not p.get("thought", False)
+    ]
+    if answer_chunks:
+        return "\n".join(answer_chunks).strip()
+    return "\n".join(
+        p.get("text", "") for p in parts if isinstance(p, dict) and p.get("text")
+    ).strip()
+
+
+def _format_structured_personal_horoscope(data: dict, lang: str) -> str:
+    headings = TOPIC_HEADINGS_BY_LANG.get(lang, TOPIC_HEADINGS_BY_LANG["ru"])
+    blocks = [
+        clean_markdown_formatting(str(data.get("greeting", "")).strip()),
+        f"🪐 <b>{headings['planets']}</b>\n\n{clean_markdown_formatting(str(data.get('planets', '')).strip())}",
+        f"💼 <b>{headings['work']}</b>\n\n{clean_markdown_formatting(str(data.get('work', '')).strip())}",
+        f"❤️ <b>{headings['relations']}</b>\n\n{clean_markdown_formatting(str(data.get('relations', '')).strip())}",
+        f"🌿 <b>{headings['health']}</b>\n\n{clean_markdown_formatting(str(data.get('health', '')).strip())}",
+        f"💡 <b>{headings['advice']}</b>\n\n{clean_markdown_formatting(str(data.get('advice', '')).strip())}",
+        f"✨ <b>{headings['wish']}</b>\n\n{clean_markdown_formatting(str(data.get('wish', '')).strip())}",
+    ]
+    return "\n\n".join(b for b in blocks if b.strip())
+
+
+def _post_gemini_with_fallbacks(url: str, headers: dict, payload: dict, timeout: int = 55) -> requests.Response:
+    """Выполняет запрос к Gemini API, автоматически снимая неподдерживаемые опции при HTTP 400."""
+    response = requests.post(url, headers=headers, json=payload, timeout=timeout)
+    if response.status_code == 400:
+        err_text = response.text
+        patched = copy.deepcopy(payload)
+        changed = False
+        if "thinkingConfig" in err_text or "thinkingBudget" in err_text:
+            patched.get("generationConfig", {}).pop("thinkingConfig", None)
+            changed = True
+        if "responseSchema" in err_text or "responseMimeType" in err_text:
+            patched.get("generationConfig", {}).pop("responseSchema", None)
+            patched.get("generationConfig", {}).pop("responseMimeType", None)
+            changed = True
+        if changed:
+            response = requests.post(url, headers=headers, json=patched, timeout=timeout)
+    return response
+
+
 def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", target_date: str = None) -> str:
     """
-    Генерирует текст гороскопа с автопоиском моделей и автопереключением (Fallback).
-    Делает до 2 попыток на каждую модель при временных сбоях.
-    Оптимизирован по токенам (maxOutputTokens: 8192, thinkingBudget: 0).
-    Если target_date не передан явно, дата определяется строго по часовому поясу пользователя.
+    Генерирует персональный гороскоп через Gemini (приоритет Gemini 4 Hydrogen / 3.8 Flash)
+    с включенным thinking-бюджетом и Structured Outputs JSON + безопасным текстовым фолбэком.
     """
     lang_clean = (lang or "ru").strip().lower()
     models = discover_models(api_key)
@@ -1233,54 +1412,85 @@ def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", 
         resolved_date = datetime.now(user_tz).strftime("%d.%m.%Y")
     prompt = build_horoscope_prompt(user_profile, resolved_date, lang=lang_clean)
 
-    headers = {
-        "x-goog-api-key": api_key,
-        "Content-Type": "application/json"
+    structured_prompt = (
+        prompt
+        + "\n\nOUTPUT FORMAT (STRICT JSON ONLY):\n"
+        + "Return ONLY a valid JSON object matching the schema with keys: "
+        + "`greeting`, `planets`, `work`, `relations`, `health`, `advice`, `wish`. "
+        + "Do NOT include section titles inside the field values — put only the rich paragraph text for each section. "
+        + "No Markdown symbols (*, **, #)."
+    )
+
+    personal_schema = {
+        "type": "OBJECT",
+        "properties": {
+            "greeting": {"type": "STRING"},
+            "planets": {"type": "STRING"},
+            "work": {"type": "STRING"},
+            "relations": {"type": "STRING"},
+            "health": {"type": "STRING"},
+            "advice": {"type": "STRING"},
+            "wish": {"type": "STRING"},
+        },
+        "required": ["greeting", "planets", "work", "relations", "health", "advice", "wish"],
     }
 
-    payload = {
-        "contents": [
-            {
-                "parts": [{"text": prompt}]
-            }
-        ],
+    headers = {
+        "x-goog-api-key": api_key,
+        "Content-Type": "application/json",
+    }
+
+    payload_json = {
+        "contents": [{"parts": [{"text": structured_prompt}]}],
         "generationConfig": {
             "temperature": 0.7,
             "maxOutputTokens": 8192,
             "topP": 0.95,
-            "thinkingConfig": {
-                "thinkingBudget": 0
-            }
-        }
+            "responseMimeType": "application/json",
+            "responseSchema": personal_schema,
+            "thinkingConfig": {"thinkingBudget": 512},
+        },
+    }
+
+    payload_text = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "temperature": 0.7,
+            "maxOutputTokens": 8192,
+            "topP": 0.95,
+            "thinkingConfig": {"thinkingBudget": 512},
+        },
     }
 
     last_error = ""
 
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-        
+
         for attempt in range(1, 3):
             try:
-                print(f"🤖 Запрос к модели {model} (попытка {attempt}/2)...")
-                response = requests.post(url, headers=headers, json=payload, timeout=50)
-                
-                # Если модель не поддерживает thinkingConfig (HTTP 400), повторяем без нее
-                if response.status_code == 400 and "thinkingConfig" in response.text:
-                    import copy
-                    fallback_payload = copy.deepcopy(payload)
-                    fallback_payload["generationConfig"].pop("thinkingConfig", None)
-                    response = requests.post(url, headers=headers, json=fallback_payload, timeout=50)
+                use_structured = attempt == 1
+                req_payload = payload_json if use_structured else payload_text
+                print(f"🤖 Запрос к модели {model} (попытка {attempt}/2, structured={use_structured})...")
+                response = _post_gemini_with_fallbacks(url, headers, req_payload, timeout=55)
 
                 if response.status_code == 200:
                     result = response.json()
                     candidates = result.get("candidates", [])
                     if candidates:
-                        content = candidates[0].get("content", {})
-                        parts = content.get("parts", [])
-                        if parts:
-                            text = parts[0].get("text", "").strip()
-                            # Очищаем от возможных случайных markdown-символов в заголовках
-                            cleaned_text = clean_markdown_formatting(text)
+                        raw_out = _extract_candidate_text(candidates[0])
+                        cleaned_text = ""
+                        if raw_out:
+                            try:
+                                parsed_json = json.loads(raw_out)
+                                if isinstance(parsed_json, dict) and all(
+                                    parsed_json.get(k) for k in ("greeting", "planets", "work", "relations", "health", "advice", "wish")
+                                ):
+                                    cleaned_text = _format_structured_personal_horoscope(parsed_json, lang_clean)
+                            except Exception:
+                                cleaned_text = clean_markdown_formatting(raw_out)
+
+                        if cleaned_text:
                             if has_unwanted_cyrillic(cleaned_text, lang_clean):
                                 cleaned_text = _enforce_target_language(cleaned_text, lang_clean, models, headers)
                             if has_unwanted_cyrillic(cleaned_text, lang_clean):
@@ -1289,17 +1499,17 @@ def generate_horoscope_text(api_key: str, user_profile: dict, lang: str = "ru", 
                                 continue
                             print(f"✅ Текст успешно сгенерирован моделью {model} ({len(cleaned_text)} симв.)!")
                             return cleaned_text
-                
-                # Если ошибка 429 (лимит) или 5xx (сервер) — делаем паузу
+
                 status = response.status_code
                 error_msg = response.text[:200]
                 last_error = f"HTTP {status}: {error_msg}"
                 print(f"⚠️ Ошибка от {model}: {last_error}")
-                
+
                 if status in [429, 500, 503, 504]:
                     time.sleep(2)
+                elif status == 400 and use_structured:
+                    continue
                 else:
-                    # Другие ошибки (например 404 для неподдерживаемой модели) — переходим к следующей модели сразу
                     break
 
             except Exception as e:
@@ -1450,9 +1660,10 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
     Извлекает визуальные космические образы из текста для промпта генерации.
     """
     default_prompt = "Sacred astrological cosmic alignment, glowing golden planets, ethereal nebula, deep starry space, mystical zodiac wheel, cinematic lighting"
-    
+
     try:
-        url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent"
+        model_id = (discover_models(api_key) or DEFAULT_MODELS_PRIORITY)[0]
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_id}:generateContent"
         headers = {"x-goog-api-key": api_key, "Content-Type": "application/json"}
         prompt_request = {
             "contents": [{
@@ -1464,16 +1675,16 @@ def extract_image_prompt(api_key: str, horoscope_text: str) -> str:
             }],
             "generationConfig": {
                 "temperature": 0.5,
-                "maxOutputTokens": 1000,
+                "maxOutputTokens": 500,
                 "thinkingConfig": {"thinkingBudget": 0}
             }
         }
-        res = requests.post(url, headers=headers, json=prompt_request, timeout=15)
+        res = _post_gemini_with_fallbacks(url, headers, prompt_request, timeout=15)
         if res.status_code == 200:
             data = res.json()
             candidates = data.get("candidates", [])
             if candidates:
-                out = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+                out = _extract_candidate_text(candidates[0])
                 if out:
                     return out
     except Exception:
@@ -1618,15 +1829,15 @@ def build_zodiac_prompt(target_date: str = None, lang: str = "ru") -> str:
 
 def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: str = "ru") -> str:
     """
-    Генерирует гороскоп по 12 знакам зодиака через Google Gemini API с автопоиском и отказоустойчивостью.
-    Гарантирует генерацию ВСЕХ 12 знаков без обрыва по лимиту токенов (MAX_TOKENS).
-    Поддерживает мультиязычность (ru, en, es, de, fr).
+    Генерирует гороскоп по 12 знакам зодиака через Google Gemini API (приоритет Gemini 4 Hydrogen / 3.8 Flash)
+    с включенным thinking-бюджетом, гарантией полноты всех 12 знаков и защитой от утечки кириллицы.
     """
+    lang_clean = (lang or "ru").strip().lower()
     resolved_date = format_date_dmy(target_date) if target_date else ""
     if not resolved_date:
         resolved_date = datetime.now().strftime("%d.%m.%Y")
 
-    prompt = build_zodiac_prompt(resolved_date, lang=lang)
+    prompt = build_zodiac_prompt(resolved_date, lang=lang_clean)
     models = discover_models(api_key)
     if not models:
         models = DEFAULT_MODELS_PRIORITY
@@ -1643,7 +1854,7 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: 
             "maxOutputTokens": 8192,
             "topP": 0.95,
             "thinkingConfig": {
-                "thinkingBudget": 0
+                "thinkingBudget": 512
             }
         }
     }
@@ -1654,14 +1865,7 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: 
         for attempt in range(1, 3):
             try:
                 print(f"🤖 [Зодиак] Запрос к модели {model_name} (попытка {attempt}/2)...")
-                response = requests.post(url, headers=headers, json=payload, timeout=50)
-                
-                # Если модель не поддерживает thinkingConfig (HTTP 400), пробуем без него
-                if response.status_code == 400 and "thinkingConfig" in response.text:
-                    import copy
-                    fallback_payload = copy.deepcopy(payload)
-                    fallback_payload["generationConfig"].pop("thinkingConfig", None)
-                    response = requests.post(url, headers=headers, json=fallback_payload, timeout=50)
+                response = _post_gemini_with_fallbacks(url, headers, payload, timeout=55)
 
                 if response.status_code == 200:
                     data = response.json()
@@ -1669,25 +1873,28 @@ def generate_zodiac_horoscope_text(api_key: str, target_date: str = None, lang: 
                     if candidates:
                         candidate = candidates[0]
                         finish_reason = candidate.get("finishReason", "")
-                        text = candidate.get("content", {}).get("parts", [{}])[0].get("text", "")
+                        text = clean_markdown_formatting(_extract_candidate_text(candidate))
 
-                        # Проверяем на обрыв генерации по лимиту токенов
                         if finish_reason == "MAX_TOKENS":
                             print(f"⚠️ [Зодиак] Модель {model_name} прервала ответ по MAX_TOKENS. Длина: {len(text)}.")
                             last_error = f"Превышен лимит токенов (MAX_TOKENS) на модели {model_name}"
                             continue
 
-                        # Проверяем наличие всех 12 знаков (с учетом языка и астрологических символов)
-                        target_signs = REQUIRED_ZODIAC_SIGNS_BY_LANG.get(lang, REQUIRED_ZODIAC_SIGNS)
+                        target_signs = REQUIRED_ZODIAC_SIGNS_BY_LANG.get(lang_clean, REQUIRED_ZODIAC_SIGNS)
                         missing_signs = []
                         for sym, ru_name, t_name in zip(ZODIAC_SYMBOLS, REQUIRED_ZODIAC_SIGNS, target_signs):
                             if sym in text or ru_name in text or t_name.lower() in text.lower():
                                 continue
-                            missing_signs.append(t_name if lang != "ru" else ru_name)
+                            missing_signs.append(t_name if lang_clean != "ru" else ru_name)
 
                         if missing_signs:
                             print(f"⚠️ [Зодиак] Модель {model_name} вернула неполный гороскоп (нет знаков: {missing_signs}).")
                             last_error = f"Неполный гороскоп: отсутствуют знаки {missing_signs}"
+                            continue
+
+                        if has_unwanted_cyrillic(text, lang_clean):
+                            print(f"⚠️ [Зодиак] Модель {model_name} допустила кириллицу для lang={lang_clean}, повторяем...")
+                            last_error = f"Утечка кириллицы для языка {lang_clean}"
                             continue
 
                         if text:

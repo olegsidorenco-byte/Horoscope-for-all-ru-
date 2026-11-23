@@ -79,6 +79,11 @@ def get_config():
                     default_config["user_profile"].update(loaded["user_profile"])
                 if "bot_settings" in loaded:
                     default_config["bot_settings"].update(loaded["bot_settings"])
+                    bs = default_config["bot_settings"]
+                    if "generation_time" in bs and "server_generation_time" not in bs:
+                        bs["server_generation_time"] = bs["generation_time"]
+                    if "timezone" in bs and "server_timezone" not in bs:
+                        bs["server_timezone"] = bs["timezone"]
         except Exception as e:
             print(f"⚠️ Предупреждение: Не удалось прочитать config.json ({e}). Используются настройки по умолчанию (общий прогноз).")
 

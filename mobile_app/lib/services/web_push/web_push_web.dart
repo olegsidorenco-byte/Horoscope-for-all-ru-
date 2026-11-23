@@ -2,22 +2,28 @@
 import 'dart:js' as js;
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../horoscope_sync_service.dart';
 
-Future<bool> subscribeWebPush(String uid) async {
+Future<bool> subscribeWebPush(String uid, {String? idToken}) async {
   try {
+    if (idToken == null || idToken.isEmpty) return false;
     if (js.context.hasProperty('cosmicSubscribeWebPush')) {
-      js.context.callMethod('cosmicSubscribeWebPush', [uid]);
+      js.context.callMethod('cosmicSubscribeWebPush', [uid, idToken]);
       return true;
     }
   } catch (_) {}
   return false;
 }
 
-Future<bool> sendTestWebPush(String uid) async {
+Future<bool> sendTestWebPush(String uid, {String? idToken}) async {
   try {
+    if (idToken == null || idToken.isEmpty) return false;
     final res = await http.post(
-      Uri.parse('https://cosmic-horoscope-api-688107707932.europe-west1.run.app/api/notifications/send-test'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('${HoroscopeSyncService.apiBaseUrl}/api/notifications/send-test'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
       body: jsonEncode({'user_id': uid}),
     );
     return res.statusCode == 200;

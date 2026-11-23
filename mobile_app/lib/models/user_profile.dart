@@ -7,7 +7,6 @@ class UserProfile {
   final String phone;
   final String authType; // "email", "phone", "telegram", "guest"
   final String telegramUsername;
-  final String passwordHash;
   final DateTime birthDate;
   final String birthTime; // Формат "12:00"
   final bool isTimeExact;
@@ -29,7 +28,6 @@ class UserProfile {
     this.phone = "",
     this.authType = "guest",
     this.telegramUsername = "",
-    this.passwordHash = "",
     required this.birthDate,
     required this.birthTime,
     this.isTimeExact = true,
@@ -54,7 +52,6 @@ class UserProfile {
       phone: "",
       authType: "guest",
       telegramUsername: "",
-      passwordHash: "",
       birthDate: DateTime(2000, 1, 1),
       birthTime: "12:00",
       isTimeExact: false,
@@ -624,7 +621,6 @@ class UserProfile {
       "phone": phone,
       "authType": authType,
       "telegramUsername": telegramUsername,
-      "passwordHash": passwordHash,
       "birthDate": birthDate.toIso8601String(),
       "birthTime": birthTime,
       "isTimeExact": isTimeExact,
@@ -659,7 +655,6 @@ class UserProfile {
       phone: json["phone"] ?? "",
       authType: json["authType"] ?? json["auth_type"] ?? "guest",
       telegramUsername: json["telegramUsername"] ?? json["telegram_username"] ?? "",
-      passwordHash: json["passwordHash"] ?? "",
       birthDate: (json["birthDate"] ?? json["birth_date"]) != null
           ? DateTime.tryParse((json["birthDate"] ?? json["birth_date"]).toString()) ?? DateTime(2000, 1, 1)
           : DateTime(2000, 1, 1),
@@ -687,7 +682,6 @@ class UserProfile {
     String? phone,
     String? authType,
     String? telegramUsername,
-    String? passwordHash,
     DateTime? birthDate,
     String? birthTime,
     bool? isTimeExact,
@@ -709,7 +703,6 @@ class UserProfile {
       phone: phone ?? this.phone,
       authType: authType ?? this.authType,
       telegramUsername: telegramUsername ?? this.telegramUsername,
-      passwordHash: passwordHash ?? this.passwordHash,
       birthDate: birthDate ?? this.birthDate,
       birthTime: birthTime ?? this.birthTime,
       isTimeExact: isTimeExact ?? this.isTimeExact,

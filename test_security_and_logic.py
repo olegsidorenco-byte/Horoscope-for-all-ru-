@@ -929,6 +929,275 @@ class SecurityAndLogicAuditTest(unittest.TestCase):
 
         print("✅ Тест 21 пройден: Французский, английский, испанский и немецкий прогнозы чисты от кириллицы.")
 
+    def test_22_api_security_auth_cors_ssrf_and_gdpr(self):
+        """Проверка аутентификации Web Push, отсутствия дефолтного VAPID-ключа, CORS, SSRF-защиты и удаления Firebase Auth."""
+        from fastapi import HTTPException
+        from fastapi.testclient import TestClient
+        import api.main as cloud_api
+
+        # 1. В коде больше нет захардкоженного VAPID_PRIVATE_KEY
+        with open(os.path.join("api", "main.py"), "r", encoding="utf-8") as f:
+            api_src = f.read()
+        self.assertIn('VAPID_PRIVATE_KEY = os.getenv("VAPID_PRIVATE_KEY", "").strip()', api_src)
+        self.assertIn("auth.delete_user(user_id)", api_src)
+
+        client = TestClient(cloud_api.app)
+
+        # 2. Защищенные эндпоинты обязаны отклонять неавторизованные запросы (401)
+        for method, path, body in [
+            ("POST", "/api/notifications/web-subscribe", {"subscription": {"endpoint": "https://fcm.googleapis.com/fcm/send/x", "keys": {"p256dh": "k", "auth": "a"}}}),
+            ("POST", "/api/notifications/send-test", {}),
+            ("POST", "/horoscope/personal", {"lang": "ru"}),
+            ("DELETE", "/user/account", None),
+        ]:
+            resp = client.request(method, path, json=body) if body is not None else client.request(method, path)
+            self.assertEqual(resp.status_code, 401, f"{method} {path} должен возвращать 401 без токена, получено {resp.status_code}")
+
+        # 3. CORS preflight для Web PWA (Firebase Hosting)
+        cors_resp = client.options(
+            "/horoscope/personal",
+            headers={
+                "Origin": "https://cosmic-horoscope-ru.web.app",
+                "Access-Control-Request-Method": "POST",
+                "Access-Control-Request-Headers": "Authorization,Content-Type",
+            },
+        )
+        self.assertEqual(cors_resp.status_code, 200)
+        self.assertEqual(cors_resp.headers.get("access-control-allow-origin"), "https://cosmic-horoscope-ru.web.app")
+
+        # 4. SSRF-валидация Web Push endpoints
+        for bad_endpoint in [
+            "http://fcm.googleapis.com/fcm/send/abc",
+            "https://169.254.169.254/latest/meta-data",
+            "https://127.0.0.1/hook",
+            "https://localhost/hook",
+            "https://10.0.0.5/hook",
+            "https://metadata.google.internal/computeMetadata/v1/",
+        ]:
+            with self.assertRaises(HTTPException, msg=f"SSRF endpoint не был заблокирован: {bad_endpoint}"):
+                cloud_api.sanitize_web_push_subscription({
+                    "endpoint": bad_endpoint,
+                    "keys": {"p256dh": "validKey", "auth": "validAuth"},
+                })
+
+        valid_sub = cloud_api.sanitize_web_push_subscription({
+            "endpoint": "https://fcm.googleapis.com/fcm/send/sampleToken123",
+            "keys": {"p256dh": "BCxyz", "auth": "Auth123"},
+            "malicious_extra": "ignored",
+        })
+        self.assertEqual(set(valid_sub.keys()), {"endpoint", "keys"})
+
+        # 5. Санитизация текстовых полей против Prompt/HTML-инъекций
+        cleaned = cloud_api._sanitize_text_field("Иван\n<script>alert(1)</script>{ignore}", 20)
+        self.assertNotIn("<", cleaned)
+        self.assertNotIn(">", cleaned)
+        self.assertNotIn("{", cleaned)
+        self.assertLessEqual(len(cleaned), 20)
+
+        print("✅ Тест 22 пройден: API защищен аутентификацией, CORS, SSRF-фильтром, санитизацией и полным удалением Auth.")
+
+    def test_23_scheduler_tick_cache_hit_and_webpush_dedup(self):
+        """Проверка отсутствия UnboundLocalError при cache hit и дедупликации Web Push в /scheduler/tick."""
+        from datetime import datetime, timezone
+        from unittest.mock import patch
+        import api.main as cloud_api
+        from timezone_scheduler import compute_profile_hash
+
+        now_utc = datetime.now(timezone.utc)
+        hhmm_now = now_utc.strftime("%H:%M")
+        target_dmy = now_utc.strftime("%d.%m.%Y")
+        target_iso = now_utc.strftime("%Y-%m-%d")
+
+        user_data = {
+            "name": "Анна",
+            "birthDate": "1992-07-15",
+            "birthTime": "10:00",
+            "isTimeExact": True,
+            "birthPlace": "Лондон",
+            "currentCity": "Лондон",
+            "timezone": "UTC",
+            "deliveryTime": hhmm_now,
+            "notificationsEnabled": True,
+            "lang": "en",
+            "web_push_subscription": {
+                "endpoint": "https://fcm.googleapis.com/fcm/send/test123",
+                "keys": {"p256dh": "key1", "auth": "auth1"},
+            },
+            "web_notifications_enabled": True,
+        }
+        from ai_service import normalize_user_profile
+        p_hash = compute_profile_hash(normalize_user_profile(user_data), lang="en")
+
+        class FakeSnap:
+            def __init__(self, doc_id, data):
+                self.id = doc_id
+                self._data = data
+                self.exists = data is not None
+
+            def to_dict(self):
+                return dict(self._data) if self._data is not None else None
+
+        class FakeDocRef:
+            def __init__(self, store, path):
+                self._store = store
+                self._path = path
+
+            def collection(self, name):
+                return FakeCollectionRef(self._store, f"{self._path}/{name}")
+
+            def get(self):
+                return FakeSnap(self._path.split("/")[-1], self._store.get(self._path))
+
+            def set(self, payload, merge=False):
+                if merge and self._path in self._store:
+                    self._store[self._path].update(payload)
+                else:
+                    self._store[self._path] = dict(payload)
+
+        class FakeCollectionRef:
+            def __init__(self, store, prefix):
+                self._store = store
+                self._prefix = prefix
+
+            def document(self, doc_id):
+                return FakeDocRef(self._store, f"{self._prefix}/{doc_id}")
+
+            def stream(self):
+                res = []
+                for k, v in list(self._store.items()):
+                    if k.startswith(self._prefix + "/") and "/" not in k[len(self._prefix) + 1:]:
+                        res.append(FakeSnap(k.split("/")[-1], v))
+                return res
+
+        class FakeDB:
+            def __init__(self, store):
+                self._store = store
+
+            def collection(self, name):
+                return FakeCollectionRef(self._store, name)
+
+        store = {
+            "users/uid_test_1": dict(user_data),
+            f"users/uid_test_1/horoscopes/{target_iso}_en": {
+                "raw_text": "Good morning, Anna!\n\n🪐 <b>Planetary Influences Today</b>\nTest text.",
+                "greeting": "Good morning, Anna!",
+                "profile_hash": p_hash,
+            },
+        }
+        fake_db = FakeDB(store)
+        push_calls = []
+
+        def fake_send_push(sub, title, body, url="https://cosmic-horoscope-ru.web.app"):
+            push_calls.append({"title": title, "body": body})
+            return True
+
+        with patch.object(cloud_api, "get_db", return_value=fake_db), \
+             patch.object(cloud_api, "send_web_push", side_effect=fake_send_push), \
+             patch.dict(os.environ, {"GEMINI_API_KEY": "dummy_test_key", "SCHEDULER_SECRET": "sec_123"}):
+            res1 = cloud_api.scheduler_tick(_authorized=True)
+            res2 = cloud_api.scheduler_tick(_authorized=True)
+
+        self.assertEqual(res1["errors_count"], 0)
+        self.assertEqual(res1["delivered_web_push"], 1)
+        self.assertEqual(res2["delivered_web_push"], 0, "Повторный тик не должен дублировать Web Push в тот же день")
+        self.assertEqual(len(push_calls), 1)
+        self.assertIn(target_dmy, push_calls[0]["title"])
+        self.assertEqual(store["users/uid_test_1"]["lastDeliveredDateWeb"], target_dmy)
+
+        print("✅ Тест 23 пройден: /scheduler/tick корректно отправляет локализованный Web Push из кэша без дублей и ошибок.")
+
+    def test_24_ephemeris_planets_houses_aspects_and_zodiac_metrics(self):
+        """Проверка реальных эфемерид 10 планет, домов Placidus, аспектов, планетарных часов и индивидуальных метрик знаков."""
+        from datetime import datetime, timezone
+        import zoneinfo
+        from astronomy_engine import (
+            datetime_to_jd,
+            get_all_planet_positions,
+            compute_houses_cusps,
+            compute_transit_aspects,
+            compute_planetary_hours,
+        )
+        from archive_service import parse_zodiac_structure
+
+        tz = zoneinfo.ZoneInfo("Europe/Chisinau")
+        jd_birth = datetime_to_jd(datetime(1978, 5, 23, 0, 50, tzinfo=tz).astimezone(timezone.utc))
+        natal_planets = get_all_planet_positions(jd_birth)
+        self.assertEqual(len(natal_planets), 10)
+        self.assertEqual(natal_planets["Sun"]["sign_ru"], "Близнецы")
+        self.assertEqual(natal_planets["Moon"]["sign_ru"], "Стрелец")
+        self.assertTrue(natal_planets["Uranus"]["retrograde"])
+
+        houses = compute_houses_cusps(jd_birth, 47.0105, 28.8638)
+        self.assertEqual(len(houses["cusps"]), 12)
+
+        jd_transit = datetime_to_jd(datetime(2026, 11, 23, 10, 0, tzinfo=timezone.utc))
+        transit_planets = get_all_planet_positions(jd_transit)
+        aspects = compute_transit_aspects(transit_planets, natal_planets)
+        self.assertGreater(len(aspects), 0)
+
+        p_hours = compute_planetary_hours(datetime(2026, 11, 23, 12, 0, tzinfo=tz), 47.0105, 28.8638, tz)
+        self.assertGreaterEqual(len(p_hours["favorable_windows"]), 1)
+
+        sample_zodiac = "\n\n".join(
+            f"<b>{sym} Sign. 23.11.</b>\nForecast text.\n<b>СОВЕТ ДНЯ ☝️</b> Держите фокус на главной цели сегодняшнего дня без суеты."
+            for sym in ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"]
+        )
+        parsed = parse_zodiac_structure(sample_zodiac, "23.11.2026", lang="ru")
+        energies = {s["energy"] for s in parsed["signs"]}
+        hours = {s["lucky_hours"] for s in parsed["signs"]}
+        self.assertGreater(len(energies), 1, "Энергия знаков не должна быть одинаковой заглушкой 85%")
+        self.assertGreater(len(hours), 1, "Часы удачи знаков должны различаться")
+        self.assertFalse(parsed["signs"][0]["focus"].endswith("суе"), "Совет не должен обрезаться посреди слова")
+
+        print("✅ Тест 24 пройден: Эфемериды, дома Placidus, аспекты, планетарные часы и метрики знаков работают точно.")
+
+    def test_25_city_word_boundary_and_ai_model_priority(self):
+        """Проверка пословного поиска городов и приоритета Gemini 4 Hydrogen / 3.8 Flash + фильтрации thought-блоков."""
+        from ai_service import (
+            DEFAULT_MODELS_PRIORITY,
+            _extract_candidate_text,
+            resolve_city_coords_strict,
+        )
+
+        self.assertIsNone(resolve_city_coords_strict("Приморск"), "'Приморск' не должен ложно матчиться с 'рим'")
+        self.assertIsNotNone(resolve_city_coords_strict("г. Мюнхен, Германия"))
+        self.assertEqual(resolve_city_coords_strict("г. Рим, Италия")[2], "Europe/Rome")
+
+        self.assertLess(
+            DEFAULT_MODELS_PRIORITY.index("gemini-4-hydrogen"),
+            DEFAULT_MODELS_PRIORITY.index("gemini-3.1-flash-lite"),
+        )
+        self.assertLess(
+            DEFAULT_MODELS_PRIORITY.index("gemini-3.8-flash"),
+            DEFAULT_MODELS_PRIORITY.index("gemini-3.1-flash-lite"),
+        )
+
+        extracted = _extract_candidate_text({
+            "content": {
+                "parts": [
+                    {"text": "Internal reasoning thoughts", "thought": True},
+                    {"text": "Final clean answer"},
+                ]
+            }
+        })
+        self.assertEqual(extracted, "Final clean answer")
+
+        print("✅ Тест 25 пройден: Пословный поиск городов, приоритет моделей ИИ и фильтрация thought-частей работают корректно.")
+
+    def test_26_telegram_html_escaping_and_field_whitelist(self):
+        """Проверка HTML-экранирования и белого списка полей Telegram-бота."""
+        from update_profile import ALLOWED_TG_PROFILE_FIELDS, _safe_html
+
+        escaped = _safe_html('<script>alert("x")</script> & Иван')
+        self.assertNotIn("<script>", escaped)
+        self.assertIn("&lt;script&gt;", escaped)
+        self.assertIn("&amp;", escaped)
+
+        for forbidden in ("id", "email", "phone", "password_hash", "auth_type", "telegram_chat_id", "telegram_username"):
+            self.assertNotIn(forbidden, ALLOWED_TG_PROFILE_FIELDS)
+
+        print("✅ Тест 26 пройден: Telegram-бот защищен от HTML-инъекций и перезаписи служебных полей.")
+
 
 if __name__ == "__main__":
     unittest.main()

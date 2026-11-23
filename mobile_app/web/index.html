@@ -368,8 +368,9 @@
     // =========================================================================
     // Web Push Notifications for iOS Safari (16.4+) & Web Browsers
     // =========================================================================
-    const COSMIC_VAPID_PUBLIC_KEY = 'BFsxlA77SduX7b8r6PDUqefbVXSOBBqCmI1kzzLtUnX5FZKw6mT1Ew92Nq747FyF9xc9eBLYv5zpOKJhXJ3K9Xg';
     const COSMIC_API_URL = 'https://cosmic-horoscope-api-688107707932.europe-west1.run.app';
+    const COSMIC_PUSH_SW_SCOPE = '/push/';
+    let cachedVapidPublicKey = null;
 
     function urlB64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -382,9 +383,37 @@
       return outputArray;
     }
 
+    async function getVapidPublicKey() {
+      if (cachedVapidPublicKey) return cachedVapidPublicKey;
+      const res = await fetch(COSMIC_API_URL + '/api/notifications/vapid-public-key');
+      if (!res.ok) throw new Error('Failed to load VAPID public key: ' + res.status);
+      const data = await res.json();
+      if (!data.public_key) throw new Error('Empty VAPID public key');
+      cachedVapidPublicKey = data.public_key;
+      return cachedVapidPublicKey;
+    }
+
+    async function getOrRegisterPushSW() {
+      let reg = await navigator.serviceWorker.getRegistration(COSMIC_PUSH_SW_SCOPE);
+      if (!reg) {
+        reg = await navigator.serviceWorker.register('sw.js', { scope: COSMIC_PUSH_SW_SCOPE });
+      }
+      if (reg.active) return reg;
+      const worker = reg.installing || reg.waiting;
+      if (worker) {
+        await new Promise((resolve) => {
+          if (worker.state === 'activated') return resolve();
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'activated') resolve();
+          });
+        });
+      }
+      return reg;
+    }
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(function(err) {
-        console.log('SW register failed: ', err);
+      navigator.serviceWorker.register('sw.js', { scope: COSMIC_PUSH_SW_SCOPE }).catch(function(err) {
+        console.log('Push SW register failed: ', err);
       });
     }
 
@@ -393,12 +422,15 @@
       return Notification.permission;
     };
 
-    window.cosmicSubscribeWebPush = async function(userId) {
+    window.cosmicSubscribeWebPush = async function(userId, idToken) {
       try {
+        if (!idToken) {
+          return { success: false, error: 'Missing auth token' };
+        }
         if (!('Notification' in window)) {
           return { success: false, error: 'Notifications not supported' };
         }
-        
+
         const perm = await Notification.requestPermission();
         if (perm !== 'granted') {
           return { success: false, error: 'Permission not granted: ' + perm };
@@ -408,22 +440,24 @@
           return { success: false, error: 'ServiceWorker not supported' };
         }
 
-        let reg = await navigator.serviceWorker.getRegistration('sw.js');
-        if (!reg) {
-          reg = await navigator.serviceWorker.register('sw.js');
-        }
-        await navigator.serviceWorker.ready;
+        const [reg, vapidPublicKey] = await Promise.all([
+          getOrRegisterPushSW(),
+          getVapidPublicKey()
+        ]);
 
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlB64ToUint8Array(COSMIC_VAPID_PUBLIC_KEY)
+          applicationServerKey: urlB64ToUint8Array(vapidPublicKey)
         });
 
         const subJson = sub.toJSON();
 
         const res = await fetch(COSMIC_API_URL + '/api/notifications/web-subscribe', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + idToken
+          },
           body: JSON.stringify({
             user_id: userId,
             subscription: subJson,
@@ -442,11 +476,15 @@
       }
     };
 
-    window.cosmicSendTestWebPush = async function(userId) {
+    window.cosmicSendTestWebPush = async function(userId, idToken) {
       try {
+        if (!idToken) return false;
         const res = await fetch(COSMIC_API_URL + '/api/notifications/send-test', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + idToken
+          },
           body: JSON.stringify({ user_id: userId })
         });
         return res.ok;

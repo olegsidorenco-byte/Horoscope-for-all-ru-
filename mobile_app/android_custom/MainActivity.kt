@@ -104,15 +104,20 @@ class MainActivity: FlutterActivity() {
                 }
                 "openUrl" -> {
                     try {
-                        val url = call.argument<String>("url")
-                        if (!url.isNullOrBlank()) {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+                        val url = call.argument<String>("url")?.trim()
+                        val uri = if (!url.isNullOrBlank()) Uri.parse(url) else null
+                        val isAllowed = uri != null &&
+                            uri.scheme.equals("https", ignoreCase = true) &&
+                            uri.host.equals("github.com", ignoreCase = true) &&
+                            (uri.path?.startsWith("/olegsidorenco-byte/") == true)
+                        if (isAllowed) {
+                            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             }
                             startActivity(intent)
                             result.success(true)
                         } else {
-                            result.error("INVALID_URL", "URL is empty", null)
+                            result.error("FORBIDDEN_URL", "Disallowed URL", null)
                         }
                     } catch (e: Exception) {
                         result.error("OPEN_URL_FAILED", e.message, null)

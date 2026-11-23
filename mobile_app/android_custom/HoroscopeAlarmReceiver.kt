@@ -312,7 +312,14 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
                     setRequestProperty("Cache-Control", "no-cache")
                 }
                 if (conn.responseCode == 200) {
-                    conn.inputStream.bufferedReader().use { it.readText() }
+                    val contentLength = conn.contentLength
+                    if (contentLength > 524288) {
+                        return null
+                    }
+                    conn.inputStream.bufferedReader().use { reader ->
+                        val text = reader.readText()
+                        if (text.length <= 524288) text else null
+                    }
                 } else {
                     null
                 }
@@ -436,6 +443,9 @@ class HoroscopeAlarmReceiver : BroadcastReceiver() {
 
         private fun showMorningAlert(context: Context, dateStr: String, lang: String = "ru") {
             val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                ?: Intent(context, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
             val pendingIntent = PendingIntent.getActivity(
                 context,
                 1,

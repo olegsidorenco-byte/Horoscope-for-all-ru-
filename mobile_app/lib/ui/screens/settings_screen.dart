@@ -96,7 +96,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       } else {
         final user = FirebaseAuth.instance.currentUser;
         if (user != null) {
-          await WebPushService.subscribe(user.uid);
+          final token = await user.getIdToken();
+          if (token != null) {
+            await WebPushService.subscribe(user.uid, idToken: token);
+          }
         }
       }
     } else {
@@ -188,7 +191,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } else {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        await WebPushService.sendTest(user.uid);
+        final token = await user.getIdToken();
+        if (token != null) {
+          await WebPushService.sendTest(user.uid, idToken: token);
+        }
       }
     }
     if (mounted) {
@@ -691,18 +697,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirmed == true) {
-      await AuthService.deleteAccount();
-      await _loadSettings();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            backgroundColor: Color(0xFF1E2235),
-            content: Text(
-              '🗑️ Account deleted.',
-              style: TextStyle(color: Colors.white),
+      try {
+        await AuthService.deleteAccount();
+        await _loadSettings();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Color(0xFF1E2235),
+              content: Text(
+                '🗑️ Account deleted.',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
-          ),
-        );
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.redAccent,
+              content: Text(
+                e.toString().replaceAll('Exception: ', ''),
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          );
+        }
       }
     }
   }

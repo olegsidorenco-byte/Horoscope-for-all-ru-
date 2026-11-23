@@ -1,5 +1,12 @@
-# Локальные секреты
+# Локальные секреты и ключи подписи
 .env
+.env.*
+!.env.example
+*.keystore
+*.jks
+*firebase-adminsdk*.json
+service-account*.json
+*service_account*.json
 
 # Временные файлы Python
 __pycache__/
@@ -19,12 +26,18 @@ env/
 # IDE и снимки
 .snapshots/
 
-# Приватный локальный кэш персональных прогнозов и статусов доставки
+# Приватные данные пользователей, кэш персональных прогнозов и статусы доставки
 data/user_forecasts/
+data/users/users_registry.json
+data/users/telegram_subscribers.json
 data/users/delivery_state.json
 data/users/telegram_offset.json
 
 # Firebase & Flutter Build artifacts
 .firebase/
 mobile_app/build/
-
+.dart_tool/
+mobile_app/.dart_tool/
+mobile_app/.flutter-plugins
+mobile_app/.flutter-plugins-dependencies
+mobile_app/pubspec.lock

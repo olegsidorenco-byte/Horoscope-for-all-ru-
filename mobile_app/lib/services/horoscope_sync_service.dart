@@ -95,7 +95,7 @@ class HoroscopeSyncService {
                     .map((item) => HoroscopeTopic.fromJson(Map<String, dynamic>.from(item as Map)))
                     .toList(),
                 rawText: rawHoroscope,
-                updatedAt: (data['generated_at'] ?? DateTime.now().toIso8601String()).toString(),
+                updatedAt: (data['updated_at'] ?? data['generated_at'] ?? DateTime.now().toIso8601String()).toString(),
                 isPersonal: true,
               );
             } else {
@@ -103,7 +103,7 @@ class HoroscopeSyncService {
                 respDate,
                 rawHoroscope,
                 isPersonal: true,
-                updatedAt: (data['generated_at'] ?? DateTime.now().toIso8601String()).toString(),
+                updatedAt: (data['updated_at'] ?? data['generated_at'] ?? DateTime.now().toIso8601String()).toString(),
               );
             }
 

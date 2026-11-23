@@ -86,7 +86,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       phone: p.phone,
       authType: p.authType,
       telegramUsername: _telegramController.text.replaceAll('@', '').trim(),
-      passwordHash: p.passwordHash,
       birthDate: _selectedDate,
       birthTime: timeStr,
       isTimeExact: _isTimeExact,
