@@ -1,0 +1,151 @@
+{
+  "date": "23.11.2026",
+  "raw_text": "Good morning! May your Monday begin with the rich aroma of fresh coffee and a heart full of serene confidence. Embrace the quiet strength of the Moon in Taurus as you step into this productive week with a warm smile and a clear, focused mind. ☕️🍂✨\n\n☀️🌿 <b>Horoscope for November 23 (Monday)</b> 🌿☀️\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. November 23.</b>\nYour fiery energy finds a steady anchor today. Focus on grounding your ambitious ideas into tangible, long-term results rather than chasing fleeting impulses.\nTIP OF THE DAY ☝️ Prioritize one major task before checking your emails.\n\n<b>♉️ Taurus. November 23.</b>\nWith the Moon in your sign, your natural charm and patience are amplified. Trust your intuition regarding financial decisions and enjoy the comfort of routine.\nTIP OF THE DAY ☝️ Treat yourself to a nourishing and healthy lunch today.\n\n<b>♊️ Gemini. November 23.</b>\nInternal reflection brings clarity to your busy mind. Use this day to organize your thoughts and prepare for the social opportunities coming later this week.\nTIP OF THE DAY ☝️ Write down your top three goals for the week.\n\n<b>♋️ Cancer. November 23.</b>\nYour emotional intelligence is your greatest asset today. Connect with friends or colleagues who appreciate your deep empathy and supportive, nurturing nature.\nTIP OF THE DAY ☝️ Reach out to a close friend for a chat.\n\n<b>♌️ Leo. November 23.</b>\nProfessional recognition is within reach if you stay consistent. Your leadership qualities shine brightly, but remember to listen as much as you command today.\nTIP OF THE DAY ☝️ Offer sincere praise to a helpful team member.\n\n<b>♍️ Virgo. November 23.</b>\nA day of intellectual expansion awaits you. Your attention to detail will help you solve a complex problem that has been lingering for some time.\nTIP OF THE DAY ☝️ Organize your workspace to improve your mental clarity.\n\n<b>♎️ Libra. November 23.</b>\nHarmony in your partnerships is highlighted today. Focus on open communication to resolve any minor misunderstandings and strengthen your personal bonds effectively.\nTIP OF THE DAY ☝️ Practice active listening during your next conversation.\n\n<b>♏️ Scorpio. November 23.</b>\nYour intensity is balanced by the stable energy of the day. Deep conversations will yield profound insights and help you navigate current challenges with grace.\nTIP OF THE DAY ☝️ Trust your gut feelings when making final decisions.\n\n<b>♐️ Sagittarius. November 23.</b>\nThe Sun illuminates your path, encouraging you to plan future adventures. Stay grounded while you dream big, ensuring your foundations remain rock solid.\nTIP OF THE DAY ☝️ Spend fifteen minutes planning your next big project.\n\n<b>♑️ Capricorn. November 23.</b>\nYour discipline pays off as you tackle your to-do list with ease. Today is perfect for cementing alliances and proving your reliability to others.\nTIP OF THE DAY ☝️ Focus on finishing one lingering task today.\n\n<b>♒️ Aquarius. November 23.</b>\nInnovative ideas are flowing, but ensure they are practical. Balance your desire for progress with the need for stability in your daily environment.\nTIP OF THE DAY ☝️ Start a new habit that promotes daily wellness.\n\n<b>♓️ Pisces. November 23.</b>\nYour creativity is heightened, allowing you to see beauty in ordinary tasks. Allow your intuition to guide your choices and maintain your inner peace.\nTIP OF THE DAY ☝️ Dedicate time to a quiet, artistic hobby tonight.\n\n✨✨✨ <i>Just as the moon reflects the sun, let your actions today reflect your inner truth. Trust that steady progress is the quietest path to your greatest dreams.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Tip: Prioritize one major task before checking your emails.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your fiery energy finds a steady anchor today. Focus on grounding your ambitious ideas into tangible, long-term results rather than chasing fleeting impulses.\n\nTIP OF THE DAY ☝️ Prioritize one major task before checking your emails."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Tip: Treat yourself to a nourishing and healthy lunch today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "With the Moon in your sign, your natural charm and patience are amplified. Trust your intuition regarding financial decisions and enjoy the comfort of routine.\n\nTIP OF THE DAY ☝️ Treat yourself to a nourishing and healthy lunch today."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Tip: Write down your top three goals for the week.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Internal reflection brings clarity to your busy mind. Use this day to organize your thoughts and prepare for the social opportunities coming later this week.\n\nTIP OF THE DAY ☝️ Write down your top three goals for the week."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Tip: Reach out to a close friend for a chat.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your emotional intelligence is your greatest asset today. Connect with friends or colleagues who appreciate your deep empathy and supportive, nurturing nature.\n\nTIP OF THE DAY ☝️ Reach out to a close friend for a chat."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Tip: Offer sincere praise to a helpful team member.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Professional recognition is within reach if you stay consistent. Your leadership qualities shine brightly, but remember to listen as much as you command today.\n\nTIP OF THE DAY ☝️ Offer sincere praise to a helpful team member."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Earth",
+      "color": "0xFF588157",
+      "focus": "Tip: Organize your workspace to improve your mental clarity.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "A day of intellectual expansion awaits you. Your attention to detail will help you solve a complex problem that has been lingering for some time.\n\nTIP OF THE DAY ☝️ Organize your workspace to improve your mental clarity."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Tip: Practice active listening during your next conversation.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Harmony in your partnerships is highlighted today. Focus on open communication to resolve any minor misunderstandings and strengthen your personal bonds effectively.\n\nTIP OF THE DAY ☝️ Practice active listening during your next conversation."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Water",
+      "color": "0xFF9D0208",
+      "focus": "Tip: Trust your gut feelings when making final decisions.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your intensity is balanced by the stable energy of the day. Deep conversations will yield profound insights and help you navigate current challenges with grace.\n\nTIP OF THE DAY ☝️ Trust your gut feelings when making final decisions."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Tip: Spend fifteen minutes planning your next big project.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "The Sun illuminates your path, encouraging you to plan future adventures. Stay grounded while you dream big, ensuring your foundations remain rock solid.\n\nTIP OF THE DAY ☝️ Spend fifteen minutes planning your next big project."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Earth",
+      "color": "0xFF3A5A40",
+      "focus": "Tip: Focus on finishing one lingering task today.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your discipline pays off as you tackle your to-do list with ease. Today is perfect for cementing alliances and proving your reliability to others.\n\nTIP OF THE DAY ☝️ Focus on finishing one lingering task today."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Tip: Start a new habit that promotes daily wellness.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Innovative ideas are flowing, but ensure they are practical. Balance your desire for progress with the need for stability in your daily environment.\n\nTIP OF THE DAY ☝️ Start a new habit that promotes daily wellness."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Water",
+      "color": "0xFF7209B7",
+      "focus": "Tip: Dedicate time to a quiet, artistic hobby tonight.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "Your creativity is heightened, allowing you to see beauty in ordinary tasks. Allow your intuition to guide your choices and maintain your inner peace.\n\nTIP OF THE DAY ☝️ Dedicate time to a quiet, artistic hobby tonight."
+    }
+  ],
+  "updated_at": "2026-11-23T04:31:22.999271Z"
+}

@@ -1,0 +1,151 @@
+{
+  "date": "23.11.2026",
+  "raw_text": "Bonjour, chers amis ! Que cette nouvelle semaine commence avec la douceur d'un café chaud et la promesse d'une belle énergie qui s'éveille en vous. Laissez la lumière du matin dissiper vos doutes et inspirez profondément pour accueillir les opportunités de cette journée. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope du 23 novembre (Lundi)</b> 🌿☀️\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Bélier. 23 novembre.</b>\n✨ Votre énergie déborde sous l'influence du Soleil. Canalisez cette ardeur pour transformer un défi professionnel en une victoire éclatante.\n<b>CONSEIL DU JOUR ☝️</b> Prenez une initiative courageuse dès ce matin.\n\n<b>♉️ Taureau. 23 novembre.</b>\n✨ Avec la Lune dans votre signe, vous rayonnez de stabilité. C'est le moment idéal pour ancrer vos projets matériels dans la réalité.\n<b>CONSEIL DU JOUR ☝️</b> Accordez-vous un moment de confort sensoriel pur.\n\n<b>♊️ Gémeaux. 23 novembre.</b>\n✨ Votre esprit est vif, propice aux échanges fructueux. Utilisez votre éloquence naturelle pour dénouer une situation complexe avec diplomatie.\n<b>CONSEIL DU JOUR ☝️</b> Écoutez attentivement avant de formuler votre réponse.\n\n<b>♋️ Cancer. 23 novembre.</b>\n✨ La douceur lunaire apaise vos émotions, vous offrant une clarté intérieure rare. Votre intuition devient votre meilleur guide aujourd'hui.\n<b>CONSEIL DU JOUR ☝️</b> Faites confiance à votre première impression intime.\n\n<b>♌️ Lion. 23 novembre.</b>\n✨ Le Soleil nourrit votre charisme naturel, attirant les regards vers vos idées audacieuses. Soyez le leader inspirant que vous savez être.\n<b>CONSEIL DU JOUR ☝️</b> Partagez votre enthousiasme avec votre équipe proche.\n\n<b>♍️ Vierge. 23 novembre.</b>\n✨ La précision est votre alliée, vous permettant d'organiser votre quotidien avec une efficacité redoutable. Le calme favorise votre réussite.\n<b>CONSEIL DU JOUR ☝️</b> Notez vos priorités pour éviter la dispersion.\n\n<b>♎️ Balance. 23 novembre.</b>\n✨ L'harmonie est à portée de main si vous choisissez de privilégier la coopération. Vos relations sociales s'épanouissent sous votre bienveillance.\n<b>CONSEIL DU JOUR ☝️</b> Cherchez le compromis gagnant pour tout le monde.\n\n<b>♏️ Scorpion. 23 novembre.</b>\n✨ Une force intérieure puissante vous anime, vous permettant de voir au-delà des apparences. Votre perspicacité est un atout majeur.\n<b>CONSEIL DU JOUR ☝️</b> Transformez une contrainte en une force nouvelle.\n\n<b>♐️ Sagittaire. 23 novembre.</b>\n✨ Le Soleil illumine votre soif d'aventure et de connaissances. Ouvrez votre esprit à de nouvelles perspectives enrichissantes pour votre avenir.\n<b>CONSEIL DU JOUR ☝️</b> Planifiez un projet qui nourrit votre curiosité.\n\n<b>♑️ Capricorne. 23 novembre.</b>\n✨ Votre persévérance porte enfin ses fruits, renforçant votre position. La stabilité est votre ancrage pour construire sur le long terme.\n<b>CONSEIL DU JOUR ☝️</b> Restez fidèle à vos objectifs initiaux aujourd'hui.\n\n<b>♒️ Verseau. 23 novembre.</b>\n✨ Votre vision unique du monde bouscule les habitudes, apportant un vent de fraîcheur nécessaire. Votre originalité est votre plus grande richesse.\n<b>CONSEIL DU JOUR ☝️</b> Osez proposer une idée totalement innovante.\n\n<b>♓️ Poissons. 23 novembre.</b>\n✨ La sensibilité accrue vous permet de percevoir les besoins d'autrui avec une grande empathie. Laissez votre compassion agir avec sagesse.\n<b>CONSEIL DU JOUR ☝️</b> Offrez un soutien discret à un proche.\n\n✨✨✨ <i>La vie est comme une mélodie : il ne suffit pas de jouer les notes, il faut savoir laisser le silence respirer entre elles pour créer l'harmonie.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Bélier",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Feu",
+      "color": "0xFFE63946",
+      "focus": "Conseil: Prenez une initiative courageuse dès ce matin.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre énergie déborde sous l'influence du Soleil. Canalisez cette ardeur pour transformer un défi professionnel en une victoire éclatante.\n\nCONSEIL DU JOUR ☝️ Prenez une initiative courageuse dès ce matin."
+    },
+    {
+      "id": "taurus",
+      "name": "Taureau",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Terre",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Accordez-vous un moment de confort sensoriel pur.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Avec la Lune dans votre signe, vous rayonnez de stabilité. C'est le moment idéal pour ancrer vos projets matériels dans la réalité.\n\nCONSEIL DU JOUR ☝️ Accordez-vous un moment de confort sensoriel pur."
+    },
+    {
+      "id": "gemini",
+      "name": "Gémeaux",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Écoutez attentivement avant de formuler votre réponse.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre esprit est vif, propice aux échanges fructueux. Utilisez votre éloquence naturelle pour dénouer une situation complexe avec diplomatie.\n\nCONSEIL DU JOUR ☝️ Écoutez attentivement avant de formuler votre réponse."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Faites confiance à votre première impression intime.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La douceur lunaire apaise vos émotions, vous offrant une clarté intérieure rare. Votre intuition devient votre meilleur guide aujourd'hui.\n\nCONSEIL DU JOUR ☝️ Faites confiance à votre première impression intime."
+    },
+    {
+      "id": "leo",
+      "name": "Lion",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Feu",
+      "color": "0xFFF4A261",
+      "focus": "Conseil: Partagez votre enthousiasme avec votre équipe proche.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le Soleil nourrit votre charisme naturel, attirant les regards vers vos idées audacieuses. Soyez le leader inspirant que vous savez être.\n\nCONSEIL DU JOUR ☝️ Partagez votre enthousiasme avec votre équipe proche."
+    },
+    {
+      "id": "virgo",
+      "name": "Vierge",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Terre",
+      "color": "0xFF588157",
+      "focus": "Conseil: Notez vos priorités pour éviter la dispersion.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La précision est votre alliée, vous permettant d'organiser votre quotidien avec une efficacité redoutable. Le calme favorise votre réussite.\n\nCONSEIL DU JOUR ☝️ Notez vos priorités pour éviter la dispersion."
+    },
+    {
+      "id": "libra",
+      "name": "Balance",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Conseil: Cherchez le compromis gagnant pour tout le monde.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ L'harmonie est à portée de main si vous choisissez de privilégier la coopération. Vos relations sociales s'épanouissent sous votre bienveillance.\n\nCONSEIL DU JOUR ☝️ Cherchez le compromis gagnant pour tout le monde."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpion",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Eau",
+      "color": "0xFF9D0208",
+      "focus": "Conseil: Transformez une contrainte en une force nouvelle.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Une force intérieure puissante vous anime, vous permettant de voir au-delà des apparences. Votre perspicacité est un atout majeur.\n\nCONSEIL DU JOUR ☝️ Transformez une contrainte en une force nouvelle."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittaire",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Feu",
+      "color": "0xFFE76F51",
+      "focus": "Conseil: Planifiez un projet qui nourrit votre curiosité.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Le Soleil illumine votre soif d'aventure et de connaissances. Ouvrez votre esprit à de nouvelles perspectives enrichissantes pour votre avenir.\n\nCONSEIL DU JOUR ☝️ Planifiez un projet qui nourrit votre curiosité."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorne",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Terre",
+      "color": "0xFF3A5A40",
+      "focus": "Conseil: Restez fidèle à vos objectifs initiaux aujourd'hui.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre persévérance porte enfin ses fruits, renforçant votre position. La stabilité est votre ancrage pour construire sur le long terme.\n\nCONSEIL DU JOUR ☝️ Restez fidèle à vos objectifs initiaux aujourd'hui."
+    },
+    {
+      "id": "aquarius",
+      "name": "Verseau",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Conseil: Osez proposer une idée totalement innovante.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Votre vision unique du monde bouscule les habitudes, apportant un vent de fraîcheur nécessaire. Votre originalité est votre plus grande richesse.\n\nCONSEIL DU JOUR ☝️ Osez proposer une idée totalement innovante."
+    },
+    {
+      "id": "pisces",
+      "name": "Poissons",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Eau",
+      "color": "0xFF7209B7",
+      "focus": "Conseil: Offrez un soutien discret à un proche.",
+      "energy": "85%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La sensibilité accrue vous permet de percevoir les besoins d'autrui avec une grande empathie. Laissez votre compassion agir avec sagesse.\n\nCONSEIL DU JOUR ☝️ Offrez un soutien discret à un proche."
+    }
+  ],
+  "updated_at": "2026-11-23T04:31:35.802906Z"
+}
