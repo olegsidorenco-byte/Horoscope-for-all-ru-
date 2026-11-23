@@ -1,15 +1,15 @@
 {
-  "version": "1.0.32",
-  "build_number": 32,
-  "tag": "app-v1.0.32",
-  "download_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/download/app-v1.0.32/Horoscope-for-all-ru.apk",
-  "release_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/tag/app-v1.0.32",
+  "version": "1.0.33",
+  "build_number": 33,
+  "tag": "app-v1.0.33",
+  "download_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/download/app-v1.0.33/Horoscope-for-all-ru.apk",
+  "release_url": "https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/tag/app-v1.0.33",
   "release_notes": {
-    "fr": "✨ Version 1.0.32 :\n• Connexion Google sécurisée via Firebase Authentication et règles Firestore renforcées.\n• Notifications Web Push fiables avec clés VAPID et protection API.\n• Éphémérides astronomiques complètes (10 planètes, rétrogradation, maisons Placidus) et prise en charge de Gemini 4 Hydrogen / 3.8 Flash.\n• Nouvelle signature Android APK (désinstallez l'ancienne version une fois avant l'installation).",
-    "en": "✨ Version 1.0.32:\n• Secure Google Sign-In via Firebase Authentication and hardened Firestore security rules.\n• Reliable Web Push notifications with dynamic VAPID key and API authentication.\n• Full astronomical ephemeris (10 planets, retrograde detection, Placidus houses) and Gemini 4 Hydrogen / 3.8 Flash support.\n• New Android APK signing key (please uninstall the previous version once before installing).",
-    "es": "✨ Versión 1.0.32:\n• Inicio de sesión con Google mediante Firebase Authentication y reglas de Firestore reforzadas.\n• Notificaciones Web Push fiables con clave VAPID y protección de API.\n• Efemérides completas (10 planetas, retrogradación, casas Placidus) y soporte para Gemini 4 Hydrogen / 3.8 Flash.\n• Nueva clave de firma APK en Android (desinstala la versión anterior una vez antes de instalar).",
-    "de": "✨ Version 1.0.32:\n• Sichere Google-Anmeldung über Firebase Authentication und verschärfte Firestore-Regeln.\n• Zuverlässige Web-Push-Benachrichtigungen mit VAPID-Schlüssel und API-Schutz.\n• Vollständige Ephemeriden (10 Planeten, Rückläufigkeit, Placidus-Häuser) und Gemini 4 Hydrogen / 3.8 Flash.\n• Neuer Android-APK-Signaturschlüssel (bitte die alte Version einmal deinstallieren).",
-    "ru": "✨ Версия 1.0.32:\n• Безопасный вход через Google (Firebase Authentication) и усиленные правила защиты Firestore.\n• Надёжные Web Push уведомления с динамическим VAPID-ключом и авторизацией запросов.\n• Полные эфемериды (10 планет, ретроградность, дома Placidus) и поддержка моделей Gemini 4 Hydrogen / 3.8 Flash.\n• Новый ключ подписи Android APK (удалите старую версию один раз перед установкой)."
+    "fr": "✨ Version 1.0.33 :\n• Saisie directe de la date et de l'heure de naissance avec séparateurs automatiques (JJ.MM.AAAA et HH:MM) et validation stricte.\n• Sélection visuelle toujours disponible via les icônes calendrier et horloge.\n• Nettoyage du workflow de déploiement Web.",
+    "en": "✨ Version 1.0.33:\n• Direct birth date and time entry with automatic separators (DD.MM.YYYY and HH:MM) and strict validation.\n• Calendar and clock pickers remain available via field icons.\n• Clean Firebase Hosting deploy workflow.",
+    "es": "✨ Versión 1.0.33:\n• Entrada directa de fecha y hora de nacimiento con separadores automáticos (DD.MM.AAAA y HH:MM) y validación estricta.\n• Los selectores visuales de calendario y reloj siguen disponibles mediante los iconos.\n• Flujo de despliegue web limpio.",
+    "de": "✨ Version 1.0.33:\n• Direkte Eingabe von Geburtsdatum und -zeit mit automatischen Trennzeichen (TT.MM.JJJJ und SS:MM) und strenger Prüfung.\n• Kalender- und Uhr-Auswahl weiterhin über die Symbole verfügbar.\n• Bereinigter Web-Deploy-Workflow.",
+    "ru": "✨ Версия 1.0.33:\n• Прямой ввод даты и времени рождения с автоматической расстановкой разделителей (ДД.ММ.ГГГГ и ЧЧ:ММ) и строгой проверкой календаря.\n• Выбор через календарь и циферблат по-прежнему доступен по иконкам справа в полях.\n• Очистка конфигурации автодеплоя веб-версии."
   }
 }
 

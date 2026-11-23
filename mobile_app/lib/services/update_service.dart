@@ -25,8 +25,8 @@ class UpdateInfo {
 }
 
 class UpdateService {
-  static const String currentVersion = '1.0.32';
-  static const int currentBuildNumber = 32;
+  static const String currentVersion = '1.0.33';
+  static const int currentBuildNumber = 33;
 
   static const String _prefLastCheckKey = 'last_update_check_epoch';
   static const String _prefDismissedKey = 'last_dismissed_update_version';

@@ -853,6 +853,36 @@ class AppLocalizations {
     }
   }
 
+  String get birthDateHint {
+    switch (langCode) {
+      case 'en':
+      case 'fr': return 'DD.MM.YYYY';
+      case 'es': return 'DD.MM.AAAA';
+      case 'de': return 'TT.MM.JJJJ';
+      default: return 'ДД.ММ.ГГГГ';
+    }
+  }
+
+  String get invalidBirthDateError {
+    switch (langCode) {
+      case 'en': return 'Enter date as DD.MM.YYYY';
+      case 'es': return 'Formato: DD.MM.AAAA';
+      case 'de': return 'Format: TT.MM.JJJJ';
+      case 'fr': return 'Format : JJ.MM.AAAA';
+      default: return 'Введите дату ДД.ММ.ГГГГ';
+    }
+  }
+
+  String get invalidBirthTimeError {
+    switch (langCode) {
+      case 'en': return 'Enter time as HH:MM';
+      case 'es': return 'Formato: HH:MM';
+      case 'de': return 'Format: SS:MM';
+      case 'fr': return 'Format : HH:MM';
+      default: return 'Введите время ЧЧ:ММ';
+    }
+  }
+
   String get pickBirthDateTitle {
     switch (langCode) {
       case 'en': return 'Select Date of Birth';

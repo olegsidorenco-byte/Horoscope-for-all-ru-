@@ -1,6 +1,6 @@
 # 🪐 Астро Гороскоп (Astro Horoscope)
 
-[![Android APK Release](https://img.shields.io/badge/Android-APK%20v1.0.32-brightgreen?logo=android)](https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/latest)
+[![Android APK Release](https://img.shields.io/badge/Android-APK%20v1.0.33-brightgreen?logo=android)](https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/latest)
 [![iOS / Web PWA](https://img.shields.io/badge/iOS%20%2F%20Web-PWA%20Live-blue?logo=apple)](https://cosmic-horoscope-ru.web.app)
 [![Cloud Run](https://img.shields.io/badge/Cloud%20Run-FastAPI%20Active-blue?logo=googlecloud)](https://cosmic-horoscope-api-688107707932.europe-west1.run.app)
 [![Firebase](https://img.shields.io/badge/Firebase-Auth%20%26%20Firestore-orange?logo=firebase)](https://console.firebase.google.com/project/cosmic-horoscope-ru)
@@ -29,7 +29,7 @@
   - 🌙 Полная поддержка темной космической темы `#0B0E1B` и адаптация под вырезы экрана (Safe Area / Dynamic Island).
 
 ### 2. 🤖 Android — Автономное мобильное приложение (Flutter APK)
-- **Скачать последнюю версию:** [Horoscope-for-all-ru.apk (v1.0.32)](https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/latest)
+- **Скачать последнюю версию:** [Horoscope-for-all-ru.apk (v1.0.33)](https://github.com/olegsidorenco-byte/Horoscope-for-all-ru-/releases/latest)
 - **Особенности Android-версии:**
   - 🚀 **Встроенная система автообновления (In-App Auto-Update):** при запуске приложение сверяет свою версию с GitHub Releases и Cloud Run API. При выходе релиза пользователю показывается диалоговое окно со списком изменений и кнопкой обновления в 1 клик.
   - ⚙️ Возможность ручной проверки обновлений в разделе «Настройки».

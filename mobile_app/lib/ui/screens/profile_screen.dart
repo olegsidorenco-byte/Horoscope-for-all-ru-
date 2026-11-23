@@ -5,6 +5,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/user_profile.dart';
 import '../../services/storage_service.dart';
 import '../../services/auth_service.dart';
+import '../../utils/date_time_input.dart';
 import '../theme/cosmic_theme.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -25,6 +26,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late TextEditingController _birthPlaceController;
   late TextEditingController _currentCityController;
   late TextEditingController _focusController;
+  late TextEditingController _birthDateController;
+  late TextEditingController _birthTimeController;
 
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
@@ -46,6 +49,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _focusController = TextEditingController(text: p.focus);
 
     _selectedDate = p.birthDate;
+    _birthDateController = TextEditingController(
+      text: DateFormat('dd.MM.yyyy').format(_selectedDate),
+    );
 
     int hour = 12;
     int minute = 0;
@@ -57,6 +63,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (_) {}
     _selectedTime = TimeOfDay(hour: hour, minute: minute);
+    _birthTimeController = TextEditingController(
+      text: "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}",
+    );
 
     _isTimeExact = p.isTimeExact;
     _selectedGender = p.gender;
@@ -70,6 +79,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _birthPlaceController.dispose();
     _currentCityController.dispose();
     _focusController.dispose();
+    _birthDateController.dispose();
+    _birthTimeController.dispose();
     super.dispose();
   }
 
@@ -144,6 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       initialDate: _selectedDate,
       firstDate: DateTime(1920),
       lastDate: DateTime.now(),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
       locale: Locale(l10n.langCode),
       helpText: l10n.pickBirthDateTitle,
       cancelText: l10n.cancel,
@@ -164,8 +176,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (picked != null) {
+      final formatted = DateFormat('dd.MM.yyyy').format(picked);
       setState(() {
         _selectedDate = picked;
+        _birthDateController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
       });
     }
   }
@@ -194,15 +211,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (picked != null) {
+      final formatted =
+          "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
       setState(() {
         _selectedTime = picked;
+        _birthTimeController.value = TextEditingValue(
+          text: formatted,
+          selection: TextSelection.collapsed(offset: formatted.length),
+        );
       });
     }
+  }
+
+  Widget _buildMaskedDateTimeField({
+    required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required TextInputFormatter formatter,
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback? onIconPressed,
+    required ValueChanged<String> onChanged,
+    required FormFieldValidator<String> validator,
+    bool enabled = true,
+  }) {
+    OutlineInputBorder border(Color color, {double width = 1.0}) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          enabled: enabled,
+          keyboardType: TextInputType.number,
+          inputFormatters: [formatter],
+          style: TextStyle(
+            color: enabled ? Colors.white : Colors.white54,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(color: Colors.white38, fontSize: 13),
+            filled: true,
+            fillColor: const Color(0xFF1E2235),
+            contentPadding: const EdgeInsets.fromLTRB(12, 14, 4, 14),
+            suffixIconConstraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+            suffixIcon: IconButton(
+              onPressed: onIconPressed,
+              tooltip: tooltip,
+              icon: Icon(
+                icon,
+                color: enabled ? CosmicTheme.goldAccent : Colors.white24,
+                size: 18,
+              ),
+            ),
+            border: border(Colors.white12),
+            enabledBorder: border(Colors.white12),
+            disabledBorder: border(Colors.white10),
+            focusedBorder: border(CosmicTheme.goldAccent, width: 1.2),
+            errorBorder: border(Colors.redAccent),
+            focusedErrorBorder: border(Colors.redAccent, width: 1.2),
+          ),
+          onChanged: onChanged,
+          validator: validator,
+        ),
+      ],
+    );
   }
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) {
       return;
+    }
+
+    final parsedDate = parseStrictBirthDate(_birthDateController.text);
+    if (parsedDate != null) {
+      _selectedDate = parsedDate;
+    }
+    if (_isTimeExact) {
+      final parsedTime = parseStrictBirthTime(_birthTimeController.text);
+      if (parsedTime != null) {
+        _selectedTime = parsedTime;
+      }
     }
 
     setState(() {
@@ -449,76 +548,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // 3. Дата и Время рождения
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Дата рождения
+                    // Дата рождения (прямой ввод с авто-разделителями ДД.ММ.ГГГГ + календарь)
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.birthDateLabel,
-                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const SizedBox(height: 6),
-                          GestureDetector(
-                            onTap: _pickDate,
-                            child: Container(
-                              height: 52,
-                              padding: const EdgeInsets.symmetric(horizontal: 14),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1E2235),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white12),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.calendar_today_rounded, color: CosmicTheme.goldAccent, size: 18),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    DateFormat('dd.MM.yyyy').format(_selectedDate),
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: _buildMaskedDateTimeField(
+                        label: l10n.birthDateLabel,
+                        controller: _birthDateController,
+                        hintText: l10n.birthDateHint,
+                        formatter: DateMaskTextInputFormatter(),
+                        icon: Icons.calendar_today_rounded,
+                        tooltip: l10n.pickBirthDateTitle,
+                        onIconPressed: _pickDate,
+                        onChanged: (val) {
+                          final parsed = parseStrictBirthDate(val);
+                          if (parsed != null) {
+                            setState(() {
+                              _selectedDate = parsed;
+                            });
+                          }
+                        },
+                        validator: (val) {
+                          if (parseStrictBirthDate(val ?? '') == null) {
+                            return l10n.invalidBirthDateError;
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Время рождения
+                    // Время рождения (прямой ввод с авто-разделителем ЧЧ:ММ + циферблат)
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.birthTimeLabel,
-                            style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.bold, color: Colors.white),
-                          ),
-                          const SizedBox(height: 6),
-                          GestureDetector(
-                            onTap: _pickTime,
-                            child: Container(
-                              height: 52,
-                              padding: const EdgeInsets.symmetric(horizontal: 14),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF1E2235),
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: Colors.white12),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.access_time_filled_rounded, color: CosmicTheme.goldAccent, size: 18),
-                                  const SizedBox(width: 10),
-                                  Text(
-                                    "${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}",
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                      child: _buildMaskedDateTimeField(
+                        label: l10n.birthTimeLabel,
+                        controller: _birthTimeController,
+                        hintText: '12:00',
+                        formatter: TimeMaskTextInputFormatter(),
+                        icon: Icons.access_time_filled_rounded,
+                        tooltip: l10n.pickBirthTimeTitle,
+                        enabled: _isTimeExact,
+                        onIconPressed: _isTimeExact ? _pickTime : null,
+                        onChanged: (val) {
+                          final parsed = parseStrictBirthTime(val);
+                          if (parsed != null) {
+                            setState(() {
+                              _selectedTime = parsed;
+                            });
+                          }
+                        },
+                        validator: (val) {
+                          if (!_isTimeExact) return null;
+                          if (parseStrictBirthTime(val ?? '') == null) {
+                            return l10n.invalidBirthTimeError;
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -536,6 +620,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       _isTimeExact = !(val ?? false);
                       if (!_isTimeExact) {
                         _selectedTime = const TimeOfDay(hour: 12, minute: 0);
+                        _birthTimeController.value = const TextEditingValue(
+                          text: '12:00',
+                          selection: TextSelection.collapsed(offset: 5),
+                        );
                       }
                     });
                   },
