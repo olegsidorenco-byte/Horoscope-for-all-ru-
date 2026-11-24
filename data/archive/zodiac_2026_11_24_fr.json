@@ -1,0 +1,151 @@
+{
+  "date": "24.11.2026",
+  "raw_text": "Bonjour à tous ! En ce mardi matin, savourez votre café ou votre thé avec un sourire confiant. La Pleine Lune en Gémeaux éclaire vos idées et vous invite à accueillir la journée avec douceur et énergie. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope du 24 novembre (Mardi)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Bélier. 24 novembre.</b>\n✨ L'énergie de Mars stimule vos échanges. Profitez de cette Pleine Lune pour clarifier une situation avec bienveillance.\n<b>CONSEIL DU JOUR ☝️</b> Exprimez votre pensée avec calme et franchise.\n\n<b>♉️ Taureau. 24 novembre.</b>\n✨ Vos finances ou vos valeurs demandent un regard neuf. La clarté lunaire vous aide à trouver un équilibre serein entre sécurité et plaisir.\n<b>CONSEIL DU JOUR ☝️</b> Accordez-vous un moment de calme sans culpabilité.\n\n<b>♊️ Gémeaux. 24 novembre.</b>\n✨ La Pleine Lune dans votre signe illumine vos émotions et votre charisme. C'est le moment idéal pour rayonner et partager vos projets.\n<b>CONSEIL DU JOUR ☝️</b> Écoutez votre intuition avant de répondre.\n\n<b>♋️ Cancer. 24 novembre.</b>\n✨ Votre monde intérieur est en ébullition, mais la paix reste accessible. Laissez partir les vieux doutes pour accueillir la nouveauté.\n<b>CONSEIL DU JOUR ☝️</b> Prenez dix minutes pour respirer profondément.\n\n<b>♌️ Lion. 24 novembre.</b>\n✨ Vos amitiés et projets collectifs prennent une belle ampleur. Votre enthousiasme naturel inspire ceux qui vous entourent aujourd'hui.\n<b>CONSEIL DU JOUR ☝️</b> Remerciez un proche pour son soutien.\n\n<b>♍️ Vierge. 24 novembre.</b>\n✨ Votre vie professionnelle est sous les projecteurs. Restez fidèle à votre rigueur tout en gardant une belle souplesse d'esprit.\n<b>CONSEIL DU JOUR ☝️</b> Notez vos trois priorités de la journée.\n\n<b>♎️ Balance. 24 novembre.</b>\n✨ L'envie d'évasion et d'apprendre vous porte loin. Une conversation inspirante pourrait ouvrir de nouveaux horizons très prometteurs.\n<b>CONSEIL DU JOUR ☝️</b> Lisez quelques pages d'un livre inspirant.\n\n<b>♏️ Scorpion. 24 novembre.</b>\n✨ Une transformation intérieure douce s'opère en vous. Acceptez de lâcher prise sur ce que vous ne contrôlez pas pour retrouver votre force.\n<b>CONSEIL DU JOUR ☝️</b> Faites confiance au processus de la vie.\n\n<b>♐️ Sagittaire. 24 novembre.</b>\n✨ Le Soleil dans votre signe éclaire vos relations. La Pleine Lune vous invite à écouter l'autre avec le cœur autant qu'avec l'esprit.\n<b>CONSEIL DU JOUR ☝️</b> Offrez une écoute sincère à votre partenaire.\n\n<b>♑️ Capricorne. 24 novembre.</b>\n✨ Votre quotidien demande un peu de réorganisation. En prenant soin de votre corps, vous décuplerez votre efficacité mentale.\n<b>CONSEIL DU JOUR ☝️</b> Buvez davantage d'eau et marchez un peu.\n\n<b>♒️ Verseau. 24 novembre.</b>\n✨ Votre créativité et votre joie de vivre sont à leur apogée. Laissez parler votre originalité sans craindre le regard des autres.\n<b>CONSEIL DU JOUR ☝️</b> Lancez-vous dans une activité qui vous amuse.\n\n<b>♓️ Poissons. 24 novembre.</b>\n✨ Votre foyer et vos racines vous apportent un doux réconfort. Créez une atmosphère chaleureuse pour apaiser votre sensibilité.\n<b>CONSEIL DU JOUR ☝️</b> Rangez un petit coin de votre maison.\n\n✨✨✨ <i>La véritable sérénité ne consiste pas à éviter les vagues, mais à apprendre à naviguer avec confiance sous la lumière de la lune.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Bélier",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Feu",
+      "color": "0xFFE63946",
+      "focus": "Conseil: Exprimez votre pensée avec calme et franchise.",
+      "energy": "95%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ L'énergie de Mars stimule vos échanges. Profitez de cette Pleine Lune pour clarifier une situation avec bienveillance.\n\nCONSEIL DU JOUR ☝️ Exprimez votre pensée avec calme et franchise."
+    },
+    {
+      "id": "taurus",
+      "name": "Taureau",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Terre",
+      "color": "0xFF2A9D8F",
+      "focus": "Conseil: Accordez-vous un moment de calme sans culpabilité.",
+      "energy": "71%",
+      "lucky_hours": "10:45–12:40",
+      "forecast": "✨ Vos finances ou vos valeurs demandent un regard neuf. La clarté lunaire vous aide à trouver un équilibre serein entre sécurité et plaisir.\n\nCONSEIL DU JOUR ☝️ Accordez-vous un moment de calme sans culpabilité."
+    },
+    {
+      "id": "gemini",
+      "name": "Gémeaux",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Conseil: Écoutez votre intuition avant de répondre.",
+      "energy": "91%",
+      "lucky_hours": "11:30–13:20",
+      "forecast": "✨ La Pleine Lune dans votre signe illumine vos émotions et votre charisme. C'est le moment idéal pour rayonner et partager vos projets.\n\nCONSEIL DU JOUR ☝️ Écoutez votre intuition avant de répondre."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Eau",
+      "color": "0xFF457B9D",
+      "focus": "Conseil: Prenez dix minutes pour respirer profondément.",
+      "energy": "76%",
+      "lucky_hours": "12:15–14:10",
+      "forecast": "✨ Votre monde intérieur est en ébullition, mais la paix reste accessible. Laissez partir les vieux doutes pour accueillir la nouveauté.\n\nCONSEIL DU JOUR ☝️ Prenez dix minutes pour respirer profondément."
+    },
+    {
+      "id": "leo",
+      "name": "Lion",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Feu",
+      "color": "0xFFF4A261",
+      "focus": "Conseil: Remerciez un proche pour son soutien.",
+      "energy": "97%",
+      "lucky_hours": "13:30–15:20",
+      "forecast": "✨ Vos amitiés et projets collectifs prennent une belle ampleur. Votre enthousiasme naturel inspire ceux qui vous entourent aujourd'hui.\n\nCONSEIL DU JOUR ☝️ Remerciez un proche pour son soutien."
+    },
+    {
+      "id": "virgo",
+      "name": "Vierge",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Terre",
+      "color": "0xFF588157",
+      "focus": "Conseil: Notez vos trois priorités de la journée.",
+      "energy": "70%",
+      "lucky_hours": "14:15–16:15",
+      "forecast": "✨ Votre vie professionnelle est sous les projecteurs. Restez fidèle à votre rigueur tout en gardant une belle souplesse d'esprit.\n\nCONSEIL DU JOUR ☝️ Notez vos trois priorités de la journée."
+    },
+    {
+      "id": "libra",
+      "name": "Balance",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Conseil: Lisez quelques pages d'un livre inspirant.",
+      "energy": "97%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "✨ L'envie d'évasion et d'apprendre vous porte loin. Une conversation inspirante pourrait ouvrir de nouveaux horizons très prometteurs.\n\nCONSEIL DU JOUR ☝️ Lisez quelques pages d'un livre inspirant."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpion",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Eau",
+      "color": "0xFF9D0208",
+      "focus": "Conseil: Faites confiance au processus de la vie.",
+      "energy": "71%",
+      "lucky_hours": "15:45–17:45",
+      "forecast": "✨ Une transformation intérieure douce s'opère en vous. Acceptez de lâcher prise sur ce que vous ne contrôlez pas pour retrouver votre force.\n\nCONSEIL DU JOUR ☝️ Faites confiance au processus de la vie."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittaire",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Feu",
+      "color": "0xFFE76F51",
+      "focus": "Conseil: Offrez une écoute sincère à votre partenaire.",
+      "energy": "92%",
+      "lucky_hours": "16:30–18:30",
+      "forecast": "✨ Le Soleil dans votre signe éclaire vos relations. La Pleine Lune vous invite à écouter l'autre avec le cœur autant qu'avec l'esprit.\n\nCONSEIL DU JOUR ☝️ Offrez une écoute sincère à votre partenaire."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorne",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Terre",
+      "color": "0xFF3A5A40",
+      "focus": "Conseil: Buvez davantage d'eau et marchez un peu.",
+      "energy": "76%",
+      "lucky_hours": "17:15–19:15",
+      "forecast": "✨ Votre quotidien demande un peu de réorganisation. En prenant soin de votre corps, vous décuplerez votre efficacité mentale.\n\nCONSEIL DU JOUR ☝️ Buvez davantage d'eau et marchez un peu."
+    },
+    {
+      "id": "aquarius",
+      "name": "Verseau",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Conseil: Lancez-vous dans une activité qui vous amuse.",
+      "energy": "87%",
+      "lucky_hours": "08:30–10:15",
+      "forecast": "✨ Votre créativité et votre joie de vivre sont à leur apogée. Laissez parler votre originalité sans craindre le regard des autres.\n\nCONSEIL DU JOUR ☝️ Lancez-vous dans une activité qui vous amuse."
+    },
+    {
+      "id": "pisces",
+      "name": "Poissons",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Eau",
+      "color": "0xFF7209B7",
+      "focus": "Conseil: Rangez un petit coin de votre maison.",
+      "energy": "70%",
+      "lucky_hours": "09:15–11:10",
+      "forecast": "✨ Votre foyer et vos racines vous apportent un doux réconfort. Créez une atmosphère chaleureuse pour apaiser votre sensibilité.\n\nCONSEIL DU JOUR ☝️ Rangez un petit coin de votre maison."
+    }
+  ],
+  "updated_at": "2026-11-24T04:32:26.458537Z"
+}

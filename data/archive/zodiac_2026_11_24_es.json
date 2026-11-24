@@ -1,0 +1,151 @@
+{
+  "date": "24.11.2026",
+  "raw_text": "¡Buenos días, almas luminosas! ☀️☕️🌿 Que este martes comience con el aroma de un buen café, una sonrisa serena y la certeza de que el universo conspira a tu favor. Con la Luna Llena en Géminis, respira hondo y abre tu mente a nuevas posibilidades.\n\n☀️🌿 <b>Horóscopo para el 24 de noviembre (Martes)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. 24 de noviembre.</b>\n✨ La Luna Llena ilumina tu mente y te impulsa a comunicar tus ideas con valentía. Marte te da energía extra para cerrar acuerdos pendientes.\n<b>CONSEJO DEL DÍA ☝️</b> Habla con claridad y escucha sin interrumpir.\n\n<b>♉️ Tauro. 24 de noviembre.</b>\n✨ Hoy valoras la estabilidad, pero el plenilunio te invita a flexibilizar tus finanzas. Confía en tu intuición para detectar oportunidades prácticas.\n<b>CONSEJO DEL DÍA ☝️</b> Revisa tus gastos y date un pequeño gusto.\n\n<b>♊️ Géminis. 24 de noviembre.</b>\n✨ Con la Luna Llena en tu signo, tus emociones y pensamientos alcanzan su punto máximo. Es tu momento de brillar y soltar dudas del pasado.\n<b>CONSEJO DEL DÍA ☝️</b> Prioriza tu bienestar y di lo que sientes.\n\n<b>♋️ Cáncer. 24 de noviembre.</b>\n✨ La energía lunar te pide un respiro del ruido exterior para conectar con tu mundo interior. Escucha tus sueños, traen respuestas claras.\n<b>CONSEJO DEL DÍA ☝️</b> Regálate diez minutos de silencio y té caliente.\n\n<b>♌️ Leo. 24 de noviembre.</b>\n✨ Tu carisma natural se multiplica en reuniones y proyectos grupales. El Sol en Sagitario aviva tu creatividad y el deseo de compartir alegría.\n<b>CONSEJO DEL DÍA ☝️</b> Conecta con un amigo que hace tiempo no ves.\n\n<b>♍️ Virgo. 24 de noviembre.</b>\n✨ El plenilunio enfoca tu atención en metas profesionales y reconocimiento. Confía en tu capacidad de análisis sin caer en la autoexigencia extrema.\n<b>CONSEJO DEL DÍA ☝️</b> Organiza tu agenda y celebra un logro reciente.\n\n<b>♎️ Libra. 24 de noviembre.</b>\n✨ Sientes un fuerte impulso de expandir tus horizontes, aprender algo nuevo o planificar un viaje. La armonía llega cuando sigues tu curiosidad.\n<b>CONSEJO DEL DÍA ☝️</b> Lee unas páginas de un libro inspirador hoy.\n\n<b>♏️ Escorpio. 24 de noviembre.</b>\n✨ La intensidad de la Luna Llena te invita a transformar miedos en poder personal. Es un día ideal para sanar vínculos y soltar cargas emocionales.\n<b>CONSEJO DEL DÍA ☝️</b> Perdona algo pendiente y libera tu corazón.\n\n<b>♐️ Sagitario. 24 de noviembre.</b>\n✨ Con el Sol en tu signo y la Luna enfrente, tus relaciones cobran protagonismo. Busca el equilibrio entre tu libertad y el compromiso afectivo.\n<b>CONSEJO DEL DÍA ☝️</b> Agradece a alguien especial por su apoyo constante.\n\n<b>♑️ Capricornio. 24 de noviembre.</b>\n✨ Hoy tu enfoque está en la salud y la eficiencia diaria. Pequeños ajustes en tu rutina te darán la vitalidad que necesitas para tus metas.\n<b>CONSEJO DEL DÍA ☝️</b> Haz una pausa activa y estira tu cuerpo.\n\n<b>♒️ Acuario. 24 de noviembre.</b>\n✨ La creatividad y el romance fluyen con fuerza gracias a la energía aérea del día. Permítete disfrutar sin analizar demasiado cada detalle.\n<b>CONSEJO DEL DÍA ☝️</b> Dedica tiempo a ese pasatiempo que tanto amas.\n\n<b>♓️ Piscis. 24 de noviembre.</b>\n✨ Tu hogar y tu familia requieren tu presencia cálida y comprensiva. La Luna Llena te ayuda a encontrar paz en tus raíces y emociones.\n<b>CONSEJO DEL DÍA ☝️</b> Ordena un rincón de tu casa con calma.\n\n✨✨✨ <i>La vida es como un río: cuando dejas de luchar contra la corriente y confías en su cauce, descubres que siempre te lleva hacia el mar de tu propia paz.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fuego",
+      "color": "0xFFE63946",
+      "focus": "Consejo: Habla con claridad y escucha sin interrumpir.",
+      "energy": "95%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ La Luna Llena ilumina tu mente y te impulsa a comunicar tus ideas con valentía. Marte te da energía extra para cerrar acuerdos pendientes.\n\nCONSEJO DEL DÍA ☝️ Habla con claridad y escucha sin interrumpir."
+    },
+    {
+      "id": "taurus",
+      "name": "Tauro",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Revisa tus gastos y date un pequeño gusto.",
+      "energy": "71%",
+      "lucky_hours": "10:45–12:40",
+      "forecast": "✨ Hoy valoras la estabilidad, pero el plenilunio te invita a flexibilizar tus finanzas. Confía en tu intuición para detectar oportunidades prácticas.\n\nCONSEJO DEL DÍA ☝️ Revisa tus gastos y date un pequeño gusto."
+    },
+    {
+      "id": "gemini",
+      "name": "Géminis",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Prioriza tu bienestar y di lo que sientes.",
+      "energy": "91%",
+      "lucky_hours": "11:30–13:20",
+      "forecast": "✨ Con la Luna Llena en tu signo, tus emociones y pensamientos alcanzan su punto máximo. Es tu momento de brillar y soltar dudas del pasado.\n\nCONSEJO DEL DÍA ☝️ Prioriza tu bienestar y di lo que sientes."
+    },
+    {
+      "id": "cancer",
+      "name": "Cáncer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Regálate diez minutos de silencio y té caliente.",
+      "energy": "76%",
+      "lucky_hours": "12:15–14:10",
+      "forecast": "✨ La energía lunar te pide un respiro del ruido exterior para conectar con tu mundo interior. Escucha tus sueños, traen respuestas claras.\n\nCONSEJO DEL DÍA ☝️ Regálate diez minutos de silencio y té caliente."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fuego",
+      "color": "0xFFF4A261",
+      "focus": "Consejo: Conecta con un amigo que hace tiempo no ves.",
+      "energy": "97%",
+      "lucky_hours": "13:30–15:20",
+      "forecast": "✨ Tu carisma natural se multiplica en reuniones y proyectos grupales. El Sol en Sagitario aviva tu creatividad y el deseo de compartir alegría.\n\nCONSEJO DEL DÍA ☝️ Conecta con un amigo que hace tiempo no ves."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Tierra",
+      "color": "0xFF588157",
+      "focus": "Consejo: Organiza tu agenda y celebra un logro reciente.",
+      "energy": "70%",
+      "lucky_hours": "14:15–16:15",
+      "forecast": "✨ El plenilunio enfoca tu atención en metas profesionales y reconocimiento. Confía en tu capacidad de análisis sin caer en la autoexigencia extrema.\n\nCONSEJO DEL DÍA ☝️ Organiza tu agenda y celebra un logro reciente."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Aire",
+      "color": "0xFFA8DADC",
+      "focus": "Consejo: Lee unas páginas de un libro inspirador hoy.",
+      "energy": "97%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "✨ Sientes un fuerte impulso de expandir tus horizontes, aprender algo nuevo o planificar un viaje. La armonía llega cuando sigues tu curiosidad.\n\nCONSEJO DEL DÍA ☝️ Lee unas páginas de un libro inspirador hoy."
+    },
+    {
+      "id": "scorpio",
+      "name": "Escorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Agua",
+      "color": "0xFF9D0208",
+      "focus": "Consejo: Perdona algo pendiente y libera tu corazón.",
+      "energy": "71%",
+      "lucky_hours": "15:45–17:45",
+      "forecast": "✨ La intensidad de la Luna Llena te invita a transformar miedos en poder personal. Es un día ideal para sanar vínculos y soltar cargas emocionales.\n\nCONSEJO DEL DÍA ☝️ Perdona algo pendiente y libera tu corazón."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagitario",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fuego",
+      "color": "0xFFE76F51",
+      "focus": "Consejo: Agradece a alguien especial por su apoyo constante.",
+      "energy": "92%",
+      "lucky_hours": "16:30–18:30",
+      "forecast": "✨ Con el Sol en tu signo y la Luna enfrente, tus relaciones cobran protagonismo. Busca el equilibrio entre tu libertad y el compromiso afectivo.\n\nCONSEJO DEL DÍA ☝️ Agradece a alguien especial por su apoyo constante."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricornio",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Tierra",
+      "color": "0xFF3A5A40",
+      "focus": "Consejo: Haz una pausa activa y estira tu cuerpo.",
+      "energy": "76%",
+      "lucky_hours": "17:15–19:15",
+      "forecast": "✨ Hoy tu enfoque está en la salud y la eficiencia diaria. Pequeños ajustes en tu rutina te darán la vitalidad que necesitas para tus metas.\n\nCONSEJO DEL DÍA ☝️ Haz una pausa activa y estira tu cuerpo."
+    },
+    {
+      "id": "aquarius",
+      "name": "Acuario",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Aire",
+      "color": "0xFF00B4D8",
+      "focus": "Consejo: Dedica tiempo a ese pasatiempo que tanto amas.",
+      "energy": "87%",
+      "lucky_hours": "08:30–10:15",
+      "forecast": "✨ La creatividad y el romance fluyen con fuerza gracias a la energía aérea del día. Permítete disfrutar sin analizar demasiado cada detalle.\n\nCONSEJO DEL DÍA ☝️ Dedica tiempo a ese pasatiempo que tanto amas."
+    },
+    {
+      "id": "pisces",
+      "name": "Piscis",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Agua",
+      "color": "0xFF7209B7",
+      "focus": "Consejo: Ordena un rincón de tu casa con calma.",
+      "energy": "70%",
+      "lucky_hours": "09:15–11:10",
+      "forecast": "✨ Tu hogar y tu familia requieren tu presencia cálida y comprensiva. La Luna Llena te ayuda a encontrar paz en tus raíces y emociones.\n\nCONSEJO DEL DÍA ☝️ Ordena un rincón de tu casa con calma."
+    }
+  ],
+  "updated_at": "2026-11-24T04:32:01.357119Z"
+}
