@@ -1,0 +1,151 @@
+{
+  "date": "25.11.2026",
+  "raw_text": "Good morning! Wrap yourself in the warmth of your favorite coffee or tea and welcome this vibrant Wednesday with a bright smile. Under today's Full Moon, trust the universe's rhythm and let curiosity guide your steps. ☀️☕️🌿\n\n☀️🌿 <b>Horoscope for November 25 (Wednesday)</b> 🌿☀️\n\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. November 25.</b>\n✨ Today's Full Moon sparks brilliant ideas and lively conversations. Channel your fiery energy into meaningful dialogue rather than rushing ahead.\n<b>TIP OF THE DAY ☝️</b> Listen carefully before making any big promises.\n\n<b>♉️ Taurus. November 25.</b>\n✨ Financial clarity and self-worth take center stage today. Release outdated worries about security and embrace a fresh, abundant perspective.\n<b>TIP OF THE DAY ☝️</b> Review your budget and treat yourself modestly.\n\n<b>♊️ Gemini. November 25.</b>\n✨ With the Full Moon shining in your sign, emotions and intuition peak. Express your true feelings openly and let go of what no longer fits.\n<b>TIP OF THE DAY ☝️</b> Speak your truth with kindness and clarity.\n\n<b>♋️ Cancer. November 25.</b>\n✨ Quiet reflection brings profound inner peace today. Step back from the noise to hear your own wisdom and recharge your emotional batteries.\n<b>TIP OF THE DAY ☝️</b> Spend twenty minutes alone in peaceful silence.\n\n<b>♌️ Leo. November 25.</b>\n✨ Your social circle illuminates new opportunities and shared joy. Collaborate with like-minded people who genuinely appreciate your bright spirit.\n<b>TIP OF THE DAY ☝️</b> Reach out to an inspiring old friend.\n\n<b>♍️ Virgo. November 25.</b>\n✨ Career ambitions and public recognition come into sharp focus. Trust your meticulous preparation, and don't be afraid to step into the spotlight.\n<b>TIP OF THE DAY ☝️</b> Share your proudest achievement with your team.\n\n<b>♎️ Libra. November 25.</b>\n✨ A thirst for knowledge and new horizons lifts your spirits. Embrace unfamiliar ideas that expand your worldview and bring harmony to your soul.\n<b>TIP OF THE DAY ☝️</b> Read an inspiring article or plan a trip.\n\n<b>♏️ Scorpio. November 25.</b>\n✨ Deep emotional transformations clear the air in close relationships. Letting go of control today invites genuine trust and intimacy into your life.\n<b>TIP OF THE DAY ☝️</b> Release one lingering grudge with a deep breath.\n\n<b>♐️ Sagittarius. November 25.</b>\n✨ Partnerships mirror your own growth under this illuminating Full Moon. Balance your fierce independence with heartfelt compromise and active listening.\n<b>TIP OF THE DAY ☝️</b> Ask your partner what they truly need today.\n\n<b>♑️ Capricorn. November 25.</b>\n✨ Daily routines and wellness habits ask for a mindful refresh. Small, consistent adjustments to your schedule will restore your natural vitality.\n<b>TIP OF THE DAY ☝️</b> Take a brisk walk and drink more water.\n\n<b>♒️ Aquarius. November 25.</b>\n✨ Creativity, romance, and playful self-expression flow effortlessly today. Allow yourself to enjoy the moment without overanalyzing the outcome.\n<b>TIP OF THE DAY ☝️</b> Dedicate an hour to your favorite hobby.\n\n<b>♓️ Pisces. November 25.</b>\n✨ Home and family matters bring comforting emotional clarity. Nurture your roots and create a cozy sanctuary where your sensitive soul can thrive.\n<b>TIP OF THE DAY ☝️</b> Tidy up your space and light a candle.\n\n✨✨✨ <i>True inner peace blooms when we stop fighting the current and trust that the river knows the way.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fire",
+      "color": "0xFFE63946",
+      "focus": "Tip: Listen carefully before making any big promises.",
+      "energy": "95%",
+      "lucky_hours": "10:45–12:40",
+      "forecast": "✨ Today's Full Moon sparks brilliant ideas and lively conversations. Channel your fiery energy into meaningful dialogue rather than rushing ahead.\n\nTIP OF THE DAY ☝️ Listen carefully before making any big promises."
+    },
+    {
+      "id": "taurus",
+      "name": "Taurus",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Earth",
+      "color": "0xFF2A9D8F",
+      "focus": "Tip: Review your budget and treat yourself modestly.",
+      "energy": "71%",
+      "lucky_hours": "11:30–13:20",
+      "forecast": "✨ Financial clarity and self-worth take center stage today. Release outdated worries about security and embrace a fresh, abundant perspective.\n\nTIP OF THE DAY ☝️ Review your budget and treat yourself modestly."
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Air",
+      "color": "0xFFE9C46A",
+      "focus": "Tip: Speak your truth with kindness and clarity.",
+      "energy": "91%",
+      "lucky_hours": "12:15–14:10",
+      "forecast": "✨ With the Full Moon shining in your sign, emotions and intuition peak. Express your true feelings openly and let go of what no longer fits.\n\nTIP OF THE DAY ☝️ Speak your truth with kindness and clarity."
+    },
+    {
+      "id": "cancer",
+      "name": "Cancer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Water",
+      "color": "0xFF457B9D",
+      "focus": "Tip: Spend twenty minutes alone in peaceful silence.",
+      "energy": "76%",
+      "lucky_hours": "13:30–15:20",
+      "forecast": "✨ Quiet reflection brings profound inner peace today. Step back from the noise to hear your own wisdom and recharge your emotional batteries.\n\nTIP OF THE DAY ☝️ Spend twenty minutes alone in peaceful silence."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fire",
+      "color": "0xFFF4A261",
+      "focus": "Tip: Reach out to an inspiring old friend.",
+      "energy": "97%",
+      "lucky_hours": "14:15–16:15",
+      "forecast": "✨ Your social circle illuminates new opportunities and shared joy. Collaborate with like-minded people who genuinely appreciate your bright spirit.\n\nTIP OF THE DAY ☝️ Reach out to an inspiring old friend."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Earth",
+      "color": "0xFF588157",
+      "focus": "Tip: Share your proudest achievement with your team.",
+      "energy": "70%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "✨ Career ambitions and public recognition come into sharp focus. Trust your meticulous preparation, and don't be afraid to step into the spotlight.\n\nTIP OF THE DAY ☝️ Share your proudest achievement with your team."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Air",
+      "color": "0xFFA8DADC",
+      "focus": "Tip: Read an inspiring article or plan a trip.",
+      "energy": "97%",
+      "lucky_hours": "15:45–17:45",
+      "forecast": "✨ A thirst for knowledge and new horizons lifts your spirits. Embrace unfamiliar ideas that expand your worldview and bring harmony to your soul.\n\nTIP OF THE DAY ☝️ Read an inspiring article or plan a trip."
+    },
+    {
+      "id": "scorpio",
+      "name": "Scorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Water",
+      "color": "0xFF9D0208",
+      "focus": "Tip: Release one lingering grudge with a deep breath.",
+      "energy": "71%",
+      "lucky_hours": "16:30–18:30",
+      "forecast": "✨ Deep emotional transformations clear the air in close relationships. Letting go of control today invites genuine trust and intimacy into your life.\n\nTIP OF THE DAY ☝️ Release one lingering grudge with a deep breath."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagittarius",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fire",
+      "color": "0xFFE76F51",
+      "focus": "Tip: Ask your partner what they truly need today.",
+      "energy": "92%",
+      "lucky_hours": "17:15–19:15",
+      "forecast": "✨ Partnerships mirror your own growth under this illuminating Full Moon. Balance your fierce independence with heartfelt compromise and active listening.\n\nTIP OF THE DAY ☝️ Ask your partner what they truly need today."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricorn",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Earth",
+      "color": "0xFF3A5A40",
+      "focus": "Tip: Take a brisk walk and drink more water.",
+      "energy": "76%",
+      "lucky_hours": "08:30–10:15",
+      "forecast": "✨ Daily routines and wellness habits ask for a mindful refresh. Small, consistent adjustments to your schedule will restore your natural vitality.\n\nTIP OF THE DAY ☝️ Take a brisk walk and drink more water."
+    },
+    {
+      "id": "aquarius",
+      "name": "Aquarius",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Air",
+      "color": "0xFF00B4D8",
+      "focus": "Tip: Dedicate an hour to your favorite hobby.",
+      "energy": "87%",
+      "lucky_hours": "09:15–11:10",
+      "forecast": "✨ Creativity, romance, and playful self-expression flow effortlessly today. Allow yourself to enjoy the moment without overanalyzing the outcome.\n\nTIP OF THE DAY ☝️ Dedicate an hour to your favorite hobby."
+    },
+    {
+      "id": "pisces",
+      "name": "Pisces",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Water",
+      "color": "0xFF7209B7",
+      "focus": "Tip: Tidy up your space and light a candle.",
+      "energy": "70%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Home and family matters bring comforting emotional clarity. Nurture your roots and create a cozy sanctuary where your sensitive soul can thrive.\n\nTIP OF THE DAY ☝️ Tidy up your space and light a candle."
+    }
+  ],
+  "updated_at": "2026-11-25T04:31:56.562484Z"
+}
