@@ -1,0 +1,151 @@
+{
+  "date": "28.11.2026",
+  "raw_text": "¡Buenos días! ☕️🍂✨ Que este sábado te abrace con calma, una taza caliente en tus manos y la certeza de que todo fluye a tu favor. Sonríe, confía en el universo y disfruta la magia de hoy.\n\n☀️🌿 <b>Horóscopo para el 28 de noviembre (Sábado)</b> 🌿☀️\n♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️\n\n<b>♈️ Aries. 28 de noviembre.</b>\n✨ La Luna en Leo enciende tu creatividad y te invita a disfrutar sin culpas. Suelta el control y permite que la alegría guíe tus pasos hoy.\n<b>CONSEJO DEL DÍA ☝️</b> Dedica una hora a tu pasatiempo favorito.\n\n<b>♉️ Tauro. 28 de noviembre.</b>\n✨ Es un buen momento para nutrir tu hogar y buscar calidez emocional. La energía del día favorece las conversaciones sinceras con quienes más amas.\n<b>CONSEJO DEL DÍA ☝️</b> Prepara tu comida favorita y compártela.\n\n<b>♊️ Géminis. 28 de noviembre.</b>\n✨ Tu mente está brillante y receptiva a nuevas ideas. Aprovecha este sábado para conectar con amigos y expresar lo que sientes con total claridad.\n<b>CONSEJO DEL DÍA ☝️</b> Llama a esa persona que tanto extrañas.\n\n<b>♋️ Cáncer. 28 de noviembre.</b>\n✨ Hoy valoras la estabilidad y el confort más que nunca. Reconoce tu propio esfuerzo y date permiso de descansar sin remordimientos.\n<b>CONSEJO DEL DÍA ☝️</b> Date un capricho pequeño que te haga feliz.\n\n<b>♌️ Leo. 28 de noviembre.</b>\n✨ Con la Luna en tu signo, tu carisma natural brilla con fuerza. Es un día ideal para liderar desde el corazón y mostrar tu auténtica esencia.\n<b>CONSEJO DEL DÍA ☝️</b> Usa esa prenda que te hace sentir radiante.\n\n<b>♍️ Virgo. 28 de noviembre.</b>\n✨ La energía menguante te invita a hacer una pausa introspectiva. Suelta las exigencias y escucha lo que tu mundo interior necesita decirte hoy.\n<b>CONSEJO DEL DÍA ☝️</b> Regálate veinte minutos de silencio absoluto.\n\n<b>♎️ Libra. 28 de noviembre.</b>\n✨ Tus relaciones sociales cobran protagonismo y te llenan de inspiración. Rodéate de personas que sumen armonía y compartan tu visión de futuro.\n<b>CONSEJO DEL DÍA ☝️</b> Acepta esa invitación inesperada para salir.\n\n<b>♏️ Escorpio. 28 de noviembre.</b>\n✨ Tu intuición te guía hacia decisiones acertadas en el ámbito personal. Confía en tu poder interior y cierra ciclos con elegancia y gratitud.\n<b>CONSEJO DEL DÍA ☝️</b> Anota tus metas para el próximo mes.\n\n<b>♐️ Sagitario. 28 de noviembre.</b>\n✨ Con el Sol en tu signo, sientes un impulso renovador de libertad y optimismo. Atrévete a mirar más allá de lo cotidiano y sueña en grande.\n<b>CONSEJO DEL DÍA ☝️</b> Planifica una escapada o actividad al aire libre.\n\n<b>♑️ Capricornio. 28 de noviembre.</b>\n✨ Saturno, tu regente, te pide equilibrar la responsabilidad con el descanso. Soltar el peso del deber te permitirá conectar con emociones profundas.\n<b>CONSEJO DEL DÍA ☝️</b> Desconéctate del trabajo durante todo el día.\n\n<b>♒️ Acuario. 28 de noviembre.</b>\n✨ El foco está en tus vínculos más cercanos y en el arte de ceder con amor. Escuchar sin juzgar fortalecerá tus lazos afectivos de manera única.\n<b>CONSEJO DEL DÍA ☝️</b> Escucha con atención plena a tu pareja o amigo.\n\n<b>♓️ Piscis. 28 de noviembre.</b>\n✨ Tu sensibilidad está a flor de piel, ideal para cuidar tu bienestar físico y mental. Pequeños gestos de autocuidado transformarán tu estado de ánimo.\n<b>CONSEJO DEL DÍA ☝️</b> Toma un baño relajante antes de dormir.\n\n✨✨✨ <i>La verdadera paz no llega cuando todo está resuelto, sino cuando decides confiar en el ritmo perfecto de la vida y abrazar el presente con amor.</i> ✨✨✨",
+  "signs": [
+    {
+      "id": "aries",
+      "name": "Aries",
+      "symbol": "♈",
+      "dates": "21.03 – 19.04",
+      "element": "Fuego",
+      "color": "0xFFE63946",
+      "focus": "Consejo: Dedica una hora a tu pasatiempo favorito.",
+      "energy": "97%",
+      "lucky_hours": "15:00–17:00",
+      "forecast": "✨ La Luna en Leo enciende tu creatividad y te invita a disfrutar sin culpas. Suelta el control y permite que la alegría guíe tus pasos hoy.\n\nCONSEJO DEL DÍA ☝️ Dedica una hora a tu pasatiempo favorito."
+    },
+    {
+      "id": "taurus",
+      "name": "Tauro",
+      "symbol": "♉",
+      "dates": "20.04 – 20.05",
+      "element": "Tierra",
+      "color": "0xFF2A9D8F",
+      "focus": "Consejo: Prepara tu comida favorita y compártela.",
+      "energy": "76%",
+      "lucky_hours": "15:45–17:45",
+      "forecast": "✨ Es un buen momento para nutrir tu hogar y buscar calidez emocional. La energía del día favorece las conversaciones sinceras con quienes más amas.\n\nCONSEJO DEL DÍA ☝️ Prepara tu comida favorita y compártela."
+    },
+    {
+      "id": "gemini",
+      "name": "Géminis",
+      "symbol": "♊",
+      "dates": "21.05 – 20.06",
+      "element": "Aire",
+      "color": "0xFFE9C46A",
+      "focus": "Consejo: Llama a esa persona que tanto extrañas.",
+      "energy": "78%",
+      "lucky_hours": "16:30–18:30",
+      "forecast": "✨ Tu mente está brillante y receptiva a nuevas ideas. Aprovecha este sábado para conectar con amigos y expresar lo que sientes con total claridad.\n\nCONSEJO DEL DÍA ☝️ Llama a esa persona que tanto extrañas."
+    },
+    {
+      "id": "cancer",
+      "name": "Cáncer",
+      "symbol": "♋",
+      "dates": "21.06 – 22.07",
+      "element": "Agua",
+      "color": "0xFF457B9D",
+      "focus": "Consejo: Date un capricho pequeño que te haga feliz.",
+      "energy": "78%",
+      "lucky_hours": "17:15–19:15",
+      "forecast": "✨ Hoy valoras la estabilidad y el confort más que nunca. Reconoce tu propio esfuerzo y date permiso de descansar sin remordimientos.\n\nCONSEJO DEL DÍA ☝️ Date un capricho pequeño que te haga feliz."
+    },
+    {
+      "id": "leo",
+      "name": "Leo",
+      "symbol": "♌",
+      "dates": "23.07 – 22.08",
+      "element": "Fuego",
+      "color": "0xFFF4A261",
+      "focus": "Consejo: Usa esa prenda que te hace sentir radiante.",
+      "energy": "97%",
+      "lucky_hours": "08:30–10:15",
+      "forecast": "✨ Con la Luna en tu signo, tu carisma natural brilla con fuerza. Es un día ideal para liderar desde el corazón y mostrar tu auténtica esencia.\n\nCONSEJO DEL DÍA ☝️ Usa esa prenda que te hace sentir radiante."
+    },
+    {
+      "id": "virgo",
+      "name": "Virgo",
+      "symbol": "♍",
+      "dates": "23.08 – 22.09",
+      "element": "Tierra",
+      "color": "0xFF588157",
+      "focus": "Consejo: Regálate veinte minutos de silencio absoluto.",
+      "energy": "78%",
+      "lucky_hours": "09:15–11:10",
+      "forecast": "✨ La energía menguante te invita a hacer una pausa introspectiva. Suelta las exigencias y escucha lo que tu mundo interior necesita decirte hoy.\n\nCONSEJO DEL DÍA ☝️ Regálate veinte minutos de silencio absoluto."
+    },
+    {
+      "id": "libra",
+      "name": "Libra",
+      "symbol": "♎",
+      "dates": "23.09 – 22.10",
+      "element": "Aire",
+      "color": "0xFFA8DADC",
+      "focus": "Consejo: Acepta esa invitación inesperada para salir.",
+      "energy": "90%",
+      "lucky_hours": "10:00–12:00",
+      "forecast": "✨ Tus relaciones sociales cobran protagonismo y te llenan de inspiración. Rodéate de personas que sumen armonía y compartan tu visión de futuro.\n\nCONSEJO DEL DÍA ☝️ Acepta esa invitación inesperada para salir."
+    },
+    {
+      "id": "scorpio",
+      "name": "Escorpio",
+      "symbol": "♏",
+      "dates": "23.10 – 21.11",
+      "element": "Agua",
+      "color": "0xFF9D0208",
+      "focus": "Consejo: Anota tus metas para el próximo mes.",
+      "energy": "74%",
+      "lucky_hours": "10:45–12:40",
+      "forecast": "✨ Tu intuición te guía hacia decisiones acertadas en el ámbito personal. Confía en tu poder interior y cierra ciclos con elegancia y gratitud.\n\nCONSEJO DEL DÍA ☝️ Anota tus metas para el próximo mes."
+    },
+    {
+      "id": "sagittarius",
+      "name": "Sagitario",
+      "symbol": "♐",
+      "dates": "22.11 – 21.12",
+      "element": "Fuego",
+      "color": "0xFFE76F51",
+      "focus": "Consejo: Planifica una escapada o actividad al aire libre.",
+      "energy": "96%",
+      "lucky_hours": "11:30–13:20",
+      "forecast": "✨ Con el Sol en tu signo, sientes un impulso renovador de libertad y optimismo. Atrévete a mirar más allá de lo cotidiano y sueña en grande.\n\nCONSEJO DEL DÍA ☝️ Planifica una escapada o actividad al aire libre."
+    },
+    {
+      "id": "capricorn",
+      "name": "Capricornio",
+      "symbol": "♑",
+      "dates": "22.12 – 19.01",
+      "element": "Tierra",
+      "color": "0xFF3A5A40",
+      "focus": "Consejo: Desconéctate del trabajo durante todo el día.",
+      "energy": "80%",
+      "lucky_hours": "12:15–14:10",
+      "forecast": "✨ Saturno, tu regente, te pide equilibrar la responsabilidad con el descanso. Soltar el peso del deber te permitirá conectar con emociones profundas.\n\nCONSEJO DEL DÍA ☝️ Desconéctate del trabajo durante todo el día."
+    },
+    {
+      "id": "aquarius",
+      "name": "Acuario",
+      "symbol": "♒",
+      "dates": "20.01 – 18.02",
+      "element": "Aire",
+      "color": "0xFF00B4D8",
+      "focus": "Consejo: Escucha con atención plena a tu pareja o amigo.",
+      "energy": "79%",
+      "lucky_hours": "13:30–15:20",
+      "forecast": "✨ El foco está en tus vínculos más cercanos y en el arte de ceder con amor. Escuchar sin juzgar fortalecerá tus lazos afectivos de manera única.\n\nCONSEJO DEL DÍA ☝️ Escucha con atención plena a tu pareja o amigo."
+    },
+    {
+      "id": "pisces",
+      "name": "Piscis",
+      "symbol": "♓",
+      "dates": "19.02 – 20.03",
+      "element": "Agua",
+      "color": "0xFF7209B7",
+      "focus": "Consejo: Toma un baño relajante antes de dormir.",
+      "energy": "69%",
+      "lucky_hours": "14:15–16:15",
+      "forecast": "✨ Tu sensibilidad está a flor de piel, ideal para cuidar tu bienestar físico y mental. Pequeños gestos de autocuidado transformarán tu estado de ánimo.\n\nCONSEJO DEL DÍA ☝️ Toma un baño relajante antes de dormir."
+    }
+  ],
+  "updated_at": "2026-11-28T04:32:23.711915Z"
+}
